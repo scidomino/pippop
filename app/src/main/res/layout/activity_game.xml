@@ -18,7 +18,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/showCurrent"
         android:textColor="@color/orange"
-        android:text="@string/derp"
         android:textSize="40sp"/>
 
 </FrameLayout>
