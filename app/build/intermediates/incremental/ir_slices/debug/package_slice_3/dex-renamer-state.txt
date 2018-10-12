@@ -1,4 +1,0 @@
-#Fri Oct 12 03:58:28 PDT 2018
-base.0=/Users/sciortino/pippop/app/build/intermediates/transforms/dexMerger/debug/3
-path.0=classes.dex
-renamed.0=classes.dex
