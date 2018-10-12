@@ -1,0 +1,138 @@
+[
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_three.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/three.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/anim_bounce.xml.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/anim/bounce.xml"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_seven.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/seven.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/layout_activity_game.xml.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/layout/activity_game.xml"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable-xhdpi_ic_launcher2.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable-xhdpi/ic_launcher2.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_zero.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/zero.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable-xxhdpi_ic_launcher2.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable-xxhdpi/ic_launcher2.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/anim_blink.xml.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/anim/blink.xml"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/layout_activity_game_over.xml.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/layout/activity_game_over.xml"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/layout_activity_high_score.xml.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/layout/activity_high_score.xml"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_plusten.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/plusten.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_nine.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/nine.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_one.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/one.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/raw_standard_vertex_shader.glsl.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/raw/standard_vertex_shader.glsl"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_six.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/six.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/anim_squish.xml.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/anim/squish.xml"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_two.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/two.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/anim_gradient.xml.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/anim/gradient.xml"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/anim_move.xml.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/anim/move.xml"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/layout_activity_main.xml.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/layout/activity_main.xml"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_numsatlas.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/numsatlas.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable-hdpi_ic_launcher2.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable-hdpi/ic_launcher2.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_eight.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/eight.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/raw_texture_fragment_shader.glsl.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/raw/texture_fragment_shader.glsl"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable-mdpi_ic_launcher2.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable-mdpi/ic_launcher2.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/raw_standard_fragment_shader.glsl.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/raw/standard_fragment_shader.glsl"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_five.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/five.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_four.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/four.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/anim_fade.xml.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/anim/fade.xml"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable-xxxhdpi_ic_launcher2.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable-xxxhdpi/ic_launcher2.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/drawable_score.png.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/drawable/score.png"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/anim_wobble.xml.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/anim/wobble.xml"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/anim_scale.xml.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/anim/scale.xml"
+    },
+    {
+        "merged": "/Users/sciortino/pippop/app/build/intermediates/res/merged/debug/raw_texture_vertex_shader.glsl.flat",
+        "source": "/Users/sciortino/pippop/app/src/main/res/raw/texture_vertex_shader.glsl"
+    }
+]

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black_overlay">#66000000</color>
+    <color name="dark_gray">#696969</color>
+    <color name="dark_green">#4C8637</color>
+    <color name="dark_orange">#BC6A1C</color>
+    <color name="dark_red">#941525</color>
+    <color name="dark_rose">#A96874</color>
+    <color name="dark_turquoise">#3B89B2</color>
+    <color name="dark_yellow">#999F27</color>
+    <color name="green">#5FA845</color>
+    <color name="light_gray">#99A78A</color>
+    <color name="orange">#EC8523</color>
+    <color name="red">#D41F35</color>
+    <color name="rose">#D48391</color>
+    <color name="turquoise">#55C4FF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="yellow">#C0C731</color>
+    <declare-styleable name="ButtonBarContainerTheme">
+        <attr format="reference" name="buttonBarStyle"/>
+        <attr format="reference" name="buttonBarButtonStyle"/>
+    </declare-styleable>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <string name="app_name">PipPop</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="game_over">GAME OVER</string>
+    <string name="high_score">High Scores</string>
+    <string name="play">Play!</string>
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+    <style name="ButtonBar">
+        <item name="android:paddingLeft">2dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingRight">2dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:background">@android:drawable/bottom_bar</item>
+    </style>
+    <style name="ButtonBarButton"/>
+    <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@null</item>
+        <item name="buttonBarStyle">@style/ButtonBar</item>
+        <item name="buttonBarButtonStyle">@style/ButtonBarButton</item>
+    </style>
+</resources>
