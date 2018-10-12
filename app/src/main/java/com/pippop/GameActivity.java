@@ -3,6 +3,7 @@ package com.pippop;
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.widget.TextView;
 
 public class GameActivity extends Activity {
   private GLSurfaceView content;
@@ -12,7 +13,8 @@ public class GameActivity extends Activity {
     super.onCreate(savedInstanceState);
 
     setContentView(R.layout.activity_game);
-    content = (GLSurfaceView) findViewById(R.id.fullscreen_content);
+      content = findViewById(R.id.fullscreen_content);
+      TextView derp = findViewById(R.id.showCurrent);
   }
 
   @Override

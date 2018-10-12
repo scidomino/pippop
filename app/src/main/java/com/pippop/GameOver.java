@@ -7,8 +7,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.widget.TextView;
 
-import com.pippop.graphics.CustomFont;
-
 public class GameOver extends Activity {
   public static final String PREFS_NAME = "LocalHighScore";
   public static final String PREFS_NAME2 = "CurrentScore";
@@ -23,26 +21,20 @@ public class GameOver extends Activity {
     SharedPreferences LocalHighScore = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
     Long highscore = LocalHighScore.getLong("highScore", 0);
     String highStr = String.format("High score: %1$d", highscore);
-    TextView showHigh = (TextView) findViewById(R.id.showHigh);
+      TextView showHigh = findViewById(R.id.showHigh);
     showHigh.setText(highStr);
-    showHigh.setTypeface(CustomFont.getTypeface(this));
 
     SharedPreferences CurrentScore = getSharedPreferences(PREFS_NAME2, MODE_PRIVATE);
     Long current = CurrentScore.getLong("CurrentScore", 0);
     String currentStr = String.format("Your score: %1$d", current);
-    TextView showCurrent = (TextView) findViewById(R.id.showCurrent);
+      TextView showCurrent = findViewById(R.id.showCurrent);
     showCurrent.setText(currentStr);
-    showCurrent.setTypeface(CustomFont.getTypeface(this));
-
-    TextView gameOver = (TextView) findViewById(R.id.gameOver);
-    gameOver.setTypeface(CustomFont.getTypeface(this));
 
     if (highscore < current) {
       SharedPreferences.Editor editor = LocalHighScore.edit();
       editor.putLong("highScore", current);
       editor.commit();
       TextView newHigh = (TextView) findViewById(R.id.newHigh);
-      newHigh.setTypeface(CustomFont.getTypeface(this));
       newHigh.setText("New High Score!");
     }
 

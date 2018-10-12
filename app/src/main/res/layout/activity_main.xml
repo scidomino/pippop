@@ -4,62 +4,54 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000"
-    tools:context=".MainActivity" >
-
+    tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/showHigh"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/sniglet_extrabold"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/showHigh"
-        android:textStyle="bold"
         android:textColor="@color/white"
-        android:textSize="40dp"/>
+        android:textSize="40sp"
+        android:textStyle="bold" />
 
     <Button
+        android:id="@+id/play"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/play"
-        android:text="@string/play"
-        android:onClick="startPlay"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
         android:background="@android:color/transparent"
         android:clickable="true"
-        android:textColor="@color/red"
-        android:textSize="70dp"
+        android:focusable="true"
+        android:fontFamily="@font/sniglet_extrabold"
+        android:onClick="startPlay"
+        android:shadowColor="@color/white"
         android:shadowDx="-3"
         android:shadowDy="3"
         android:shadowRadius="1"
-        android:shadowColor="@color/white"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"/>
+        android:text="@string/play"
+        android:textColor="@color/red"
+        android:textSize="70sp" />
 
     <TextView
+        android:id="@+id/appName"
         android:layout_width="wrap_content"
         android:layout_height="200dp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/appName"
-        android:text="@string/app_name"
+        android:layout_above="@+id/play"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="@font/sniglet_extrabold"
         android:maxLines="2"
-        android:textStyle="bold"
+        android:shadowColor="@color/white"
         android:shadowDx="-10"
         android:shadowDy="10"
         android:shadowRadius="1"
-        android:shadowColor="@color/white"
+        android:text="@string/app_name"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/turquoise"
-        android:textSize="150dp"
-        android:layout_above="@+id/play"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="10dp"/>
-
-
-    <!--Needed for global high score view access-->
-    <!--<Button-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_below="@id/play"-->
-        <!--android:text="@string/high_score"-->
-        <!--android:onClick="viewScores" />-->
+        android:textSize="150sp"
+        android:textStyle="bold" />
 </RelativeLayout>

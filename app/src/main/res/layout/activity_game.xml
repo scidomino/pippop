@@ -2,22 +2,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
     android:background="#000000"
-    tools:context=".GameActivity" >
+    android:orientation="horizontal"
+    tools:context=".GameActivity">
 
     <com.pippop.GameGLSurfaceView
         android:id="@+id/fullscreen_content"
-        android:layout_marginTop="40sp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:keepScreenOn="true"
-        android:layout_gravity="center_horizontal|top"/>
+        android:layout_gravity="center_horizontal|top"
+        android:keepScreenOn="true" />
+
     <TextView
+        android:id="@+id/score_board"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/showCurrent"
-        android:textColor="@color/orange"
-        android:textSize="40sp"/>
+        android:layout_marginStart="20sp"
+        android:fontFamily="@font/sniglet_extrabold"
+        android:text="Score: 100"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/white"
+        android:textSize="40sp" />
 
 </FrameLayout>
