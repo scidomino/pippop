@@ -41,19 +41,4 @@ public class GameActivity extends Activity {
     super.onResume();
     content.onResume();
   }
-
-  @Override
-  public void onDestroy() {
-    super.onDestroy();
-  }
-
-  @Override
-  public void onStop() {
-    super.onStop();
-  }
-
-  @Override
-  public void onRestart() {
-    super.onRestart();
-  }
 }

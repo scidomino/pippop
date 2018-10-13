@@ -2,7 +2,6 @@ package com.pippop;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.widget.TextView;
@@ -17,22 +16,16 @@ public class GameOver extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_game_over);
 
-    // see if there is a new high score; update it if there is
-
-    SharedPreferences LocalHighScore = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-    Long highscore = LocalHighScore.getLong("highScore", 0);
-    String highStr = String.format("High score: %1$d", highscore);
+    Long highscore = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getLong("highScore", 0);
     TextView showHigh = findViewById(R.id.showHigh);
-    showHigh.setText(highStr);
+    showHigh.setText(getBaseContext().getString(R.string.high_score, highscore));
 
-    SharedPreferences CurrentScore = getSharedPreferences(PREFS_NAME2, MODE_PRIVATE);
-    Long current = CurrentScore.getLong("CurrentScore", 0);
-    String currentStr = String.format("Your score: %1$d", current);
+    Long current = getSharedPreferences(PREFS_NAME2, MODE_PRIVATE).getLong("CurrentScore", 0);
     TextView showCurrent = findViewById(R.id.showCurrent);
-    showCurrent.setText(currentStr);
+    showCurrent.setText(getBaseContext().getString(R.string.your_score, current));
 
     if (highscore < current) {
-      LocalHighScore.edit().putLong("highScore", current).apply();
+      getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().putLong("highScore", current).apply();
       TextView newHigh = findViewById(R.id.newHigh);
       newHigh.setText("New High Score!");
     }
@@ -43,27 +36,11 @@ public class GameOver extends Activity {
     new CountDownTimer(4000, 1000) {
       @Override
       public void onFinish() {
-        Intent returnToMain = new Intent(GameOver.this, MainActivity.class);
-        startActivity(returnToMain);
+        startActivity(new Intent(GameOver.this, MainActivity.class));
         finish();
       }
 
       public void onTick(long millisUntilFinished) {}
     }.start();
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-  }
-
-  @Override
-  protected void onStart() {
-    super.onStart();
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
   }
 }

@@ -1,52 +1,51 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal"
-    tools:context=".GameOver">
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="horizontal"
+  tools:context=".GameOver">
 
-    <TextView
-        android:id="@+id/showCurrent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/sniglet_extrabold"
-        android:textColor="@color/orange"
-        android:textSize="40sp" />
+  <TextView
+    android:id="@+id/showCurrent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:fontFamily="@font/sniglet_extrabold"
+    android:textColor="@color/orange"
+    android:textSize="40sp"/>
 
-    <TextView
-        android:id="@+id/showHigh"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/showCurrent"
-        android:fontFamily="@font/sniglet_extrabold"
-        android:textColor="@color/white"
-        android:textSize="40sp" />
+  <TextView
+    android:id="@+id/showHigh"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/showCurrent"
+    android:fontFamily="@font/sniglet_extrabold"
+    android:textColor="@color/white"
+    android:textSize="40sp"/>
 
-    <TextView
-        android:id="@+id/newHigh"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/showHigh"
-        android:layout_centerHorizontal="true"
-        android:fontFamily="@font/sniglet_extrabold"
-        android:textColor="@color/red"
-        android:textSize="40sp" />
+  <TextView
+    android:id="@+id/newHigh"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/showHigh"
+    android:layout_centerHorizontal="true"
+    android:fontFamily="@font/sniglet_extrabold"
+    android:textColor="@color/red"
+    android:textSize="40sp"/>
 
-    <TextView
-      android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/newHigh"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="53dp"
-        android:fontFamily="@font/sniglet_extrabold"
-        android:shadowColor="@color/dark_green"
-        android:shadowDx="-15"
-        android:shadowDy="0"
-        android:shadowRadius="1"
-        android:text="@string/game_over"
-        android:textColor="@color/green"
-        android:textSize="80sp" />
-
+  <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="24dp"
+    android:layout_marginEnd="53dp"
+    android:layout_alignParentEnd="true"
+    android:layout_below="@+id/newHigh"
+    android:fontFamily="@font/sniglet_extrabold"
+    android:shadowColor="@color/dark_green"
+    android:shadowDx="-15"
+    android:shadowDy="0"
+    android:shadowRadius="1"
+    android:text="@string/game_over"
+    android:textColor="@color/green"
+    android:textSize="80sp"/>
 
 </RelativeLayout>
