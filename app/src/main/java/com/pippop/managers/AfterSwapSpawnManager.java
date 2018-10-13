@@ -1,5 +1,6 @@
 package com.pippop.managers;
 
+import android.content.Context;
 import com.pippop.graph.Graph;
 import com.pippop.graphics.Color;
 import com.pippop.util.RandomChooser;
@@ -10,8 +11,8 @@ public class AfterSwapSpawnManager extends SpawnManager {
   private int bubblesToSpawn = 0;
   private int nextSpawnTime = 1000;
 
-  public AfterSwapSpawnManager(RandomChooser<Color> colorChooser, int minBubbles) {
-    super(colorChooser);
+  public AfterSwapSpawnManager(RandomChooser<Color> colorChooser, int minBubbles, Context context) {
+    super(colorChooser, context);
     this.minBubbles = minBubbles;
   }
 

@@ -1,5 +1,8 @@
 package com.pippop.managers;
 
+import android.content.Context;
+import android.media.MediaPlayer;
+import com.pippop.R;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Point;
 import com.pippop.graphics.Color;
@@ -19,16 +22,18 @@ public class ScoreManager {
   private static final int WALL_BURST_POINTS = 10;
   private static final Color DISPLAY_COLOR = new Color(212 / 255f, 31 / 255f, 53 / 255f, 1);
 
-  //  private final Sound burst = ResourceManager.get().getBurst();
-  //  private final Sound pop = ResourceManager.get().getPop();
   private final ScoreBoard scoreBoard;
 
   private final List<RisingPoints> risingPoints = new ArrayList<>();
 
   private final ChainTimer burstChainTimer = new ChainTimer(2000);
   private final ChainTimer popChainTimer = new ChainTimer(2000);
+  private final MediaPlayer burst;
+  private final MediaPlayer pop;
 
-  public ScoreManager(ScoreBoard scoreBoard) {
+  public ScoreManager(ScoreBoard scoreBoard, Context context) {
+    burst = MediaPlayer.create(context, R.raw.burst);
+    pop = MediaPlayer.create(context, R.raw.pop);
     this.scoreBoard = scoreBoard;
   }
 
@@ -76,7 +81,7 @@ public class ScoreManager {
   }
 
   public void onBurst(Edge edge) {
-    //    burst.play();
+    burst.start();
     burstChainTimer.reUp();
     scoreBoard.getLevelStats().onWallBurst(burstChainTimer.getCount());
     scoreBoard.getGameStats().onWallBurst(burstChainTimer.getCount());
@@ -93,7 +98,7 @@ public class ScoreManager {
   }
 
   public void onPop(PoppedBubble popped) {
-    //    pop.play();
+    pop.start();
     popChainTimer.reUp();
     scoreBoard.getLevelStats().onBubblePopped(popChainTimer.getCount());
     scoreBoard.getGameStats().onBubblePopped(popChainTimer.getCount());

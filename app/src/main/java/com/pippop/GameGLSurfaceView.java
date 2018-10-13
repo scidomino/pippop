@@ -42,11 +42,11 @@ public class GameGLSurfaceView extends GLSurfaceView {
   private final SlideManager slide = new SlideManager();
   private final SwapManager swap = new SwapManager();
   private final BurstManager burst = new BurstManager();
-  private final SpawnManager spawn = new RandomSpawnManager(Colors.getChooser(6), 20);
+  private final SpawnManager spawn = new RandomSpawnManager(Colors.getChooser(6), 20, getContext());
   private final PipPopManager pipPop = new PipPopManager();
   private final BlowoutManager blowout = new BlowoutManager();
   private final SuccessManager success = new ImpossibleSuccessManager();
-  private final ScoreManager score = new ScoreManager(new ScoreBoard(getContext()));
+  private final ScoreManager score = new ScoreManager(new ScoreBoard(getContext()), getContext());
   private State state = State.NORMAL;
   private Graphics graphics;
 

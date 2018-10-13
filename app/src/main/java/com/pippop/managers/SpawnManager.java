@@ -1,5 +1,8 @@
 package com.pippop.managers;
 
+import android.content.Context;
+import android.media.MediaPlayer;
+import com.pippop.R;
 import com.pippop.graph.Bubble;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
@@ -19,12 +22,13 @@ import java.util.Set;
 
 public abstract class SpawnManager extends GraphManager {
 
-  //	private final Sound spawn = ResourceManager.get().getSpawn();
   private final RandomChooser<Color> colorChooser;
   private final Random random = new Random();
+  private final MediaPlayer spawn;
 
-    SpawnManager(RandomChooser<Color> colorChooser) {
+  SpawnManager(RandomChooser<Color> colorChooser, Context context) {
     this.colorChooser = colorChooser;
+    this.spawn = MediaPlayer.create(context, R.raw.spawn);
   }
 
   public abstract void update(Graph graph, int delta);
@@ -37,13 +41,13 @@ public abstract class SpawnManager extends GraphManager {
     Color color1 = colorChooser.chooseRanom();
     double angle = random.nextFloat() * Math.PI;
 
-      PlayerStyle style1 = new PlayerStyle(1, Color.WHITE);
-      GameStyle style2 = new GameStyle(1, color1);
+    PlayerStyle style1 = new PlayerStyle(1, Color.WHITE);
+    GameStyle style2 = new GameStyle(1, color1);
     graph.reset(style1, style2, 0, 0, angle);
-    //		spawn.play();
+    spawn.start();
   }
 
-    void spawn(Graph graph, boolean openAirOnly) {
+  void spawn(Graph graph, boolean openAirOnly) {
     Vertex vertex;
     Color color;
 
@@ -69,7 +73,7 @@ public abstract class SpawnManager extends GraphManager {
   }
 
   private List<Vertex> getOpenAirVertices(Graph graph) {
-      List<Vertex> list = new ArrayList<>();
+    List<Vertex> list = new ArrayList<>();
     for (Edge edge : graph.getOpenAir()) {
       list.add(edge.getStart());
     }
@@ -81,7 +85,7 @@ public abstract class SpawnManager extends GraphManager {
   }
 
   private List<Vertex> findOpen(Map<Vertex, Set<Color>> map) {
-      List<Vertex> list = new ArrayList<>();
+    List<Vertex> list = new ArrayList<>();
     for (Entry<Vertex, Set<Color>> entry : map.entrySet()) {
       if (entry.getValue().size() < colorChooser.getSize()) {
         list.add(entry.getKey());
@@ -92,13 +96,13 @@ public abstract class SpawnManager extends GraphManager {
 
   private void spawn(Graph graph, GameStyle gameStyle, Vertex vertex) {
     graph.spawn(vertex, gameStyle);
-    //		spawn.play();
+    spawn.start();
   }
 
   private Map<Vertex, Set<Color>> createTouchingMap(Graph graph) {
-      Map<Vertex, Set<Color>> map = new HashMap<>();
+    Map<Vertex, Set<Color>> map = new HashMap<>();
     for (Vertex vertex : graph.getVertices()) {
-        map.put(vertex, new HashSet<>());
+      map.put(vertex, new HashSet<>());
     }
 
     for (Edge edge : graph.getEdges()) {

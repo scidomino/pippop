@@ -1,5 +1,6 @@
 package com.pippop.managers;
 
+import android.content.Context;
 import com.pippop.graph.Graph;
 import com.pippop.graphics.Color;
 import com.pippop.util.RandomChooser;
@@ -12,8 +13,8 @@ public class RandomSpawnManager extends SpawnManager {
   private int nextSpawnTime = 1000;
   private long totalPlayTime = 0;
 
-  public RandomSpawnManager(RandomChooser<Color> colorChooser, int minBubbles) {
-    super(colorChooser);
+  public RandomSpawnManager(RandomChooser<Color> colorChooser, int minBubbles, Context context) {
+    super(colorChooser, context);
     this.minBubbles = minBubbles;
   }
 
