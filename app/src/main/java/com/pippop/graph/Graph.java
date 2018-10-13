@@ -9,9 +9,9 @@ import java.util.List;
 /** User: Tommaso Sciortino Date: Oct 16, 2011 Time: 9:39:01 AM */
 public class Graph {
 
-  private final List<Vertex> vertices = new ArrayList<Vertex>();
-  private final List<Edge> edges = new ArrayList<Edge>();
-  private final List<Bubble> bubbles = new ArrayList<Bubble>();
+    private final List<Vertex> vertices = new ArrayList<>();
+    private final List<Edge> edges = new ArrayList<>();
+    private final List<Bubble> bubbles = new ArrayList<>();
 
   private final PhysicsModel physicsModel = new PhysicsModel(this);
   private boolean isModelDirty = true;
@@ -121,7 +121,7 @@ public class Graph {
     return edge;
   }
 
-  private Bubble getBubble(Point point) {
+    public Bubble getBubble(Point point) {
     return this.bubbles.stream().filter(b -> b.contains(point)).findFirst().orElse(null);
   }
 
@@ -296,4 +296,6 @@ public class Graph {
 
     prev.makeFirstEdge();
   }
+
+
 }

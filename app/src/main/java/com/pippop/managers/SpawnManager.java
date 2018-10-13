@@ -6,16 +6,11 @@ import com.pippop.graph.Graph;
 import com.pippop.graph.Vertex;
 import com.pippop.graphics.Color;
 import com.pippop.style.GameStyle;
+import com.pippop.style.PlayerStyle;
 import com.pippop.util.RandomChooser;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
 
 public abstract class SpawnManager extends GraphManager {
 
@@ -35,11 +30,10 @@ public abstract class SpawnManager extends GraphManager {
 
   public void reset(Graph graph) {
     Color color1 = colorChooser.chooseRanom();
-    Color color2 = colorChooser.chooseRanom(color1);
     double angle = random.nextFloat() * Math.PI;
 
-    GameStyle style1 = new GameStyle(1, color1);
-    GameStyle style2 = new GameStyle(1, color2);
+      PlayerStyle style1 = new PlayerStyle(1, Color.WHITE);
+      GameStyle style2 = new GameStyle(1, color1);
     graph.reset(style1, style2, 0, 0, angle);
     //		spawn.play();
   }

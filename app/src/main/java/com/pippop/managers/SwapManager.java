@@ -5,7 +5,7 @@ import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
 import com.pippop.graph.Point;
 import com.pippop.graphics.Graphics;
-import com.pippop.style.GameStyle;
+import com.pippop.style.PlayerStyle;
 import com.pippop.util.SwapPair;
 
 public class SwapManager extends GraphManager {
@@ -15,18 +15,27 @@ public class SwapManager extends GraphManager {
   public SwapManager() {}
 
   public boolean swap(Graph graph, Point point) {
-    Edge edge = graph.getEdge(point);
+    Bubble bubble = graph.getBubble(point);
+    if (bubble == null) {
+      return false;
+    }
+    Edge edge =
+      bubble
+        .stream()
+        .filter(e -> e.getTwin().getBubble().getStyle() instanceof PlayerStyle)
+        .findFirst()
+        .orElse(null);
 
     if (edge == null) {
       return false;
     }
 
-    Bubble top = edge.getTwin().getBubble();
-    Bubble bot = edge.getBubble();
-
-    if (!(top.getStyle() instanceof GameStyle && bot.getStyle() instanceof GameStyle)) {
-      return false;
-    }
+    //    Bubble top = edge.getTwin().getBubble();
+    //    Bubble bot = edge.getBubble();
+    //
+    //    if (!(top.getStyle() instanceof GameStyle && bot.getStyle() instanceof GameStyle)) {
+    //      return false;
+    //    }
 
     this.pair = new SwapPair(edge, false);
     return true;

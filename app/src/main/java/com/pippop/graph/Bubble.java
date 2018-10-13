@@ -145,7 +145,7 @@ public class Bubble implements Iterable<Edge> {
     return null;
   }
 
-  Stream<Edge> stream() {
+  public Stream<Edge> stream() {
     return StreamSupport.stream(spliterator(), false);
   }
 
