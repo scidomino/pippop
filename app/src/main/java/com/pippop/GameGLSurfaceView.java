@@ -1,8 +1,5 @@
 package com.pippop;
 
-import static android.opengl.Matrix.multiplyMM;
-import static android.opengl.Matrix.setIdentityM;
-import static android.opengl.Matrix.translateM;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -29,7 +26,6 @@ import com.pippop.managers.SlideManager;
 import com.pippop.managers.SpawnManager;
 import com.pippop.managers.SuccessManager;
 import com.pippop.managers.SwapManager;
-import com.pippop.util.MatrixHelper;
 import com.pippop.util.ScoreBoard;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -53,7 +49,7 @@ public class GameGLSurfaceView extends GLSurfaceView {
   public GameGLSurfaceView(Context context, AttributeSet attrs) {
     super(context, attrs);
     setEGLContextClientVersion(2);
-    setRenderer(new GameRenderer(context));
+    setRenderer(new GameRenderer());
   }
 
   @SuppressLint("ClickableViewAccessibility")
@@ -89,13 +85,9 @@ public class GameGLSurfaceView extends GLSurfaceView {
 
   private class GameRenderer implements Renderer {
     private static final long MILIS_PER_FRAME = 1000 / 60;
-    private final Context context;
-    private final float[] projectionMatrix = new float[16];
-    private final float[] modelMatrix = new float[16];
     private long startTime = System.currentTimeMillis();
 
-    GameRenderer(Context context) {
-      this.context = context;
+    GameRenderer() {
       spawn.reset(graph);
       success.reset();
       blowout.reset();
@@ -110,14 +102,6 @@ public class GameGLSurfaceView extends GLSurfaceView {
     public void onSurfaceChanged(GL10 gl, int w, int h) {
       // makes adjustments for screen ratio
       graphics.updateDimensions(w, h);
-      MatrixHelper.perspectiveM(projectionMatrix);
-
-      setIdentityM(modelMatrix, 0);
-      translateM(modelMatrix, 0, 0f, .15f, -1.0f);
-
-      final float[] temp = new float[16];
-      multiplyMM(temp, 0, projectionMatrix, 0, modelMatrix, 0);
-      System.arraycopy(temp, 0, projectionMatrix, 0, temp.length);
     }
 
     public void onDrawFrame(GL10 gl) {

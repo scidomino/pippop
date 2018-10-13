@@ -1,9 +1,12 @@
 package com.pippop.managers;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+
 import android.content.Context;
 import android.media.MediaPlayer;
 import com.pippop.R;
-import com.pippop.graph.Bubble;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
 import com.pippop.graph.Vertex;
@@ -11,14 +14,12 @@ import com.pippop.graphics.Color;
 import com.pippop.style.GameStyle;
 import com.pippop.style.PlayerStyle;
 import com.pippop.util.RandomChooser;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public abstract class SpawnManager extends GraphManager {
 
@@ -73,11 +74,7 @@ public abstract class SpawnManager extends GraphManager {
   }
 
   private List<Vertex> getOpenAirVertices(Graph graph) {
-    List<Vertex> list = new ArrayList<>();
-    for (Edge edge : graph.getOpenAir()) {
-      list.add(edge.getStart());
-    }
-    return list;
+    return graph.getOpenAir().stream().map(Edge::getStart).collect(toList());
   }
 
   private <T> T getRandom(List<T> list) {
@@ -85,13 +82,11 @@ public abstract class SpawnManager extends GraphManager {
   }
 
   private List<Vertex> findOpen(Map<Vertex, Set<Color>> map) {
-    List<Vertex> list = new ArrayList<>();
-    for (Entry<Vertex, Set<Color>> entry : map.entrySet()) {
-      if (entry.getValue().size() < colorChooser.getSize()) {
-        list.add(entry.getKey());
-      }
-    }
-    return list;
+    return map.entrySet()
+        .stream()
+        .filter(e -> e.getValue().size() < colorChooser.getSize())
+        .map(Entry::getKey)
+        .collect(toList());
   }
 
   private void spawn(Graph graph, GameStyle gameStyle, Vertex vertex) {
@@ -100,23 +95,21 @@ public abstract class SpawnManager extends GraphManager {
   }
 
   private Map<Vertex, Set<Color>> createTouchingMap(Graph graph) {
-    Map<Vertex, Set<Color>> map = new HashMap<>();
-    for (Vertex vertex : graph.getVertices()) {
-      map.put(vertex, new HashSet<>());
-    }
-
-    for (Edge edge : graph.getEdges()) {
-      Set<Color> vertexColors = map.get(edge.getStart());
-      addBubbleColor(vertexColors, edge.getBubble());
-      addBubbleColor(vertexColors, edge.getNext().getTwin().getBubble());
-    }
-    return map;
-  }
-
-  private void addBubbleColor(Set<Color> set, Bubble bubble) {
-    if (bubble.getStyle() instanceof GameStyle) {
-      GameStyle gameStyle = (GameStyle) bubble.getStyle();
-      set.add(gameStyle.getColor());
-    }
+    return graph
+        .getVertices()
+        .stream()
+        .collect(
+            toMap(
+                v -> v,
+                v1 -> {
+                  Edge e1 = v1.getEdge().getTwin();
+                  Edge e2 = e1.getNext().getTwin();
+                  Edge e3 = e2.getNext().getTwin();
+                  return Stream.of(e1, e2, e3)
+                      .map(e -> e.getBubble().getStyle())
+                      .filter(s -> s instanceof GameStyle)
+                      .map(s -> ((GameStyle) s).getColor())
+                      .collect(toSet());
+                }));
   }
 }

@@ -3,7 +3,7 @@ package com.pippop.physics;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Variable;
 
-public class SurfaceForce {
+class SurfaceForce {
 
   private static final DerStartX derSX = new DerStartX();
   private static final DerStartCtrlX derSCX = new DerStartCtrlX();

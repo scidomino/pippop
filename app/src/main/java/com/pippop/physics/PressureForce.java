@@ -2,7 +2,7 @@ package com.pippop.physics;
 
 import com.pippop.graph.Edge;
 
-public class PressureForce {
+class PressureForce {
   private static final float ONE_TWENTIETH = 1f / 20f;
 
   public static class X implements Force {

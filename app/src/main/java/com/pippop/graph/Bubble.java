@@ -112,16 +112,9 @@ public class Bubble implements Iterable<Edge> {
       return this.firstEdge.getCenter();
     }
 
-    float x = 0;
-    float y = 0;
-    for (Edge edge : this) {
-      x += edge.getCentroidComponentX();
-      y += edge.getCentroidComponentY();
-    }
-
-    x /= area;
-    y /= area;
-    return new Point(x, -y);
+    float x = (float) (stream().mapToDouble(Edge::getCentroidComponentX).sum() / area);
+    float y = (float) (-stream().mapToDouble(Edge::getCentroidComponentY).sum() / area);
+    return new Point(x, y);
   }
 
   public boolean contains(Point point) {

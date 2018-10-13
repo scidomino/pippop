@@ -7,7 +7,7 @@ import com.pippop.graph.Vertex;
 
 class LookupTableBuilder {
 
-  public void reindex(Graph graph) {
+  void reindex(Graph graph) {
     int index = 0;
     for (Vertex v : graph.getVertices()) {
       v.setIndex(index++);
@@ -18,8 +18,7 @@ class LookupTableBuilder {
     }
   }
 
-  public void rebuildCtrlPoint2Vertex(
-      int[] ctrlPoint2NearVertex, int[] ctrlPoint2FarVertex, Graph graph) {
+  void rebuildCtrlPoint2Vertex(int[] ctrlPoint2NearVertex, int[] ctrlPoint2FarVertex, Graph graph) {
     for (Edge edge : graph.getEdges()) {
       int i = edge.getStartCtrl().getIndex();
 
@@ -28,7 +27,7 @@ class LookupTableBuilder {
     }
   }
 
-  public void rebuildVertex2CtrlPoint(
+  void rebuildVertex2CtrlPoint(
       int[][] vertex2NearCtrlPoints, int[][] vertex2FarCtrlPoints, Graph graph) {
     for (Vertex vertex : graph.getVertices()) {
       int i = vertex.getIndex();
@@ -49,7 +48,7 @@ class LookupTableBuilder {
     }
   }
 
-  public void rebuildVertex2Vertex(int[][] vertex2Vertices, Graph graph) {
+  void rebuildVertex2Vertex(int[][] vertex2Vertices, Graph graph) {
     for (Vertex vertex : graph.getVertices()) {
       int i = vertex.getIndex();
       if (i == 100) {

@@ -41,9 +41,8 @@ public class RandomSpawnManager extends SpawnManager {
   private int getNextSpawnTime(Graph graph) {
     if (graph.getBubbles().size() < minBubbles) {
       return 1000;
-    } else {
-      double averageWait = 1000 * (1 + 1.5 * Math.exp(-totalPlayTime / 200000f));
-      return (int) (-averageWait * Math.log(1 - random.nextDouble()));
     }
+    double averageWait = 1000 * (1 + 1.5 * Math.exp(-totalPlayTime / 200000f));
+    return (int) (-averageWait * Math.log(1 - random.nextDouble()));
   }
 }

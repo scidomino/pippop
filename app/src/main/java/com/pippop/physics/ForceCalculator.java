@@ -17,15 +17,13 @@ class ForceCalculator {
   private final Force pressureX = new PressureForce.X();
   private final Force pressureY = new PressureForce.Y();
 
-  public void calculateForceX(
-      float[] vertexForce, float[] ctrlPointForce, Graph graph, float centerX) {
+  void calculateForceX(float[] vertexForce, float[] ctrlPointForce, Graph graph, float centerX) {
     Point bubbleCenter = graph.getOpenAir().getCenter();
     float gravityX = GRAVITY * (centerX - bubbleCenter.x);
     calculateForce(vertexForce, ctrlPointForce, surfaceX, pressureX, gravityX, graph);
   }
 
-  public void calculateForceY(
-      float[] vertexForce, float[] ctrlPointForce, Graph graph, float centerY) {
+  void calculateForceY(float[] vertexForce, float[] ctrlPointForce, Graph graph, float centerY) {
     Point bubbleCenter = graph.getOpenAir().getCenter();
     float gravityY = GRAVITY * (centerY - bubbleCenter.y);
     calculateForce(vertexForce, ctrlPointForce, surfaceY, pressureY, gravityY, graph);
