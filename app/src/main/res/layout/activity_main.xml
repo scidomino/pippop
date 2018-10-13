@@ -11,7 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="@font/sniglet_extrabold"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/white"
         android:textSize="40sp"
         android:textStyle="bold" />
@@ -50,7 +49,6 @@
         android:shadowDy="10"
         android:shadowRadius="1"
         android:text="@string/app_name"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/turquoise"
         android:textSize="150sp"
         android:textStyle="bold" />

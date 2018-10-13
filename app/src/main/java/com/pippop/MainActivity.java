@@ -17,8 +17,8 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    SharedPreferences LocalHighScore = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-    Long score = LocalHighScore.getLong("highScore", 0);
+      SharedPreferences localHighScore = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+      Long score = localHighScore.getLong("highScore", 0);
     String highStr = String.format("High score: %1$d", score);
 
       TextView showHigh = findViewById(R.id.showHigh);

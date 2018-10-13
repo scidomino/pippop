@@ -6,6 +6,7 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="play">Play!</string>
     <string name="high_score">High Scores</string>
+    <string name="score">Score: %1$d</string>
     <string name="game_over">Game Over</string>
 
 </resources>

@@ -19,8 +19,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="20sp"
         android:fontFamily="@font/sniglet_extrabold"
-        android:text="Score: 100"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/white"
         android:textSize="40sp" />
 

@@ -25,11 +25,8 @@ import com.pippop.managers.SlideManager;
 import com.pippop.managers.SpawnManager;
 import com.pippop.managers.SuccessManager;
 import com.pippop.managers.SwapManager;
-import com.pippop.programs.TextureShaderProgram;
 import com.pippop.util.MatrixHelper;
 import com.pippop.util.ScoreBoard;
-import com.pippop.util.ScorePoints;
-import com.pippop.util.TextureHelper;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -51,7 +48,6 @@ public class GameGLSurfaceView extends GLSurfaceView {
   private final BlowoutManager blowout = new BlowoutManager();
   private final SuccessManager success = new ImpossibleSuccessManager();
   private final ScoreManager score = new ScoreManager(new ScoreBoard(getContext()));
-  private final ScorePoints scorePoints = new ScorePoints();
   private State state = State.NORMAL;
   private Graphics graphics;
 
@@ -109,13 +105,9 @@ public class GameGLSurfaceView extends GLSurfaceView {
     private final Context context;
     private final float[] projectionMatrix = new float[16];
     private final float[] modelMatrix = new float[16];
-    private long thePoints;
     private long startTime = System.currentTimeMillis();
-    private TextureShaderProgram textureProgram;
 
-    private int scoreID;
-
-    public GameRenderer(Context context) {
+      GameRenderer(Context context) {
       this.context = context;
       spawn.reset(graph);
       success.reset();
@@ -126,11 +118,6 @@ public class GameGLSurfaceView extends GLSurfaceView {
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
       GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
       graphics = new Graphics(getContext());
-
-      textureProgram = new TextureShaderProgram(context);
-      // load pngs and get texture ids
-      scoreID = TextureHelper.loadTexture(context, R.drawable.score);
-      scorePoints.setupTextures(context);
     }
 
     public void onSurfaceChanged(GL10 gl, int w, int h) {
@@ -160,10 +147,6 @@ public class GameGLSurfaceView extends GLSurfaceView {
       startTime = System.currentTimeMillis();
       update((int) elapsed);
       render(graphics);
-      textureProgram.useProgram();
-      textureProgram.setUniforms(projectionMatrix, scoreID);
-      thePoints = score.hereIsScore();
-      scorePoints.drawPoints(projectionMatrix, context, thePoints);
     }
 
     public void update(int delta) {

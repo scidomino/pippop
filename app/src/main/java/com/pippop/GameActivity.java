@@ -1,12 +1,18 @@
 package com.pippop;
 
 import android.app.Activity;
-import android.opengl.GLSurfaceView;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.TextView;
 
 public class GameActivity extends Activity {
-  private GLSurfaceView content;
+    private GameGLSurfaceView content;
+    private TextView scoreBoard;
+    private SharedPreferences.OnSharedPreferenceChangeListener currentScore = (s, k) -> {
+        long score = s.getLong("CurrentScore", 0);
+        scoreBoard.setText(getBaseContext().getString(R.string.score, score));
+    };
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -14,7 +20,11 @@ public class GameActivity extends Activity {
 
     setContentView(R.layout.activity_game);
       content = findViewById(R.id.fullscreen_content);
-      TextView derp = findViewById(R.id.showCurrent);
+      scoreBoard = findViewById(R.id.score_board);
+      scoreBoard.setText(getBaseContext().getString(R.string.score, 0));
+
+      getBaseContext().getSharedPreferences("CurrentScore", Context.MODE_PRIVATE)
+              .registerOnSharedPreferenceChangeListener(currentScore);
   }
 
   @Override

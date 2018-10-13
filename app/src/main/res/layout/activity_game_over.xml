@@ -10,6 +10,7 @@
         android:id="@+id/showCurrent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/sniglet_extrabold"
         android:textColor="@color/orange"
         android:textSize="40sp" />
 
@@ -18,6 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/showCurrent"
+        android:fontFamily="@font/sniglet_extrabold"
         android:textColor="@color/white"
         android:textSize="40sp" />
 
@@ -27,6 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/showHigh"
         android:layout_centerHorizontal="true"
+        android:fontFamily="@font/sniglet_extrabold"
         android:textColor="@color/red"
         android:textSize="40sp" />
 
@@ -38,6 +41,7 @@
         android:layout_alignParentEnd="true"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="53dp"
+        android:fontFamily="@font/sniglet_extrabold"
         android:shadowColor="@color/dark_green"
         android:shadowDx="-15"
         android:shadowDy="0"
