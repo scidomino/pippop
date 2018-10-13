@@ -21,13 +21,13 @@ public class GameOver extends Activity {
     SharedPreferences LocalHighScore = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
     Long highscore = LocalHighScore.getLong("highScore", 0);
     String highStr = String.format("High score: %1$d", highscore);
-      TextView showHigh = findViewById(R.id.showHigh);
+    TextView showHigh = findViewById(R.id.showHigh);
     showHigh.setText(highStr);
 
     SharedPreferences CurrentScore = getSharedPreferences(PREFS_NAME2, MODE_PRIVATE);
     Long current = CurrentScore.getLong("CurrentScore", 0);
     String currentStr = String.format("Your score: %1$d", current);
-      TextView showCurrent = findViewById(R.id.showCurrent);
+    TextView showCurrent = findViewById(R.id.showCurrent);
     showCurrent.setText(currentStr);
 
     if (highscore < current) {

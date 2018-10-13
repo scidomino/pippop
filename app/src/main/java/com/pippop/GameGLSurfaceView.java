@@ -1,5 +1,10 @@
 package com.pippop;
 
+import static android.opengl.Matrix.multiplyMM;
+import static android.opengl.Matrix.setIdentityM;
+import static android.opengl.Matrix.translateM;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.opengl.GLES20;
@@ -9,14 +14,25 @@ import android.view.MotionEvent;
 import com.pippop.graph.Graph;
 import com.pippop.graph.Point;
 import com.pippop.graphics.Graphics;
-import com.pippop.managers.*;
+import com.pippop.managers.BlowoutManager;
+import com.pippop.managers.BurstManager;
+import com.pippop.managers.Colors;
+import com.pippop.managers.HighlightManager;
+import com.pippop.managers.ImpossibleSuccessManager;
+import com.pippop.managers.PipPopManager;
+import com.pippop.managers.PopManager;
+import com.pippop.managers.PoppedBubble;
+import com.pippop.managers.RandomSpawnManager;
+import com.pippop.managers.ScoreManager;
+import com.pippop.managers.ShowAndMoveManager;
+import com.pippop.managers.SlideManager;
+import com.pippop.managers.SpawnManager;
+import com.pippop.managers.SuccessManager;
+import com.pippop.managers.SwapManager;
 import com.pippop.util.MatrixHelper;
 import com.pippop.util.ScoreBoard;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
-
-import static android.opengl.Matrix.*;
 
 public class GameGLSurfaceView extends GLSurfaceView {
   private final Graph graph = new Graph();
@@ -50,6 +66,7 @@ public class GameGLSurfaceView extends GLSurfaceView {
     super.onResume();
   }
 
+  @SuppressLint("ClickableViewAccessibility")
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     switch (event.getActionMasked()) {
@@ -62,11 +79,11 @@ public class GameGLSurfaceView extends GLSurfaceView {
 
   void swap(final Point point) {
     queueEvent(
-      () -> {
-        if (state == State.NORMAL) {
-          graphics.convertToBubbleSpacePoint(point);
-          if (swap.swap(graph, point)) {
-            state = State.SWAPPING;
+        () -> {
+          if (state == State.NORMAL) {
+            graphics.convertToBubbleSpacePoint(point);
+            if (swap.swap(graph, point)) {
+              state = State.SWAPPING;
             }
           }
         });
@@ -77,7 +94,7 @@ public class GameGLSurfaceView extends GLSurfaceView {
     SWAPPING,
     BURST,
     POPPING,
-    PIPPOP;
+    PIPPOP
   }
 
   private class GameRenderer implements Renderer {

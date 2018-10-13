@@ -20,11 +20,11 @@ public class SwapManager extends GraphManager {
       return false;
     }
     Edge edge =
-      bubble
-        .stream()
-        .filter(e -> e.getTwin().getBubble().getStyle() instanceof PlayerStyle)
-        .findFirst()
-        .orElse(null);
+        bubble
+            .stream()
+            .filter(e -> e.getTwin().getBubble().getStyle() instanceof PlayerStyle)
+            .findFirst()
+            .orElse(null);
 
     if (edge == null) {
       return false;

@@ -3,7 +3,6 @@ package com.pippop.graphics;
 import com.pippop.graph.Bubble;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Point;
-
 import java.nio.BufferOverflowException;
 import java.nio.FloatBuffer;
 

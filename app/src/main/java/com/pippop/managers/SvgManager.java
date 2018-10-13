@@ -2,7 +2,6 @@ package com.pippop.managers;
 
 import android.content.Context;
 import android.os.Environment;
-
 import com.pippop.graph.Bubble;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
@@ -12,7 +11,6 @@ import com.pippop.graph.Vertex;
 import com.pippop.graphics.Color;
 import com.pippop.style.GameStyle;
 import com.pippop.style.Style;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

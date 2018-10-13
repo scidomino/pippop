@@ -12,7 +12,6 @@ import com.pippop.graphics.Polygon;
 import com.pippop.style.EmptyStyle;
 import com.pippop.style.GameStyle;
 import com.pippop.util.MorphShape;
-
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;

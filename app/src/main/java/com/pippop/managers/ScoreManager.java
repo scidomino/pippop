@@ -8,7 +8,6 @@ import com.pippop.style.GameStyle;
 import com.pippop.style.Style;
 import com.pippop.util.ChainTimer;
 import com.pippop.util.ScoreBoard;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

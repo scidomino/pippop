@@ -2,7 +2,6 @@ package com.pippop.graphics;
 
 import com.pippop.graph.Edge;
 import com.pippop.graph.Vertex;
-
 import java.nio.FloatBuffer;
 
 public class Polyline {

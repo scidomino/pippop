@@ -4,7 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class ScoreBoard {
-    public static final String PREFS_NAME = "CurrentScore";
+
+  public static final String PREFS_NAME = "CurrentScore";
   private static final int MAX_HIGH_SCORES = 5;
   Context context;
 
@@ -38,8 +39,7 @@ public class ScoreBoard {
 
   public void addToCurrentScore(long points) {
     currentScore += points;
-      SharedPreferences currentScore = context.getSharedPreferences(PREFS_NAME, Context
-              .MODE_PRIVATE);
-      currentScore.edit().putLong("CurrentScore", this.currentScore).apply();
+    SharedPreferences currentScore = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    currentScore.edit().putLong("CurrentScore", this.currentScore).apply();
   }
 }

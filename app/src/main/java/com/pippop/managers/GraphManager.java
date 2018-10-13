@@ -5,7 +5,6 @@ import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
 import com.pippop.style.GameStyle;
 import com.pippop.style.Style;
-
 import java.util.HashSet;
 import java.util.Set;
 

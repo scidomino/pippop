@@ -1,7 +1,6 @@
 package com.pippop.util;
 
 import com.pippop.graphics.Polygon;
-
 import java.nio.FloatBuffer;
 
 /** User: Tommaso Sciortino Date: Jan 1, 2012 Time: 4:44:44 PM */

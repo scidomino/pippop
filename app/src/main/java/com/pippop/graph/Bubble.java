@@ -1,16 +1,15 @@
 package com.pippop.graph;
 
+import static java.util.stream.Collectors.toSet;
+
 import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
 import com.pippop.graphics.Polygon;
 import com.pippop.style.Style;
-
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import static java.util.stream.Collectors.toSet;
 
 /**
  * Represents a single bubble. It holds firstEdge which can be viewed as a circularly linked list of

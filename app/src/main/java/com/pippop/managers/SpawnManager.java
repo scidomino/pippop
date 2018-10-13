@@ -8,9 +8,14 @@ import com.pippop.graphics.Color;
 import com.pippop.style.GameStyle;
 import com.pippop.style.PlayerStyle;
 import com.pippop.util.RandomChooser;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Set;
 
 public abstract class SpawnManager extends GraphManager {
 

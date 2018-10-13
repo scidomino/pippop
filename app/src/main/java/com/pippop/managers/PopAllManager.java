@@ -4,7 +4,6 @@ import com.pippop.graph.Bubble;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
 import com.pippop.graph.OpenAir;
-
 import java.util.Set;
 
 /** User: Tommaso Sciortino Date: Mar 30, 2011 Time: 8:46:00 PM */

@@ -2,10 +2,8 @@ package com.pippop.graphics;
 
 import android.content.Context;
 import android.opengl.GLES20;
-
 import com.pippop.R;
 import com.pippop.graph.Point;
-
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

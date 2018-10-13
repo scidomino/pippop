@@ -17,19 +17,19 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-      SharedPreferences localHighScore = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-      Long score = localHighScore.getLong("highScore", 0);
+    SharedPreferences localHighScore = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+    Long score = localHighScore.getLong("highScore", 0);
     String highStr = String.format("High score: %1$d", score);
 
-      TextView showHigh = findViewById(R.id.showHigh);
+    TextView showHigh = findViewById(R.id.showHigh);
     showHigh.setText(highStr);
 
-      Button play = findViewById(R.id.play);
-      play.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale));
+    Button play = findViewById(R.id.play);
+    play.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale));
   }
 
   public void startPlay(View view) {
-      startActivity(new Intent(this, GameActivity.class));
+    startActivity(new Intent(this, GameActivity.class));
   }
 
   public void viewScores(View view) {

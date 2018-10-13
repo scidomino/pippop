@@ -3,7 +3,6 @@ package com.pippop.style;
 import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
 import com.pippop.graphics.Polygon;
-
 import java.nio.FloatBuffer;
 
 public class GameStyle implements Style {

@@ -3,7 +3,6 @@ package com.pippop.managers;
 import com.pippop.graph.Graph;
 import com.pippop.graphics.Color;
 import com.pippop.util.RandomChooser;
-
 import java.util.Random;
 
 public class RandomSpawnManager extends SpawnManager {

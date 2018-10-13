@@ -2,7 +2,6 @@ package com.pippop.graphics;
 
 import com.pippop.graph.Edge;
 import com.pippop.graph.Variable;
-
 import java.nio.FloatBuffer;
 
 public class CurveFlattener {

@@ -10,7 +10,6 @@ import com.pippop.graphics.Polygon;
 import com.pippop.style.GameStyle;
 import com.pippop.style.Style;
 import com.pippop.util.RandomChooser;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;

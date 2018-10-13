@@ -3,7 +3,6 @@ package com.pippop.physics;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
 import com.pippop.graph.Point;
-
 import java.util.Arrays;
 
 public class ForceCalculator {

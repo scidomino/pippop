@@ -5,7 +5,6 @@ import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
 import com.pippop.graph.OpenAir;
 import com.pippop.graph.Vertex;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
