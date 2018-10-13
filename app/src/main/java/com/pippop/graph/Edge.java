@@ -47,6 +47,22 @@ public class Edge {
     return new Variable(x, y);
   }
 
+    /**
+     * Calculates half of the centroid component for this edge. The twin edge's half should be
+     * subtracted from this one to get the total centroid component.
+     */
+    private static double calculateHalfPartialCentroid(double sx, double sy, double scx, double
+            scy, double ecx, double ecy, double ex, double ey) {
+        double area = scx * ecx * (45 * sy + 27 * scy);
+        area += scx * ex * (12 * sy + 18 * scy);
+        area += sx * scx * (105 * sy - 45 * scy - 45 * ecy - 15 * ey);
+        area += sx * ecx * (30 * sy);
+        area += sx * ex * (5 * sy + 3 * scy);
+        area += scx * scx * (45 * sy - 27 * ecy - 18 * ey);
+        area += sx * sx * (-280 * sy - 105 * scy - 30 * ecy - 5 * ey);
+        return area / 840;
+    }
+
   public Bubble getBubble() {
     return bubble;
   }
@@ -179,21 +195,5 @@ public class Edge {
     double ey = getEnd().y;
 
     return calculateHalfPartialCentroid(sx, sy, scx, scy, ecx, ecy, ex, ey);
-  }
-
-  /**
-   * Calculates half of the centroid component for this edge. The twin edge's half should be
-   * subtracted from this one to get the total centroid component.
-   */
-  private static double calculateHalfPartialCentroid(
-      double sx, double sy, double scx, double scy, double ecx, double ecy, double ex, double ey) {
-    double area = scx * ecx * (45 * sy + 27 * scy);
-    area += scx * ex * (12 * sy + 18 * scy);
-    area += sx * scx * (105 * sy - 45 * scy - 45 * ecy - 15 * ey);
-    area += sx * ecx * (30 * sy);
-    area += sx * ex * (5 * sy + 3 * scy);
-    area += scx * scx * (45 * sy - 27 * ecy - 18 * ey);
-    area += sx * sx * (-280 * sy - 105 * scy - 30 * ecy - 5 * ey);
-    return area / 840;
   }
 }

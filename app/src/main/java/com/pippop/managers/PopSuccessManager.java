@@ -8,13 +8,13 @@ public class PopSuccessManager implements SuccessManager {
   private final int popsRequired;
   private int pops;
 
+    public PopSuccessManager(int popsRequired) {
+        this.popsRequired = popsRequired;
+    }
+
   @Override
   public void reset() {
     pops = 0;
-  }
-
-  public PopSuccessManager(int popsRequired) {
-    this.popsRequired = popsRequired;
   }
 
   @Override
