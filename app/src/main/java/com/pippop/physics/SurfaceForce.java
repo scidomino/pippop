@@ -66,8 +66,7 @@ public class SurfaceForce {
     private float cx;
     private float cy;
 
-    public void set(
-        float sx, float sy, float scx, float scy, float ecx, float ecy, float ex, float ey) {
+    void set(float sx, float sy, float scx, float scy, float ecx, float ecy, float ex, float ey) {
       ax = 3 * (scx - ecx) + ex - sx;
       ay = 3 * (scy - ecy) + ey - sy;
       bx = 2 * (sx - 2 * scx + ecx);
@@ -98,8 +97,7 @@ public class SurfaceForce {
     private float cx;
     private float cy;
 
-    public void set(
-        float sx, float sy, float scx, float scy, float ecx, float ecy, float ex, float ey) {
+    void set(float sx, float sy, float scx, float scy, float ecx, float ecy, float ex, float ey) {
       ax = 3 * (scx - ecx) + ex - sx;
       ay = 3 * (scy - ecy) + ey - sy;
       bx = 2 * (sx - 2 * scx + ecx);
@@ -130,7 +128,7 @@ public class SurfaceForce {
 
     private static final float[] WEIGHTS_3 = {5f / 18f, 4f / 9f, 5f / 18f};
 
-    public float integrate() {
+    float integrate() {
       float sum = 0f;
       for (int i = 0; i < ABSCISSAS_3.length; ++i) {
         sum += WEIGHTS_3[i] * evaluate(ABSCISSAS_3[i]);

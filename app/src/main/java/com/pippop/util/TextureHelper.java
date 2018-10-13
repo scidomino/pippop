@@ -22,7 +22,7 @@ import android.util.Log;
  * This method will read png and load data into OpenGL. Returns texture ID or 0. Created by L on
  * 10/5/2016.
  */
-public class TextureHelper {
+class TextureHelper {
   // returns id of loaded texture
   public static int loadTexture(Context context, int resourceId) {
     // generate new texture

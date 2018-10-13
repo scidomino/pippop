@@ -8,8 +8,9 @@ import android.os.CountDownTimer;
 import android.widget.TextView;
 
 public class GameOver extends Activity {
-  public static final String PREFS_NAME = "LocalHighScore";
-  public static final String PREFS_NAME2 = "CurrentScore";
+
+  private static final String PREFS_NAME = "LocalHighScore";
+  private static final String PREFS_NAME2 = "CurrentScore";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -31,10 +32,8 @@ public class GameOver extends Activity {
     showCurrent.setText(currentStr);
 
     if (highscore < current) {
-      SharedPreferences.Editor editor = LocalHighScore.edit();
-      editor.putLong("highScore", current);
-      editor.commit();
-      TextView newHigh = (TextView) findViewById(R.id.newHigh);
+      LocalHighScore.edit().putLong("highScore", current).apply();
+      TextView newHigh = findViewById(R.id.newHigh);
       newHigh.setText("New High Score!");
     }
 

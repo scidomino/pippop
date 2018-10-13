@@ -2,7 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
     android:orientation="horizontal"
     tools:context=".GameOver">
 
@@ -34,8 +33,7 @@
         android:textSize="40sp" />
 
     <TextView
-        android:id="@+id/gameOver"
-        android:layout_width="wrap_content"
+      android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/newHigh"
         android:layout_alignParentEnd="true"

@@ -10,7 +10,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-  public static final String PREFS_NAME = "LocalHighScore";
+
+  private static final String PREFS_NAME = "LocalHighScore";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -30,34 +31,5 @@ public class MainActivity extends Activity {
 
   public void startPlay(View view) {
     startActivity(new Intent(this, GameActivity.class));
-  }
-
-  public void viewScores(View view) {
-    setContentView(R.layout.activity_high_score);
-  }
-
-  @Override
-  protected void onStart() {
-    super.onStart();
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
   }
 }

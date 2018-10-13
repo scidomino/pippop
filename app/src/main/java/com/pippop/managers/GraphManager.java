@@ -8,9 +8,9 @@ import com.pippop.style.Style;
 import java.util.HashSet;
 import java.util.Set;
 
-public class GraphManager {
+class GraphManager {
 
-  protected void burstAll(Graph graph) {
+  void burstAll(Graph graph) {
     Edge burstStarter = findBurstStarter(graph);
     while (burstStarter != null) {
       burst(graph, burstStarter);
@@ -26,7 +26,7 @@ public class GraphManager {
     }
   }
 
-  protected void burst(Graph graph, Edge edge) {
+  void burst(Graph graph, Edge edge) {
     if (!isBurstable(edge)) {
       throw new IllegalStateException("edge is not burstable");
     }
@@ -41,15 +41,15 @@ public class GraphManager {
     graph.detach(edge);
   }
 
-  protected Edge findBurstStarter(Graph graph) {
+  Edge findBurstStarter(Graph graph) {
     if (graph.getBubbles().size() <= 5) {
       return null;
     }
 
     for (Bubble bubble : graph.getBubbles()) {
-      Set<Bubble> matching = new HashSet<Bubble>();
+      Set<Bubble> matching = new HashSet<>();
       matching.add(bubble);
-      Set<Edge> couldBurst = new HashSet<Edge>();
+      Set<Edge> couldBurst = new HashSet<>();
       for (Edge edge : bubble) {
         if (!couldBurst.contains(edge.getTwin()) && isBurstable(edge)) {
           couldBurst.add(edge);
@@ -64,7 +64,7 @@ public class GraphManager {
     return null;
   }
 
-  protected Edge findBurstableEdge(Bubble bubble) {
+  Edge findBurstableEdge(Bubble bubble) {
     for (Edge edge : bubble) {
       if (isBurstable(edge)) {
         return edge;
@@ -73,24 +73,20 @@ public class GraphManager {
     return null;
   }
 
-  protected boolean isBurstable(Edge edge) {
+  private boolean isBurstable(Edge edge) {
     Bubble top = edge.getTwin().getBubble();
     Bubble bottom = edge.getBubble();
 
     return canCombine(top.getStyle(), bottom.getStyle());
   }
 
-  protected boolean canCombine(Style s1, Style s2) {
+  private boolean canCombine(Style s1, Style s2) {
     if (!(s1 instanceof GameStyle && s2 instanceof GameStyle)) {
       return false;
     }
     GameStyle style1 = (GameStyle) s1;
     GameStyle style2 = (GameStyle) s2;
 
-    if (!style1.getColor().equals(style2.getColor())) {
-      return false;
-    }
-
-    return true;
+    return style1.getColor().equals(style2.getColor());
   }
 }

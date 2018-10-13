@@ -10,13 +10,14 @@ import java.util.Random;
 public class RandomChooser<T> {
 
   private final Random random = new Random();
-  private final Map<T, Integer> map = new HashMap<T, Integer>();
+  private final Map<T, Integer> map = new HashMap<>();
 
   public void add(T obj, int ratio) {
     map.put(obj, ratio);
   }
 
-  public T chooseRanom(T... excluded) {
+  @SafeVarargs
+  public final T chooseRanom(T... excluded) {
     return chooseRanom(Arrays.asList(excluded));
   }
 

@@ -7,7 +7,7 @@ import com.pippop.graph.OpenAir;
 import java.util.Set;
 
 /** User: Tommaso Sciortino Date: Mar 30, 2011 Time: 8:46:00 PM */
-public class PopAllManager {
+class PopAllManager {
   private static final int POP_DELAY = 100;
 
   private int timeTillNextPop;

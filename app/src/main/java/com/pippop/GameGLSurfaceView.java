@@ -56,16 +56,6 @@ public class GameGLSurfaceView extends GLSurfaceView {
     setRenderer(new GameRenderer(context));
   }
 
-  @Override
-  public void onPause() {
-    super.onPause();
-  }
-
-  @Override
-  public void onResume() {
-    super.onResume();
-  }
-
   @SuppressLint("ClickableViewAccessibility")
   @Override
   public boolean onTouchEvent(MotionEvent event) {
@@ -77,7 +67,7 @@ public class GameGLSurfaceView extends GLSurfaceView {
     return true;
   }
 
-  void swap(final Point point) {
+  private void swap(final Point point) {
     queueEvent(
         () -> {
           if (state == State.NORMAL) {
@@ -146,7 +136,7 @@ public class GameGLSurfaceView extends GLSurfaceView {
       render(graphics);
     }
 
-    public void update(int delta) {
+    void update(int delta) {
       showAndMove.update(graph, 0, 0);
       spawn.update(graph, delta);
       score.update(delta);
@@ -219,7 +209,7 @@ public class GameGLSurfaceView extends GLSurfaceView {
       }
     }
 
-    public void render(Graphics g) {
+    void render(Graphics g) {
       GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
       showAndMove.render(g, graph, blowout.getColor());
       switch (state) {

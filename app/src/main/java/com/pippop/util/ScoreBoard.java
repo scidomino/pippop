@@ -5,9 +5,9 @@ import android.content.SharedPreferences;
 
 public class ScoreBoard {
 
-  public static final String PREFS_NAME = "CurrentScore";
+  private static final String PREFS_NAME = "CurrentScore";
   private static final int MAX_HIGH_SCORES = 5;
-  Context context;
+  private final Context context;
 
   private long currentScore;
   private GameStats levelStats = new GameStats();

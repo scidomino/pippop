@@ -2,7 +2,7 @@ package com.pippop.graph;
 
 import com.pippop.physics.PhysicsModel;
 
-public class GraphChangeDetector {
+class GraphChangeDetector {
   private PhysicsModel physicsModel;
 
   public boolean hasChanged(Graph graph) {

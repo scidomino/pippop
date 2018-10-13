@@ -2,7 +2,7 @@ package com.pippop.physics;
 
 import com.pippop.graph.Edge;
 
-public interface Force {
+interface Force {
 
   float getVertex(Edge edge);
 

@@ -5,7 +5,7 @@ import com.pippop.graph.Graph;
 import com.pippop.graph.Point;
 import java.util.Arrays;
 
-public class ForceCalculator {
+class ForceCalculator {
 
   private static final float SURFACE_TENSION = .3f;
   private static final float PRESSURE_TENSION = .04f;

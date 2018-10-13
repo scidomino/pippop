@@ -9,11 +9,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class SanityManager {
+class SanityManager {
 
   public void sanityCheck(Graph graph) {
-    Set<Vertex> vertices = new HashSet<Vertex>();
-    Set<Edge> edges = new HashSet<Edge>();
+    Set<Vertex> vertices = new HashSet<>();
+    Set<Edge> edges = new HashSet<>();
     if (!(graph.getBubbles().get(0) instanceof OpenAir)) {
       throw new RuntimeException("First bubble is not open air");
     }

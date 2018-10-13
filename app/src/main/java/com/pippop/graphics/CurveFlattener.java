@@ -4,7 +4,7 @@ import com.pippop.graph.Edge;
 import com.pippop.graph.Variable;
 import java.nio.FloatBuffer;
 
-public class CurveFlattener {
+class CurveFlattener {
 
   private static final double FLATNESS = 2;
 

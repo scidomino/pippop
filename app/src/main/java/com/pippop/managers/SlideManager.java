@@ -12,7 +12,7 @@ public class SlideManager extends GraphManager {
   private static final long TIMEOUT = 1000;
   private static final int MIN_LENGTH = 10;
 
-  private final Map<Edge, Long> recentlySlid = new HashMap<Edge, Long>();
+  private final Map<Edge, Long> recentlySlid = new HashMap<>();
 
   public void slideSlidableEdges(Graph graph, int delta) {
     prune(delta);

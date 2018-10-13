@@ -23,7 +23,7 @@ public abstract class SpawnManager extends GraphManager {
   private final RandomChooser<Color> colorChooser;
   private final Random random = new Random();
 
-  public SpawnManager(RandomChooser<Color> colorChooser) {
+    SpawnManager(RandomChooser<Color> colorChooser) {
     this.colorChooser = colorChooser;
   }
 
@@ -43,7 +43,7 @@ public abstract class SpawnManager extends GraphManager {
     //		spawn.play();
   }
 
-  protected void spawn(Graph graph, boolean openAirOnly) {
+    void spawn(Graph graph, boolean openAirOnly) {
     Vertex vertex;
     Color color;
 
@@ -69,7 +69,7 @@ public abstract class SpawnManager extends GraphManager {
   }
 
   private List<Vertex> getOpenAirVertices(Graph graph) {
-    List<Vertex> list = new ArrayList<Vertex>();
+      List<Vertex> list = new ArrayList<>();
     for (Edge edge : graph.getOpenAir()) {
       list.add(edge.getStart());
     }
@@ -81,7 +81,7 @@ public abstract class SpawnManager extends GraphManager {
   }
 
   private List<Vertex> findOpen(Map<Vertex, Set<Color>> map) {
-    List<Vertex> list = new ArrayList<Vertex>();
+      List<Vertex> list = new ArrayList<>();
     for (Entry<Vertex, Set<Color>> entry : map.entrySet()) {
       if (entry.getValue().size() < colorChooser.getSize()) {
         list.add(entry.getKey());
@@ -96,9 +96,9 @@ public abstract class SpawnManager extends GraphManager {
   }
 
   private Map<Vertex, Set<Color>> createTouchingMap(Graph graph) {
-    Map<Vertex, Set<Color>> map = new HashMap<Vertex, Set<Color>>();
+      Map<Vertex, Set<Color>> map = new HashMap<>();
     for (Vertex vertex : graph.getVertices()) {
-      map.put(vertex, new HashSet<Color>());
+        map.put(vertex, new HashSet<>());
     }
 
     for (Edge edge : graph.getEdges()) {

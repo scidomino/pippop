@@ -96,7 +96,7 @@ public class Edge {
     return start;
   }
 
-  public void setStart(Vertex start) {
+  private void setStart(Vertex start) {
     this.start = start;
     this.start.setEdge(this);
   }
@@ -155,7 +155,7 @@ public class Edge {
   }
 
   /** Calculates half of the area. To get the total subtract the twin edges half. */
-  public double calculateHalfArea() {
+  private double calculateHalfArea() {
     double sx = getStart().x;
     double sy = getStart().y;
     double scx = getStartCtrl().x;
@@ -169,7 +169,7 @@ public class Edge {
     return area / 20;
   }
 
-  public double calculateHalfPartialCentroidY() {
+  private double calculateHalfPartialCentroidY() {
     double sx = getStart().x;
     double sy = getStart().y;
     double scx = getStartCtrl().x;
@@ -183,7 +183,7 @@ public class Edge {
     return calculateHalfPartialCentroid(sy, sx, scy, scx, ecy, ecx, ey, ex);
   }
 
-  public double calculateHalfPartialCentroidX() {
+  private double calculateHalfPartialCentroidX() {
     double sx = getStart().x;
     double sy = getStart().y;
     double scx = getStartCtrl().x;

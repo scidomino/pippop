@@ -2,18 +2,17 @@ package com.pippop.graphics;
 
 import java.nio.FloatBuffer;
 
-public class PolygonCrossingsEvaluator {
+class PolygonCrossingsEvaluator {
 
   public static int evaluateCrossings(float x, float y, float distance, FloatBuffer buffer) {
     float x0;
     float x1;
     float y0;
     float y1;
-    float epsilon = 0.0f;
     int crossings = 0;
 
     /* Get a value which is small but not insignificant relative the path. */
-    epsilon = 1E-7f;
+    float epsilon = 1E-7f;
 
     x0 = buffer.get(0) - x;
     y0 = buffer.get(1) - y;

@@ -18,7 +18,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class SvgManager {
+class SvgManager {
 
   public void write(Graph graph, Context context) {
     try {
@@ -26,11 +26,13 @@ public class SvgManager {
           new File(
               Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
               "pippop");
-      dir.mkdirs();
-      String time = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss").format(new Date());
+      if (!dir.mkdirs()) {
+        throw new RuntimeException("couldn't create dir");
+      }
+
+      String time = SimpleDateFormat.getDateTimeInstance().format(new Date());
       FileOutputStream out = new FileOutputStream(dir.getAbsoluteFile() + "/test." + time + ".svg");
-      PrintWriter writer = new PrintWriter(out);
-      try {
+      try (PrintWriter writer = new PrintWriter(out)) {
         writer.append(
             "<svg width=\"20cm\" height=\"20cm\" viewBox=\"-250 -250 500 500\" "
                 + "xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n");
@@ -39,22 +41,38 @@ public class SvgManager {
             continue;
           }
           writer.append("  <path stroke=\"black\" stroke-width=\"3\" ");
-          writer.append("fill=\"" + getColorString(bubble) + "\" ");
+          writer.append("fill=\"").append(getColorString(bubble)).append("\" ");
           Vertex start = bubble.getFirstEdge().getStart();
-          writer.append("d=\"M" + start.x + "," + start.y + " ");
+          writer
+              .append("d=\"M")
+              .append(String.valueOf(start.x))
+              .append(",")
+              .append(String.valueOf(start.y))
+              .append(" ");
           for (Edge edge : bubble) {
             Variable startCtrl = edge.getStartCtrl();
             Variable endCtrl = edge.getEndCtrl();
             Vertex end = edge.getEnd();
-            writer.append("C" + startCtrl.x + "," + startCtrl.y + " ");
-            writer.append(endCtrl.x + "," + endCtrl.y + " ");
-            writer.append(end.x + "," + end.y + " ");
+            writer
+                .append("C")
+                .append(String.valueOf(startCtrl.x))
+                .append(",")
+                .append(String.valueOf(startCtrl.y))
+                .append(" ");
+            writer
+                .append(String.valueOf(endCtrl.x))
+                .append(",")
+                .append(String.valueOf(endCtrl.y))
+                .append(" ");
+            writer
+                .append(String.valueOf(end.x))
+                .append(",")
+                .append(String.valueOf(end.y))
+                .append(" ");
           }
           writer.append("\" />\n");
         }
         writer.append("</svg>\n");
-      } finally {
-        writer.close();
       }
     } catch (IOException e) {
       throw new RuntimeException(e);

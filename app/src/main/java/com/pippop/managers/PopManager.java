@@ -23,12 +23,11 @@ public class PopManager extends GraphManager {
   private static final int FREEZE_MILLISECONDS = 500;
   private static final int UNOTICEABLE_SIZE = 10;
 
-  private final List<Bubble> deflating = new ArrayList<Bubble>();
+  private final List<Bubble> deflating = new ArrayList<>();
+  private final Polygon circle = new Polygon(100);
+  private final MorphShape popShape = new MorphShape();
   private Bubble pending;
   private int pendingTime;
-
-  private Polygon circle = new Polygon(100);
-  private MorphShape popShape = new MorphShape();
 
   public boolean deflateBigBubble(Graph graph) {
     for (Bubble bubble : graph.getBubbles()) {

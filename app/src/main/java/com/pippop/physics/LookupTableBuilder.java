@@ -5,7 +5,7 @@ import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
 import com.pippop.graph.Vertex;
 
-public class LookupTableBuilder {
+class LookupTableBuilder {
 
   public void reindex(Graph graph) {
     int index = 0;

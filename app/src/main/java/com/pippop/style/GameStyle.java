@@ -15,7 +15,7 @@ public class GameStyle implements Style {
     this(size, 5, color);
   }
 
-  public GameStyle(int size, int maxSize, Color color) {
+  private GameStyle(int size, int maxSize, Color color) {
     this.size = size;
     this.maxSize = maxSize;
     this.color = color;

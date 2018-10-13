@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
     tools:context=".MainActivity">
 
     <TextView
@@ -36,8 +35,7 @@
         android:textSize="70sp" />
 
     <TextView
-        android:id="@+id/appName"
-        android:layout_width="wrap_content"
+      android:layout_width="wrap_content"
         android:layout_height="200dp"
         android:layout_above="@+id/play"
         android:layout_centerHorizontal="true"

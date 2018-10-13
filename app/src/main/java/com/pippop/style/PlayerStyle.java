@@ -32,10 +32,6 @@ public class PlayerStyle implements Style {
     return 3000 * Math.sqrt(size);
   }
 
-  public boolean isPoppable() {
-    return false;
-  }
-
   public int getPoint() {
     return size;
   }

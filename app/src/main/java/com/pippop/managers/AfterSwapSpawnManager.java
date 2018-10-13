@@ -16,11 +16,6 @@ public class AfterSwapSpawnManager extends SpawnManager {
   }
 
   @Override
-  public void reset(Graph graph) {
-    super.reset(graph);
-  }
-
-  @Override
   public void update(Graph graph, int delta) {
     if (graph.getBubbles().size() < minBubbles) {
       nextSpawnTime -= delta;

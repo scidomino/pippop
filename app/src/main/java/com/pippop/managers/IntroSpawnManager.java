@@ -69,7 +69,7 @@ public class IntroSpawnManager {
   }
 
   private Set<Color> getColors(Collection<Bubble> bubbles) {
-    Set<Color> colors = new HashSet<Color>();
+    Set<Color> colors = new HashSet<>();
     for (Bubble bubble : bubbles) {
       if (bubble.getStyle() instanceof GameStyle) {
         GameStyle gameStyle = (GameStyle) bubble.getStyle();

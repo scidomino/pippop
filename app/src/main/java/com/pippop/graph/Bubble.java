@@ -18,14 +18,15 @@ import java.util.stream.StreamSupport;
  * <p>User: Tommaso Sciortino Date: Oct 24, 2011 Time: 8:49:28 PM
  */
 public class Bubble implements Iterable<Edge> {
-  public final Polygon shape;
+
+  private final Polygon shape;
   private Edge firstEdge;
   private Style style;
   // These are manually updated whenever the underlying edges change
   private double area;
   private Point center;
 
-  public Bubble(Style style, Edge start, Polygon polygon) {
+  Bubble(Style style, Edge start, Polygon polygon) {
     this.shape = polygon;
     this.firstEdge = start;
     this.style = style;
@@ -102,11 +103,11 @@ public class Bubble implements Iterable<Edge> {
     shape.update(this);
   }
 
-  public double calculateArea() {
+  private double calculateArea() {
     return stream().mapToDouble(Edge::getArea).sum();
   }
 
-  public Point calculateCenter() {
+  private Point calculateCenter() {
     if (area == 0) {
       return this.firstEdge.getCenter();
     }

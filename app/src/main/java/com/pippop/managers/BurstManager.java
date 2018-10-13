@@ -11,10 +11,9 @@ public class BurstManager extends GraphManager {
   private static final int FREEZE_MILLISECONDS = 500;
   private static final int MAX_WIDTH = 20;
   private static final Color HIGHLIGHT_COLOR = Color.TRANSPARENT_WHITE;
-
+  private final Polyline polyline = new Polyline(100);
   private Edge edge;
   private long timeLeft;
-  private Polyline polyline = new Polyline(100);
 
   public void update(Graph graph, int delta) {
     timeLeft -= delta;

@@ -79,7 +79,7 @@ public class SwapPair {
     return this.bottom;
   }
 
-  public void tween(Graphics g, Point center, Bubble startBubble, Bubble endBubble, Style style) {
+  private void tween(Graphics g, Point center, Bubble startBubble, Bubble endBubble, Style style) {
     morphedStart.rotate(center, Math.PI * rotation, startBubble.getShape());
     morphedEnd.rotate(center, Math.PI * (rotation - 1), endBubble.getShape());
     morphShape.build(morphedStart, morphedEnd, rotation);
@@ -87,8 +87,9 @@ public class SwapPair {
   }
 
   private class WaitingStyle extends EmptyStyle {
-    private double startTargetArea;
-    private double endTargetArea;
+
+    private final double startTargetArea;
+    private final double endTargetArea;
 
     WaitingStyle(double startTargetArea, double endTargetArea) {
       this.startTargetArea = startTargetArea;

@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">PipPop</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="play">Play!</string>
-    <string name="high_score">High Scores</string>
-    <string name="score">Score: %1$d</string>
-    <string name="game_over">Game Over</string>
+  <string name="app_name">PipPop</string>
+  <string name="play">Play!</string>
+  <string name="high_score">High Scores</string>
+  <string name="score">Score: %1$d</string>
+  <string name="game_over">Game Over</string>
 
 </resources>

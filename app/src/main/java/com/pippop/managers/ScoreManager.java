@@ -23,10 +23,10 @@ public class ScoreManager {
   //  private final Sound pop = ResourceManager.get().getPop();
   private final ScoreBoard scoreBoard;
 
-  private final List<RisingPoints> risingPoints = new ArrayList<RisingPoints>();
+  private final List<RisingPoints> risingPoints = new ArrayList<>();
 
-  private ChainTimer burstChainTimer = new ChainTimer(2000);
-  private ChainTimer popChainTimer = new ChainTimer(2000);
+  private final ChainTimer burstChainTimer = new ChainTimer(2000);
+  private final ChainTimer popChainTimer = new ChainTimer(2000);
 
   public ScoreManager(ScoreBoard scoreBoard) {
     this.scoreBoard = scoreBoard;
@@ -40,7 +40,7 @@ public class ScoreManager {
     burstChainTimer.update(delta);
     popChainTimer.update(delta);
 
-    Set<RisingPoints> landingPoints = new HashSet<RisingPoints>();
+    Set<RisingPoints> landingPoints = new HashSet<>();
     for (RisingPoints flyingPoint : risingPoints) {
       if (flyingPoint.update(delta)) {
         landingPoints.add(flyingPoint);
@@ -50,8 +50,7 @@ public class ScoreManager {
   }
 
   public long hereIsScore() {
-    long score = scoreBoard.getCurrentScore();
-    return score;
+    return scoreBoard.getCurrentScore();
   }
 
   public void render(Graphics g) {
@@ -103,11 +102,7 @@ public class ScoreManager {
     int points = WALL_BURST_POINTS * gameStyle.getPoint();
     points *= popChainTimer.getCount();
 
-    Color color = DISPLAY_COLOR;
-    Style style = gameStyle;
-    if (style instanceof GameStyle) {
-      color = ((GameStyle) style).getColor();
-    }
+    Color color = gameStyle.getColor();
 
     addPoint(popped.getCenter(), points, color);
   }
@@ -143,9 +138,7 @@ public class ScoreManager {
 
     void render(Graphics g) {
       float rise = (time / POINT_DISPLAY_TIME) * POINT_MAX_HEIGHT;
-      float dx = x;
-      float dy = y - rise;
-      g.drawString(this.text, color, dx, dy);
+      g.drawString(this.text, color, (float) x, y - rise);
     }
   }
 }

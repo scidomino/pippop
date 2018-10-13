@@ -10,7 +10,7 @@ public class GameActivity extends Activity {
 
   private GameGLSurfaceView content;
   private TextView scoreBoard;
-  private SharedPreferences.OnSharedPreferenceChangeListener currentScore =
+  private final SharedPreferences.OnSharedPreferenceChangeListener currentScore =
       (s, k) -> {
         long score = s.getLong("CurrentScore", 0);
         scoreBoard.setText(getBaseContext().getString(R.string.score, score));
@@ -34,11 +34,6 @@ public class GameActivity extends Activity {
   protected void onPause() {
     super.onPause();
     content.onPause();
-  }
-
-  @Override
-  protected void onStart() {
-    super.onStart();
   }
 
   @Override
