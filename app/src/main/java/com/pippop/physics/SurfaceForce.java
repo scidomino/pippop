@@ -49,21 +49,18 @@ class SurfaceForce {
     };
   }
 
-  // Legendre Gauss Integrator
-  private static float integrate5(FloatFunction f) {
-    return 0.27777777777f * f.evaluate(0.11270166537f)
-        + 0.44444444444f * f.evaluate(.5f)
-        + 0.27777777777f * f.evaluate(0.88729833462f);
+  // 3 point Legendre Gauss Integrator
+  private static float integrate(FloatFunction f) {
+    return 0.44444444444f * f.evaluate(.5f)
+        + 0.27777777777f * (f.evaluate(0.11270166537f) + f.evaluate(0.88729833462f));
   }
 
-  // Legendre Gauss Integrator
-  private static float integrate(FloatFunction f) {
-    return 0.11846344252f * f.evaluate(0.04691007703f)
-        + 0.23931433525f * f.evaluate(0.23076534494F)
-        + 0.28444444444f * f.evaluate(.5f)
-        + 0.23931433525f * f.evaluate(0.76923465505F)
-        + 0.11846344252f * f.evaluate(0.95308992296f);
-  }
+  // 5 point Legendre Gauss Integrator
+//  private static float integrate5(FloatFunction f) {
+//    return 0.28444444444f * f.evaluate(.5f)
+//        + 0.23931433525f * (f.evaluate(0.23076534494F) + f.evaluate(0.76923465505f))
+//        + 0.11846344252f * (f.evaluate(0.04691007703f) + f.evaluate(0.95308992296f));
+//  }
 
   private interface FloatFunction {
     float evaluate(float v);
