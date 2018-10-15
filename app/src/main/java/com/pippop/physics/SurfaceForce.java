@@ -5,11 +5,6 @@ import com.pippop.graph.Variable;
 
 class SurfaceForce {
 
-  private static final float[] ABSCISSAS_3 = {
-      (float) (.5 * (1 - Math.sqrt(3.0 / 5.0))), .5f, (float) (.5 * (1 + Math.sqrt(3.0 / 5.0)))
-  };
-  private static final float[] WEIGHTS_3 = {5f / 18f, 4f / 9f, 5f / 18f};
-
   private static FloatFunction derStartX(
       float sx, float sy, float scx, float scy, float ecx, float ecy, float ex, float ey) {
     float ax = 3 * (scx - ecx) + ex - sx;
@@ -55,16 +50,22 @@ class SurfaceForce {
   }
 
   // Legendre Gauss Integrator
+  private static float integrate5(FloatFunction f) {
+    return 0.27777777777f * f.evaluate(0.11270166537f)
+        + 0.44444444444f * f.evaluate(.5f)
+        + 0.27777777777f * f.evaluate(0.88729833462f);
+  }
+
+  // Legendre Gauss Integrator
   private static float integrate(FloatFunction f) {
-    float sum = 0f;
-    for (int i = 0; i < ABSCISSAS_3.length; ++i) {
-      sum += WEIGHTS_3[i] * f.evaluate(ABSCISSAS_3[i]);
-    }
-    return sum;
+    return 0.11846344252f * f.evaluate(0.04691007703f)
+        + 0.23931433525f * f.evaluate(0.23076534494F)
+        + 0.28444444444f * f.evaluate(.5f)
+        + 0.23931433525f * f.evaluate(0.76923465505F)
+        + 0.11846344252f * f.evaluate(0.95308992296f);
   }
 
   private interface FloatFunction {
-
     float evaluate(float v);
   }
 
