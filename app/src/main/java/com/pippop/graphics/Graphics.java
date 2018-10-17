@@ -62,7 +62,7 @@ public class Graphics {
     return new Scanner(stream, "UTF-8").useDelimiter("\\A").next();
   }
 
-  static FloatBuffer createVertexBuffer(int size) {
+  public static FloatBuffer createVertexBuffer(int size) {
     return ByteBuffer.allocateDirect(size * COORDS_PER_VERTEX * FLOAT_BYTES)
         .order(ByteOrder.nativeOrder())
         .asFloatBuffer();
@@ -94,13 +94,13 @@ public class Graphics {
 
   public void drawString(String value, Color color, float x, float y) {}
 
-  public void drawFill(Polygon polygon, Color color) {
-    drawStandard(polygon.getVertices(), color, GLES20.GL_TRIANGLE_FAN, 0, 0);
+  public void drawFill(FloatBuffer buffer, Color color) {
+    drawStandard(buffer, color, GLES20.GL_TRIANGLE_FAN, 0, 0);
   }
 
-  public void draw(Polygon polygon, Color color, float width) {
+  public void draw(FloatBuffer buffer, Color color, float width) {
     GLES20.glLineWidth(width);
-    drawStandard(polygon.getVertices(), color, GLES20.GL_LINE_LOOP, 1, 1);
+    drawStandard(buffer, color, GLES20.GL_LINE_LOOP, 1, 1);
   }
 
   private void drawStandard(FloatBuffer buffer, Color color, int mode, int start, int endClip) {

@@ -2,7 +2,7 @@ package com.pippop.style;
 
 import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
-import com.pippop.graphics.Polygon;
+import java.nio.FloatBuffer;
 
 public class EmptyStyle implements Style {
 
@@ -12,5 +12,6 @@ public class EmptyStyle implements Style {
   }
 
   @Override
-  public void render(Graphics g, Polygon polygon, Color outlineColor) {}
+  public void render(Graphics g, FloatBuffer buffer, Color outlineColor) {
+  }
 }

@@ -8,10 +8,9 @@ import com.pippop.graph.Point;
 import com.pippop.graph.Vertex;
 import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
-import com.pippop.graphics.Polygon;
 import com.pippop.style.EmptyStyle;
 import com.pippop.style.GameStyle;
-import com.pippop.util.MorphShape;
+import com.pippop.util.Tweener;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -24,8 +23,8 @@ public class PopManager extends GraphManager {
   private static final int UNOTICEABLE_SIZE = 10;
 
   private final List<Bubble> deflating = new ArrayList<>();
-  private final Polygon circle = new Polygon(100);
-  private final MorphShape popShape = new MorphShape();
+  private final FloatBuffer circle = Graphics.createVertexBuffer(100);
+  private final FloatBuffer popShape = Graphics.createVertexBuffer(100);
   private Bubble pending;
   private int pendingTime;
 
@@ -103,18 +102,21 @@ public class PopManager extends GraphManager {
     Vertex start = pending.getFirstEdge().getStart();
     double startAngle = Math.atan2(start.y - center.y, start.x - center.x);
 
-    FloatBuffer vertices = circle.getVertices();
-    vertices.clear();
+    populateCircle(center, radius, startAngle);
+
+    Tweener.tween(circle, pending.getBuffer(), popShape, percentDone);
+    gameStyle.render(g, popShape, Color.WHITE);
+  }
+
+  private void populateCircle(Point center, int radius, double startAngle) {
+    circle.clear();
     for (int i = 0; i < 40; i++) {
       double angle = startAngle + (2 * Math.PI) * (i / 40f);
-      vertices.put((float) (center.x + Math.cos(angle) * radius));
-      vertices.put((float) (center.y + Math.sin(angle) * radius));
+      circle.put((float) (center.x + Math.cos(angle) * radius));
+      circle.put((float) (center.y + Math.sin(angle) * radius));
     }
-    vertices.put(vertices.get(2));
-    vertices.put(vertices.get(3));
-    vertices.flip();
-
-    popShape.build(circle, pending.getShape(), percentDone);
-    gameStyle.render(g, popShape, Color.WHITE);
+    circle.put(circle.get(2));
+    circle.put(circle.get(3));
+    circle.flip();
   }
 }

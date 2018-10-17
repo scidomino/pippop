@@ -1,5 +1,6 @@
 package com.pippop.graph;
 
+import com.pippop.graphics.Graphics;
 import com.pippop.physics.PhysicsModel;
 import com.pippop.style.Style;
 import java.util.ArrayList;
@@ -157,8 +158,8 @@ public class Graph {
     addBothSides(edge3);
 
     bubbles.add(new OpenAir(edge1.getTwin()));
-    bubbles.add(new Bubble(style1, edge1));
-    bubbles.add(new Bubble(style2, middleEdge));
+    bubbles.add(new Bubble(style1, edge1, Graphics.createVertexBuffer(1000)));
+    bubbles.add(new Bubble(style2, middleEdge, Graphics.createVertexBuffer(1000)));
 
     isModelDirty = true;
   }
@@ -191,7 +192,7 @@ public class Graph {
     ne3.update();
     ne3.getTwin().update();
 
-    bubbles.add(new Bubble(style, ne1.getTwin()));
+    bubbles.add(new Bubble(style, ne1.getTwin(), Graphics.createVertexBuffer(1000)));
 
     addBothSides(ne1);
     addBothSides(ne2);

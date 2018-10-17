@@ -28,7 +28,7 @@ public class HighlightManager {
   }
 
   private void drawHighlight(Bubble bubble, Graphics g) {
-    g.draw(bubble.getShape(), Color.RED, 7);
+    g.draw(bubble.getBuffer(), Color.RED, 7);
   }
 
   private void processPoint(Graph graph) {

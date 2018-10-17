@@ -5,17 +5,17 @@ import com.pippop.graph.Edge;
 import com.pippop.graph.Point;
 import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
-import com.pippop.graphics.Polygon;
 import com.pippop.style.EmptyStyle;
 import com.pippop.style.Style;
+import java.nio.FloatBuffer;
 
 public class SwapPair {
 
   private static final float SWAP_TIME = 200f;
 
-  private final Polygon morphedStart = new Polygon(100);
-  private final Polygon morphedEnd = new Polygon(100);
-  private final MorphShape morphShape = new MorphShape();
+  private final FloatBuffer morphedStart = Graphics.createVertexBuffer(100);
+  private final FloatBuffer morphedEnd = Graphics.createVertexBuffer(100);
+  private final FloatBuffer morphShape = Graphics.createVertexBuffer(100);
 
   private final Edge edge;
   private final Bubble top;
@@ -59,8 +59,8 @@ public class SwapPair {
 
   public void draw(Graphics g) {
     Point center = this.edge.getCenter();
-    tween(g, center, this.top, this.bottom, topStyle);
-    tween(g, center, this.bottom, this.top, bottomStyle);
+    renderSwapSide(g, center, this.top, this.bottom, topStyle);
+    renderSwapSide(g, center, this.bottom, this.top, bottomStyle);
   }
 
   public void move(int delta) {
@@ -79,11 +79,31 @@ public class SwapPair {
     return this.bottom;
   }
 
-  private void tween(Graphics g, Point center, Bubble startBubble, Bubble endBubble, Style style) {
-    morphedStart.rotate(center, Math.PI * rotation, startBubble.getShape());
-    morphedEnd.rotate(center, Math.PI * (rotation - 1), endBubble.getShape());
-    morphShape.build(morphedStart, morphedEnd, rotation);
+  private void renderSwapSide(Graphics g, Point center, Bubble startBubble, Bubble endBubble,
+      Style style) {
+    rotate(center, Math.PI * rotation, morphedStart, startBubble.getBuffer());
+    rotate(center, Math.PI * (rotation - 1), morphedEnd, endBubble.getBuffer());
+    Tweener.tween(morphedStart, morphedEnd, morphShape, rotation);
     style.render(g, morphShape, Color.WHITE);
+  }
+
+  public void rotate(Point center, double angle, FloatBuffer in, FloatBuffer out) {
+    float sin = (float) Math.sin(angle);
+    float cos = (float) Math.cos(angle);
+
+    out.clear();
+    for (int i = 0; i < in.limit() / 2; i++) {
+      int xIndex = i * 2;
+      int yIndex = xIndex + 1;
+      float x = in.get(xIndex);
+      float y = in.get(yIndex);
+      float rotatedX = cos * (x - center.x) - sin * (y - center.y) + center.x;
+      float rotatedY = sin * (x - center.x) + cos * (y - center.y) + center.y;
+
+      out.put(rotatedX);
+      out.put(rotatedY);
+    }
+    out.flip();
   }
 
   private class WaitingStyle extends EmptyStyle {

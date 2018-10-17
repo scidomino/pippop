@@ -4,8 +4,10 @@ import static java.util.stream.Collectors.toSet;
 
 import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
-import com.pippop.graphics.Polygon;
+import com.pippop.graphics.PolygonCrossingsEvaluator;
 import com.pippop.style.Style;
+import java.nio.BufferOverflowException;
+import java.nio.FloatBuffer;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -19,23 +21,24 @@ import java.util.stream.StreamSupport;
  */
 public class Bubble implements Iterable<Edge> {
 
-  private final Polygon shape;
+  // First point is the center, the last point is the same as the second point.
+  private FloatBuffer buffer;
   private Edge firstEdge;
   private Style style;
   // These are manually updated whenever the underlying edges change
   private double area;
   private Point center;
 
-  Bubble(Style style, Edge start, Polygon polygon) {
-    this.shape = polygon;
-    this.firstEdge = start;
-    this.style = style;
-    stream().forEach(edge -> edge.setBubble(this));
-    update();
+  public Bubble(Style style, Edge firstEdge) {
+    this(style, firstEdge, Graphics.createVertexBuffer(100));
   }
 
-  public Bubble(Style style, Edge start) {
-    this(style, start, new Polygon(100));
+  Bubble(Style style, Edge firstEdge, FloatBuffer buffer) {
+    this.firstEdge = firstEdge;
+    this.style = style;
+    this.buffer = buffer;
+    stream().forEach(edge -> edge.setBubble(this));
+    update();
   }
 
   private static boolean isBelow(Point start, Point end, Point point) {
@@ -78,7 +81,7 @@ public class Bubble implements Iterable<Edge> {
   }
 
   public void render(Graphics graphics, Color outline) {
-    style.render(graphics, shape, outline);
+    style.render(graphics, buffer, outline);
   }
 
   public boolean isDeflating() {
@@ -93,14 +96,35 @@ public class Bubble implements Iterable<Edge> {
     return center;
   }
 
-  public Polygon getShape() {
-    return shape;
-  }
-
   public void update() {
     this.area = calculateArea();
     this.center = calculateCenter();
-    shape.update(this);
+    repopulateBuffer();
+  }
+
+  private void repopulateBuffer() {
+    try {
+      buffer.clear();
+      buffer.put(center.x);
+      buffer.put(center.y);
+      for (Edge edge : this) {
+        edge.flatten(buffer);
+      }
+      buffer.put(buffer.get(2));
+      buffer.put(buffer.get(3));
+      buffer.flip();
+    } catch (BufferOverflowException e) {
+      if (buffer.capacity() > 10000) {
+        // Forget it, Jake. It's Chinatown.
+        return;
+      }
+      buffer = Graphics.createVertexBuffer(2 * buffer.capacity());
+      repopulateBuffer();
+    }
+  }
+
+  public FloatBuffer getBuffer() {
+    return buffer;
   }
 
   private double calculateArea() {
@@ -118,7 +142,10 @@ public class Bubble implements Iterable<Edge> {
   }
 
   public boolean contains(Point point) {
-    return shape.contains(point.x, point.y);
+    return (PolygonCrossingsEvaluator.evaluateCrossings(
+        point.x, point.y, Float.MAX_VALUE / 16, buffer)
+        & 1)
+        != 0;
   }
 
   public boolean sharesExactlyOneEdge(Bubble o) {

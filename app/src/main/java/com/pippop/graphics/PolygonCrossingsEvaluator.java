@@ -2,7 +2,7 @@ package com.pippop.graphics;
 
 import java.nio.FloatBuffer;
 
-class PolygonCrossingsEvaluator {
+public class PolygonCrossingsEvaluator {
 
   public static int evaluateCrossings(float x, float y, float distance, FloatBuffer buffer) {
     float x0;

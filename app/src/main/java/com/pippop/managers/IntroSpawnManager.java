@@ -6,10 +6,10 @@ import com.pippop.graph.Graph;
 import com.pippop.graph.Vertex;
 import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
-import com.pippop.graphics.Polygon;
 import com.pippop.style.GameStyle;
 import com.pippop.style.Style;
 import com.pippop.util.RandomChooser;
+import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -87,7 +87,7 @@ public class IntroSpawnManager {
     }
 
     @Override
-    public void render(Graphics g, Polygon shape, Color outlineColor) {
+    public void render(Graphics g, FloatBuffer shape, Color outlineColor) {
       //			g.setColor(color);
       //			g.fill(shape);
       //
