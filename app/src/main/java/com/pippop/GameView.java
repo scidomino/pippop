@@ -140,7 +140,7 @@ public class GameView extends GLSurfaceView {
               }
             } else if (blowout.isGameOver()) {
               highlight.killHighlight();
-              Intent gameOverIntent = new Intent(getContext(), GameOver.class);
+              Intent gameOverIntent = new Intent(getContext(), GameOverActivity.class);
               getContext().startActivity(gameOverIntent);
             }
           }

@@ -36,11 +36,11 @@
       android:screenOrientation="landscape"
       android:theme="@android:style/Theme.Holo.NoActionBar"/>
     <activity
-      android:name=".GameOver"
+      android:name=".GameOverActivity"
       android:screenOrientation="landscape"
       android:theme="@android:style/Theme.Holo.NoActionBar"/>
     <activity
-      android:name=".HighScore"
+      android:name=".HighScoreActivity"
       android:screenOrientation="landscape"
       android:theme="@android:style/Theme.Holo.NoActionBar"/>
   </application>
