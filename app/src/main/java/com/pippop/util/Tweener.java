@@ -7,8 +7,8 @@ import java.nio.FloatBuffer;
  */
 public class Tweener {
 
-  public static void tween(FloatBuffer bigBuffer, FloatBuffer smallBuffer, FloatBuffer out,
-      float morph) {
+  public static void tween(
+      FloatBuffer bigBuffer, FloatBuffer smallBuffer, FloatBuffer out, float morph) {
     if (smallBuffer.limit() > bigBuffer.limit()) {
       tween(smallBuffer, bigBuffer, out, 1 - morph);
       return;
@@ -34,6 +34,4 @@ public class Tweener {
 
     out.flip();
   }
-
-
 }
