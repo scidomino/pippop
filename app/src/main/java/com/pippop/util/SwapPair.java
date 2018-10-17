@@ -79,8 +79,8 @@ public class SwapPair {
     return this.bottom;
   }
 
-  private void renderSwapSide(Graphics g, Point center, Bubble startBubble, Bubble endBubble,
-      Style style) {
+  private void renderSwapSide(
+      Graphics g, Point center, Bubble startBubble, Bubble endBubble, Style style) {
     rotate(center, Math.PI * rotation, startBubble.getBuffer(), morphedStart);
     rotate(center, Math.PI * (rotation - 1), endBubble.getBuffer(), morphedEnd);
     Tweener.tween(morphedStart, morphedEnd, morphShape, rotation);
@@ -92,16 +92,11 @@ public class SwapPair {
     float cos = (float) Math.cos(angle);
 
     out.clear();
-    for (int i = 0; i < in.limit() / 2; i++) {
-      int xIndex = i * 2;
-      int yIndex = xIndex + 1;
-      float x = in.get(xIndex);
-      float y = in.get(yIndex);
-      float rotatedX = cos * (x - center.x) - sin * (y - center.y) + center.x;
-      float rotatedY = sin * (x - center.x) + cos * (y - center.y) + center.y;
-
-      out.put(rotatedX);
-      out.put(rotatedY);
+    for (int i = 0; i < in.limit(); i += 2) {
+      float x = in.get(i);
+      float y = in.get(i + 1);
+      out.put(cos * (x - center.x) - sin * (y - center.y) + center.x);
+      out.put(sin * (x - center.x) + cos * (y - center.y) + center.y);
     }
     out.flip();
   }
