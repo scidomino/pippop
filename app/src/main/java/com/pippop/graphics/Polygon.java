@@ -30,7 +30,6 @@ public class Polygon {
       vertices.put(bubble.getCenter().x);
       vertices.put(bubble.getCenter().y);
       for (Edge edge : bubble) {
-//        edge.flatten(vertices, 4);
         CurveFlattener.flatten(vertices, edge);
       }
 

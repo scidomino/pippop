@@ -1,7 +1,5 @@
 package com.pippop.graph;
 
-import java.nio.FloatBuffer;
-
 /**
  * Represents one side of a bubble wall. Together with it's twin it describes a cubic bezier curve
  * with control points (start, startCtrl, twin.startCtrl, twin.start) sometimes referred to as
@@ -10,14 +8,14 @@ import java.nio.FloatBuffer;
  * <p>User: Tommaso Sciortino Date: Oct 16, 2011 Time: 9:57:10 AM
  */
 public class Edge {
-
-  private static final double FLATNESS = 2;
   private final Edge twin;
   private final Variable startCtrl;
+
   // only updated when graph is modified
   private Vertex start;
   private Bubble bubble;
   private Edge next;
+
   // updated every time the position moves
   private double halfCentroidComponentY;
   private double halfCentroidComponentX;
@@ -197,94 +195,5 @@ public class Edge {
     double ey = getEnd().y;
 
     return calculateHalfPartialCentroid(sx, sy, scx, scy, ecx, ecy, ex, ey);
-  }
-
-  public void flatten(FloatBuffer buffer, float width) {
-    if (buffer.remaining() < 8) {
-      return;
-    }
-
-    Point start = getStart();
-    Point startCtrl = getStartCtrl();
-    Point endCtrl = getEndCtrl();
-    Point end = getEnd();
-
-    Bezier bx = new Bezier(start.x, startCtrl.x, endCtrl.x, end.x);
-    Bezier by = new Bezier(start.y, startCtrl.y, endCtrl.y, end.y);
-
-    populate(buffer, 0, bx, by, width, start);
-
-    flatten(buffer, width, bx, by, 0f, start, 1f, end);
-
-    populate(buffer, 1, bx, by, width, end);
-  }
-
-  private void flatten(
-      FloatBuffer buffer,
-      float width,
-      Bezier bx,
-      Bezier by,
-      float low,
-      Point lowPoint,
-      float high,
-      Point highPoint) {
-    if (buffer.remaining() < 4) {
-      return;
-    }
-
-    float mid = (low + high) / 2;
-    Point midPoint = new Point(bx.getValue(mid), by.getValue(mid));
-
-    float approxX = (lowPoint.x + highPoint.x) / 2;
-    float approxY = (lowPoint.y + highPoint.y) / 2;
-
-    double distance = Math.hypot(midPoint.x - approxX, midPoint.y - approxY);
-    if (distance > FLATNESS) {
-      flatten(buffer, width, bx, by, low, lowPoint, mid, midPoint);
-
-      populate(buffer, mid, bx, by, width, midPoint);
-
-      flatten(buffer, width, bx, by, mid, midPoint, high, highPoint);
-    }
-  }
-
-  private void populate(
-      FloatBuffer buffer, float t, Bezier bx, Bezier by, float width, Point point) {
-    float dx = bx.getDerivative(t);
-    float dy = by.getDerivative(t);
-    double hypot = width * Math.hypot(dx, dy);
-    dx /= hypot;
-    dy /= hypot;
-
-    // upper point
-    buffer.put(point.x - dy);
-    buffer.put(point.y + dx);
-
-    // lower point
-    buffer.put(point.x + dy);
-    buffer.put(point.y - dx);
-  }
-
-  private static class Bezier {
-
-    private final float a;
-    private final float b;
-    private final float c;
-    private final float d;
-
-    Bezier(float start, float startCtrl, float endCtrl, float end) {
-      a = start;
-      b = 3 * (startCtrl - start);
-      c = 3 * (endCtrl - 2 * startCtrl + start);
-      d = end - start + 3 * (startCtrl - endCtrl);
-    }
-
-    private float getValue(float t) {
-      return a + t * (b + t * (c + t * d));
-    }
-
-    private float getDerivative(float t) {
-      return (b + t * (2 * c + 3 * t * d));
-    }
   }
 }
