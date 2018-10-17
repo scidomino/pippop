@@ -81,8 +81,8 @@ public class SwapPair {
 
   private void renderSwapSide(Graphics g, Point center, Bubble startBubble, Bubble endBubble,
       Style style) {
-    rotate(center, Math.PI * rotation, morphedStart, startBubble.getBuffer());
-    rotate(center, Math.PI * (rotation - 1), morphedEnd, endBubble.getBuffer());
+    rotate(center, Math.PI * rotation, startBubble.getBuffer(), morphedStart);
+    rotate(center, Math.PI * (rotation - 1), endBubble.getBuffer(), morphedEnd);
     Tweener.tween(morphedStart, morphedEnd, morphShape, rotation);
     style.render(g, morphShape, Color.WHITE);
   }
