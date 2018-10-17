@@ -1,24 +1,20 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+  xmlns:tools="http://schemas.android.com/tools"
+  tools:context=".GameActivity">
+
+  <com.pippop.GameGLSurfaceView
+    android:id="@+id/fullscreen_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
-    tools:context=".GameActivity">
+    android:keepScreenOn="true"/>
 
-    <com.pippop.GameGLSurfaceView
-        android:id="@+id/fullscreen_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal|top"
-        android:keepScreenOn="true" />
-
-    <TextView
-        android:id="@+id/score_board"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20sp"
-        android:fontFamily="@font/sniglet_extrabold"
-        android:textColor="@color/white"
-        android:textSize="40sp" />
+  <TextView
+    android:id="@+id/score_board"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="20sp"
+    android:fontFamily="@font/sniglet_extrabold"
+    android:textColor="@color/white"
+    android:textSize="40sp"/>
 
 </merge>
