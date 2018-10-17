@@ -82,7 +82,7 @@ public class Polyline {
 
   private void populateTemp(Edge edge) {
     temp.clear();
-    CurveFlattener.flatten(temp, edge);
+    edge.flatten(temp);
     Vertex end = edge.getEnd();
     temp.put(end.x);
     temp.put(end.y);

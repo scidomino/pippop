@@ -1,5 +1,7 @@
 package com.pippop.graph;
 
+import java.nio.FloatBuffer;
+
 /**
  * Represents one side of a bubble wall. Together with it's twin it describes a cubic bezier curve
  * with control points (start, startCtrl, twin.startCtrl, twin.start) sometimes referred to as
@@ -8,14 +10,14 @@ package com.pippop.graph;
  * <p>User: Tommaso Sciortino Date: Oct 16, 2011 Time: 9:57:10 AM
  */
 public class Edge {
+
+  private static final double FLATNESS = .5;
   private final Edge twin;
   private final Variable startCtrl;
-
   // only updated when graph is modified
   private Vertex start;
   private Bubble bubble;
   private Edge next;
-
   // updated every time the position moves
   private double halfCentroidComponentY;
   private double halfCentroidComponentX;
@@ -195,5 +197,58 @@ public class Edge {
     double ey = getEnd().y;
 
     return calculateHalfPartialCentroid(sx, sy, scx, scy, ecx, ecy, ex, ey);
+  }
+
+  // flattens this to a buffer *excluding the end point*
+  public void flatten(FloatBuffer buffer) {
+    Point p1 = getStart();
+    Point p2 = getStartCtrl();
+    Point p3 = getEndCtrl();
+    Point p4 = getEnd();
+
+    flatten(buffer, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y);
+  }
+
+  private void flatten(
+      FloatBuffer buffer,
+      float x1,
+      float y1,
+      float x2,
+      float y2,
+      float x3,
+      float y3,
+      float x4,
+      float y4) {
+    if (!buffer.hasRemaining()) {
+      return;
+    }
+
+    float dx = x4 - x1;
+    float dy = y4 - y1;
+    float d2 = Math.abs(((x2 - x4) * dy - (y2 - y4) * dx));
+    float d3 = Math.abs(((x3 - x4) * dy - (y3 - y4) * dx));
+
+    if ((d2 + d3) * (d2 + d3) < FLATNESS * (dx * dx + dy * dy)) {
+      buffer.put(x1);
+      buffer.put(y1);
+      return;
+    }
+
+    // split in two by De Casteljau's Algorithm
+    float x12 = (x1 + x2) / 2;
+    float y12 = (y1 + y2) / 2;
+    float x23 = (x2 + x3) / 2;
+    float y23 = (y2 + y3) / 2;
+    float x34 = (x3 + x4) / 2;
+    float y34 = (y3 + y4) / 2;
+    float x123 = (x12 + x23) / 2;
+    float y123 = (y12 + y23) / 2;
+    float x234 = (x23 + x34) / 2;
+    float y234 = (y23 + y34) / 2;
+    float x1234 = (x123 + x234) / 2;
+    float y1234 = (y123 + y234) / 2;
+
+    flatten(buffer, x1, y1, x12, y12, x123, y123, x1234, y1234);
+    flatten(buffer, x1234, y1234, x234, y234, x34, y34, x4, y4);
   }
 }

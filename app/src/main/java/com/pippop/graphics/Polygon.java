@@ -30,9 +30,8 @@ public class Polygon {
       vertices.put(bubble.getCenter().x);
       vertices.put(bubble.getCenter().y);
       for (Edge edge : bubble) {
-        CurveFlattener.flatten(vertices, edge);
+        edge.flatten(vertices);
       }
-
       vertices.put(vertices.get(2));
       vertices.put(vertices.get(3));
       vertices.flip();
