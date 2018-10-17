@@ -87,7 +87,7 @@ public class SwapPair {
     style.render(g, morphShape, Color.WHITE);
   }
 
-  public void rotate(Point center, double angle, FloatBuffer in, FloatBuffer out) {
+  private void rotate(Point center, double angle, FloatBuffer in, FloatBuffer out) {
     float sin = (float) Math.sin(angle);
     float cos = (float) Math.cos(angle);
 

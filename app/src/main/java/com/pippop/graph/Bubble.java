@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.toSet;
 
 import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
-import com.pippop.graphics.PolygonCrossingsEvaluator;
 import com.pippop.style.Style;
 import java.nio.BufferOverflowException;
 import java.nio.FloatBuffer;
@@ -21,7 +20,7 @@ import java.util.stream.StreamSupport;
  */
 public class Bubble implements Iterable<Edge> {
 
-  // First point is the center, the last point is the same as the second point.
+  // First point is the center, then the polygon, the last point is the same as the second point.
   private FloatBuffer buffer;
   private Edge firstEdge;
   private Style style;
@@ -47,6 +46,21 @@ public class Bubble implements Iterable<Edge> {
     float pointX = point.x - start.x;
     float pointY = point.y - start.y;
     return endX * pointY < endY * pointX;
+  }
+
+  private static boolean intersects(float x1, float y1, float x2, float y2, float x, float y) {
+    if (y1 > y2) {
+      return intersects(x2, y2, x1, y1, x, y);
+    }
+
+    if (y == y1 || y == y2) {
+      y += 0.0001;
+    }
+
+    return !(y > y2)
+        && !(y < y1)
+        && !(x >= Math.max(x1, x2))
+        && (x < Math.min(x1, x2) || (y - y1) / (x - x1) >= (y2 - y1) / (x2 - x1));
   }
 
   public double getPressureRatio(double speedBump) {
@@ -142,7 +156,17 @@ public class Bubble implements Iterable<Edge> {
   }
 
   public boolean contains(Point point) {
-    return PolygonCrossingsEvaluator.contains(buffer, point.x, point.y);
+    boolean inside = false;
+    for (int i = 2; i < buffer.limit() - 2; i += 2) {
+      float x1 = buffer.get(i);
+      float y1 = buffer.get(i + 1);
+      float x2 = buffer.get(i + 2);
+      float y2 = buffer.get(i + 3);
+      if (intersects(x1, y1, x2, y2, point.x, point.y)) {
+        inside = !inside;
+      }
+    }
+    return inside;
   }
 
   public boolean sharesExactlyOneEdge(Bubble o) {
