@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 public class GameActivity extends Activity {
 
-  private GameGLSurfaceView content;
+  private GameView content;
   private TextView scoreBoard;
   private final SharedPreferences.OnSharedPreferenceChangeListener currentScore =
       (s, k) -> {

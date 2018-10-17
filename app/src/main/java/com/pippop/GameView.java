@@ -29,7 +29,7 @@ import com.pippop.util.ScoreBoard;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class GameGLSurfaceView extends GLSurfaceView {
+public class GameView extends GLSurfaceView {
   private final Graph graph = new Graph();
   private final HighlightManager highlight = new HighlightManager();
   private final ShowAndMoveManager showAndMove = new ShowAndMoveManager();
@@ -45,7 +45,7 @@ public class GameGLSurfaceView extends GLSurfaceView {
   private State state = State.NORMAL;
   private Graphics graphics;
 
-  public GameGLSurfaceView(Context context, AttributeSet attrs) {
+  public GameView(Context context, AttributeSet attrs) {
     super(context, attrs);
     setEGLContextClientVersion(2);
     setRenderer(new GameRenderer());
