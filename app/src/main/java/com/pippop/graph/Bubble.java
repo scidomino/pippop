@@ -142,10 +142,7 @@ public class Bubble implements Iterable<Edge> {
   }
 
   public boolean contains(Point point) {
-    return (PolygonCrossingsEvaluator.evaluateCrossings(
-        point.x, point.y, Float.MAX_VALUE / 16, buffer)
-        & 1)
-        != 0;
+    return PolygonCrossingsEvaluator.contains(buffer, point.x, point.y);
   }
 
   public boolean sharesExactlyOneEdge(Bubble o) {
