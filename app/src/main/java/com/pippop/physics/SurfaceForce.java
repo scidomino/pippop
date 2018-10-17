@@ -7,12 +7,12 @@ class SurfaceForce {
 
   private static FloatFunction derStartX(
       float sx, float sy, float scx, float scy, float ecx, float ecy, float ex, float ey) {
-    float ax = 3 * (scx - ecx) + ex - sx;
-    float ay = 3 * (scy - ecy) + ey - sy;
-    float bx = 2 * (sx - 2 * scx + ecx);
-    float by = 2 * (sy - 2 * scy + ecy);
-    float cx = scx - sx;
-    float cy = scy - sy;
+    float ax = 3 * (ecx - scx) + sx - ex;
+    float ay = 3 * (ecy - scy) + sy - ey;
+    float bx = 2 * (ex - 2 * ecx + scx);
+    float by = 2 * (ey - 2 * ecy + scy);
+    float cx = ecx - ex;
+    float cy = ecy - ey;
 
     return p -> {
       float bezierXDp = cx + p * (bx + p * ax);
@@ -29,12 +29,12 @@ class SurfaceForce {
 
   private static FloatFunction derStartCtrlX(
       float sx, float sy, float scx, float scy, float ecx, float ecy, float ex, float ey) {
-    float ax = 3 * (scx - ecx) + ex - sx;
-    float ay = 3 * (scy - ecy) + ey - sy;
-    float bx = 2 * (sx - 2 * scx + ecx);
-    float by = 2 * (sy - 2 * scy + ecy);
-    float cx = scx - sx;
-    float cy = scy - sy;
+    float ax = 3 * (ecx - scx) + sx - ex;
+    float ay = 3 * (ecy - scy) + sy - ey;
+    float bx = 2 * (ex - 2 * ecx + scx);
+    float by = 2 * (ey - 2 * ecy + scy);
+    float cx = ecx - ex;
+    float cy = ecy - ey;
 
     return p -> {
       float bezierXDp = cx + p * (bx + p * ax);
@@ -56,11 +56,11 @@ class SurfaceForce {
   }
 
   // 5 point Legendre Gauss Integrator
-//  private static float integrate5(FloatFunction f) {
-//    return 0.28444444444f * f.evaluate(.5f)
-//        + 0.23931433525f * (f.evaluate(0.23076534494F) + f.evaluate(0.76923465505f))
-//        + 0.11846344252f * (f.evaluate(0.04691007703f) + f.evaluate(0.95308992296f));
-//  }
+  //  private static float integrate5(FloatFunction f) {
+  //    return 0.28444444444f * f.evaluate(.5f)
+  //        + 0.23931433525f * (f.evaluate(0.23076534494F) + f.evaluate(0.76923465505f))
+  //        + 0.11846344252f * (f.evaluate(0.04691007703f) + f.evaluate(0.95308992296f));
+  //  }
 
   private interface FloatFunction {
     float evaluate(float v);
@@ -70,20 +70,20 @@ class SurfaceForce {
 
     @Override
     public float getVertex(Edge edge) {
-      Variable s = edge.getEnd();
-      Variable sc = edge.getEndCtrl();
-      Variable ec = edge.getStartCtrl();
-      Variable e = edge.getStart();
+      Variable s = edge.getStart();
+      Variable sc = edge.getStartCtrl();
+      Variable ec = edge.getEndCtrl();
+      Variable e = edge.getEnd();
 
       return integrate(derStartX(s.x, s.y, sc.x, sc.y, ec.x, ec.y, e.x, e.y));
     }
 
     @Override
     public float getCtrl(Edge edge) {
-      Variable s = edge.getEnd();
-      Variable sc = edge.getEndCtrl();
-      Variable ec = edge.getStartCtrl();
-      Variable e = edge.getStart();
+      Variable s = edge.getStart();
+      Variable sc = edge.getStartCtrl();
+      Variable ec = edge.getEndCtrl();
+      Variable e = edge.getEnd();
 
       return integrate(derStartCtrlX(s.x, s.y, sc.x, sc.y, ec.x, ec.y, e.x, e.y));
     }
@@ -93,20 +93,20 @@ class SurfaceForce {
 
     @Override
     public float getVertex(Edge edge) {
-      Variable s = edge.getEnd();
-      Variable sc = edge.getEndCtrl();
-      Variable ec = edge.getStartCtrl();
-      Variable e = edge.getStart();
+      Variable s = edge.getStart();
+      Variable sc = edge.getStartCtrl();
+      Variable ec = edge.getEndCtrl();
+      Variable e = edge.getEnd();
 
       return integrate(derStartX(s.y, s.x, sc.y, sc.x, ec.y, ec.x, e.y, e.x));
     }
 
     @Override
     public float getCtrl(Edge edge) {
-      Variable s = edge.getEnd();
-      Variable sc = edge.getEndCtrl();
-      Variable ec = edge.getStartCtrl();
-      Variable e = edge.getStart();
+      Variable s = edge.getStart();
+      Variable sc = edge.getStartCtrl();
+      Variable ec = edge.getEndCtrl();
+      Variable e = edge.getEnd();
 
       return integrate(derStartCtrlX(s.y, s.x, sc.y, sc.x, ec.y, ec.x, e.y, e.x));
     }
