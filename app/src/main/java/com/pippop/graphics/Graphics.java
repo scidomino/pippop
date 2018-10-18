@@ -4,6 +4,7 @@ import android.content.Context;
 import android.opengl.GLES20;
 import com.pippop.R;
 import com.pippop.graph.Point;
+import com.pippop.graphics.gltext.GLText;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -21,6 +22,7 @@ public class Graphics {
   private final int matrixHandle;
 
   private final float[] transformMatrix = new float[4];
+  private final GLText glText;
   private float width;
   private float height;
 
@@ -29,6 +31,9 @@ public class Graphics {
     this.colorHandle = GLES20.glGetUniformLocation(standardProgram, "u_Color");
     this.posHandle = GLES20.glGetAttribLocation(standardProgram, "vPosition");
     this.matrixHandle = GLES20.glGetUniformLocation(standardProgram, "uMVPMatrix");
+
+    glText = new GLText(context.getResources());
+    glText.load(R.font.sniglet_extrabold, 30, 2, 2);
   }
 
   private static int loadProgram(Context context) {
@@ -53,7 +58,6 @@ public class Graphics {
       String log = GLES20.glGetShaderInfoLog(shader);
       throw new RuntimeException("Could not compile shader : " + log);
     }
-
     return shader;
   }
 
@@ -92,7 +96,22 @@ public class Graphics {
     GLES20.glDisable(GLES20.GL_BLEND);
   }
 
-  public void drawString(String value, Color color, float x, float y) {}
+  public void drawString(String value, Color color, float x, float y) {
+
+    float[] mVPMatrix = new float[16];
+    mVPMatrix[0] = transformMatrix[0];
+    mVPMatrix[5] = transformMatrix[3];
+    mVPMatrix[10] = 1;
+    mVPMatrix[15] = 1;
+
+    GLES20.glEnable(GLES20.GL_BLEND);
+    GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+    glText.begin(
+        color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha(), mVPMatrix);
+    glText.drawC(value, x, y);
+    glText.end();
+    GLES20.glDisable(GLES20.GL_BLEND);
+  }
 
   public void drawFill(FloatBuffer buffer, Color color) {
     drawStandard(buffer, color, GLES20.GL_TRIANGLE_FAN, 0, 0);
