@@ -12,7 +12,7 @@ public abstract class Program {
   private int fragmentShaderHandle;
   private boolean mInitialized;
 
-  public Program() {
+  Program() {
     mInitialized = false;
   }
 
@@ -20,7 +20,7 @@ public abstract class Program {
     init(null, null, null);
   }
 
-  public void init(String vertexShaderCode, String fragmentShaderCode,
+  void init(String vertexShaderCode, String fragmentShaderCode,
       AttribVariable[] programVariables) {
     vertexShaderHandle = Utilities.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
     fragmentShaderHandle = Utilities.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);

@@ -9,7 +9,7 @@ public enum AttribVariable {
   private int mHandle;
   private String mName;
 
-  private AttribVariable(int handle, String name) {
+  AttribVariable(int handle, String name) {
     mHandle = handle;
     mName = name;
   }
