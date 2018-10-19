@@ -1,12 +1,13 @@
 package com.pippop.managers;
 
+import static java.util.stream.Collectors.toSet;
+
 import com.pippop.graph.Bubble;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
 import com.pippop.style.GameStyle;
 import com.pippop.style.Style;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 
 class GraphManager {
 
@@ -46,41 +47,29 @@ class GraphManager {
       return null;
     }
 
-    for (Bubble bubble : graph.getBubbles()) {
-      Set<Bubble> matching = new HashSet<>();
-      matching.add(bubble);
-      Set<Edge> couldBurst = new HashSet<>();
-      for (Edge edge : bubble) {
-        if (!couldBurst.contains(edge.getTwin()) && isBurstable(edge)) {
-          couldBurst.add(edge);
-          matching.add(edge.getTwin().getBubble());
-        }
-      }
-      if (matching.size() >= 3) {
-        return couldBurst.iterator().next();
-      }
-    }
-
-    return null;
+    return graph
+        .getBubbles()
+        .stream()
+        .map(b -> b.stream().filter(this::isBurstable).collect(toSet()))
+        .filter(burstableEdges -> burstableEdges.size() >= 2)
+        .flatMap(Collection::stream)
+        .findAny()
+        .orElse(null);
   }
 
   Edge findBurstableEdge(Bubble bubble) {
-    for (Edge edge : bubble) {
-      if (isBurstable(edge)) {
-        return edge;
-      }
-    }
-    return null;
+    return bubble.stream().filter(this::isBurstable).findAny().orElse(null);
   }
 
   private boolean isBurstable(Edge edge) {
     Bubble top = edge.getTwin().getBubble();
     Bubble bottom = edge.getBubble();
+    if (top == bottom) {
+      return false;
+    }
 
-    return canCombine(top.getStyle(), bottom.getStyle());
-  }
-
-  private boolean canCombine(Style s1, Style s2) {
+    Style s1 = top.getStyle();
+    Style s2 = bottom.getStyle();
     if (!(s1 instanceof GameStyle && s2 instanceof GameStyle)) {
       return false;
     }

@@ -49,6 +49,9 @@ public class BurstManager extends GraphManager {
       timeLeft = FREEZE_MILLISECONDS;
     }
 
+    sound.seekTo(0);
+    sound.start();
+
     return removed;
   }
 
@@ -59,10 +62,6 @@ public class BurstManager extends GraphManager {
     }
     edge = burstStarter;
     timeLeft = FREEZE_MILLISECONDS;
-
-    sound.seekTo(0);
-    sound.start();
-
     return true;
   }
 
