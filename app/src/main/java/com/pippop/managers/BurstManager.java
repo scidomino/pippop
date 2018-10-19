@@ -1,5 +1,8 @@
 package com.pippop.managers;
 
+import android.content.Context;
+import android.media.MediaPlayer;
+import com.pippop.R;
 import com.pippop.graph.Bubble;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
@@ -12,8 +15,13 @@ public class BurstManager extends GraphManager {
   private static final int MAX_WIDTH = 20;
   private static final Color HIGHLIGHT_COLOR = Color.TRANSPARENT_WHITE;
   private final Polyline polyline = new Polyline(100);
+  private final MediaPlayer sound;
   private Edge edge;
   private long timeLeft;
+
+  public BurstManager(Context context) {
+    this.sound = MediaPlayer.create(context, R.raw.burst);
+  }
 
   public void update(Graph graph, int delta) {
     timeLeft -= delta;
@@ -48,11 +56,14 @@ public class BurstManager extends GraphManager {
     Edge burstStarter = findBurstStarter(graph);
     if (burstStarter == null) {
       return false;
-    } else {
-      edge = burstStarter;
-      timeLeft = FREEZE_MILLISECONDS;
-      return true;
     }
+    edge = burstStarter;
+    timeLeft = FREEZE_MILLISECONDS;
+
+    sound.seekTo(0);
+    sound.start();
+
+    return true;
   }
 
   public boolean isDone() {

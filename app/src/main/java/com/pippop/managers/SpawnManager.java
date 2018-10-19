@@ -25,11 +25,11 @@ public abstract class SpawnManager extends GraphManager {
 
   private final RandomChooser<Color> colorChooser;
   private final Random random = new Random();
-  private final MediaPlayer spawn;
+  private final MediaPlayer sound;
 
   SpawnManager(RandomChooser<Color> colorChooser, Context context) {
     this.colorChooser = colorChooser;
-    this.spawn = MediaPlayer.create(context, R.raw.spawn);
+    this.sound = MediaPlayer.create(context, R.raw.spawn);
   }
 
   public abstract void update(Graph graph, int delta);
@@ -45,7 +45,7 @@ public abstract class SpawnManager extends GraphManager {
     PlayerStyle style1 = new PlayerStyle(1, Color.WHITE);
     GameStyle style2 = new GameStyle(1, color1);
     graph.reset(style1, style2, 0, 0, angle);
-    spawn.start();
+    sound.start();
   }
 
   void spawn(Graph graph, boolean openAirOnly) {
@@ -91,7 +91,7 @@ public abstract class SpawnManager extends GraphManager {
 
   private void spawn(Graph graph, GameStyle gameStyle, Vertex vertex) {
     graph.spawn(vertex, gameStyle);
-    spawn.start();
+    sound.start();
   }
 
   private Map<Vertex, Set<Color>> createTouchingMap(Graph graph) {

@@ -1,5 +1,8 @@
 package com.pippop.managers;
 
+import android.content.Context;
+import android.media.MediaPlayer;
+import com.pippop.R;
 import com.pippop.graph.Bubble;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
@@ -22,9 +25,14 @@ public class PopManager extends GraphManager {
   private static final int UNOTICEABLE_SIZE = 10;
 
   private final List<Bubble> deflating = new ArrayList<>();
+  private final MediaPlayer sound;
   private FloatBuffer popShape = Graphics.createVertexBuffer(100);
   private Bubble pending;
   private int pendingTime;
+
+  public PopManager(Context context) {
+    this.sound = MediaPlayer.create(context, R.raw.pop);
+  }
 
   public boolean deflateBigBubble(Graph graph) {
     for (Bubble bubble : graph.getBubbles()) {
@@ -33,6 +41,10 @@ public class PopManager extends GraphManager {
         if (gameStyle.isPoppable()) {
           pendingTime = FREEZE_MILLISECONDS;
           pending = bubble;
+
+          sound.seekTo(0);
+          sound.start();
+
           return true;
         }
       }

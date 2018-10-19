@@ -1,8 +1,5 @@
 package com.pippop.managers;
 
-import android.content.Context;
-import android.media.MediaPlayer;
-import com.pippop.R;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Point;
 import com.pippop.graphics.Color;
@@ -24,15 +21,8 @@ public class ScoreManager {
 
   private final ChainTimer burstChainTimer = new ChainTimer(2000);
   private final ChainTimer popChainTimer = new ChainTimer(2000);
-  private final MediaPlayer burst;
-  private final MediaPlayer pop;
 
   private long score;
-
-  public ScoreManager(Context context) {
-    burst = MediaPlayer.create(context, R.raw.burst);
-    pop = MediaPlayer.create(context, R.raw.pop);
-  }
 
   public boolean isProcessing() {
     return !risingPoints.isEmpty();
@@ -73,7 +63,6 @@ public class ScoreManager {
   }
 
   public void onBurst(Edge edge) {
-    burst.start();
     burstChainTimer.reUp();
 
     int points = WALL_BURST_POINTS * burstChainTimer.getCount();
@@ -82,7 +71,6 @@ public class ScoreManager {
   }
 
   public void onPop(PoppedBubble popped) {
-    pop.start();
     popChainTimer.reUp();
 
     GameStyle gameStyle = popped.getStyle();
