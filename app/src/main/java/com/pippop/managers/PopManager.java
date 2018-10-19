@@ -10,7 +10,6 @@ import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
 import com.pippop.style.EmptyStyle;
 import com.pippop.style.GameStyle;
-import com.pippop.util.Tweener;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,8 +22,7 @@ public class PopManager extends GraphManager {
   private static final int UNOTICEABLE_SIZE = 10;
 
   private final List<Bubble> deflating = new ArrayList<>();
-  private final FloatBuffer circle = Graphics.createVertexBuffer(100);
-  private final FloatBuffer popShape = Graphics.createVertexBuffer(100);
+  private FloatBuffer popShape = Graphics.createVertexBuffer(100);
   private Bubble pending;
   private int pendingTime;
 
@@ -92,31 +90,41 @@ public class PopManager extends GraphManager {
   }
 
   public void render(Graphics g) {
-    float percentDone = pendingTime / (float) FREEZE_MILLISECONDS;
-    percentDone = percentDone * percentDone;
-
-    Point center = pending.getCenter();
     GameStyle gameStyle = (GameStyle) pending.getStyle();
-    int radius = 5 * (int) (Math.sqrt(gameStyle.getTargetArea() / Math.PI));
+    double radius = 5 * (Math.sqrt(gameStyle.getTargetArea() / Math.PI));
 
-    Vertex start = pending.getFirstEdge().getStart();
-    double startAngle = Math.atan2(start.y - center.y, start.x - center.x);
+    // closer to 0 closer to full circle
+    float morphRatio = (float) Math.pow(pendingTime / (float) FREEZE_MILLISECONDS, 2);
+    updatePopShape(radius, morphRatio);
 
-    populateCircle(center, radius, startAngle);
-
-    Tweener.tween(circle, pending.getBuffer(), popShape, percentDone);
     gameStyle.render(g, popShape, Color.WHITE);
   }
 
-  private void populateCircle(Point center, int radius, double startAngle) {
-    circle.clear();
-    for (int i = 0; i < 40; i++) {
-      double angle = startAngle + (2 * Math.PI) * (i / 40f);
-      circle.put((float) (center.x + Math.cos(angle) * radius));
-      circle.put((float) (center.y + Math.sin(angle) * radius));
+  private void updatePopShape(double radius, float morphRatio) {
+    float invM = 1 - morphRatio;
+
+    Point center = pending.getCenter();
+    Vertex start = pending.getFirstEdge().getStart();
+    double startAngle = Math.atan2(start.y - center.y, start.x - center.x);
+
+    FloatBuffer buffer = pending.getBuffer();
+    if (popShape.capacity() < buffer.limit()) {
+      popShape = Graphics.createVertexBuffer(buffer.capacity());
     }
-    circle.put(circle.get(2));
-    circle.put(circle.get(3));
-    circle.flip();
+    popShape.clear();
+    popShape.put(center.x);
+    popShape.put(center.y);
+    for (int i = 2; i < buffer.limit() - 2; i += 2) {
+      double angle = startAngle - (2 * Math.PI) * (i / (float) buffer.limit());
+
+      float circleX = center.x + (float) (Math.cos(angle) * radius);
+      float circleY = center.y + (float) (Math.sin(angle) * radius);
+
+      popShape.put(invM * circleX + morphRatio * buffer.get(i));
+      popShape.put(invM * circleY + morphRatio * buffer.get(i + 1));
+    }
+    popShape.put(popShape.get(2));
+    popShape.put(popShape.get(3));
+    popShape.flip();
   }
 }

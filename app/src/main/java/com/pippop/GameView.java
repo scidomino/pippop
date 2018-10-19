@@ -25,7 +25,6 @@ import com.pippop.managers.SlideManager;
 import com.pippop.managers.SpawnManager;
 import com.pippop.managers.SuccessManager;
 import com.pippop.managers.SwapManager;
-import com.pippop.util.ScoreBoard;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -41,7 +40,7 @@ public class GameView extends GLSurfaceView {
   private final PipPopManager pipPop = new PipPopManager();
   private final BlowoutManager blowout = new BlowoutManager();
   private final SuccessManager success = new ImpossibleSuccessManager();
-  private final ScoreManager score = new ScoreManager(new ScoreBoard(getContext()), getContext());
+  private final ScoreManager score = new ScoreManager(getContext());
   private State state = State.NORMAL;
   private Graphics graphics;
 

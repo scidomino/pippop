@@ -9,7 +9,6 @@ import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
 import com.pippop.style.GameStyle;
 import com.pippop.util.ChainTimer;
-import com.pippop.util.ScoreBoard;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,8 +20,6 @@ public class ScoreManager {
   private static final int WALL_BURST_POINTS = 10;
   private static final Color DISPLAY_COLOR = Color.WHITE;
 
-  private final ScoreBoard scoreBoard;
-
   private final List<RisingPoints> risingPoints = new ArrayList<>();
 
   private final ChainTimer burstChainTimer = new ChainTimer(2000);
@@ -30,10 +27,11 @@ public class ScoreManager {
   private final MediaPlayer burst;
   private final MediaPlayer pop;
 
-  public ScoreManager(ScoreBoard scoreBoard, Context context) {
+  private long score;
+
+  public ScoreManager(Context context) {
     burst = MediaPlayer.create(context, R.raw.burst);
     pop = MediaPlayer.create(context, R.raw.pop);
-    this.scoreBoard = scoreBoard;
   }
 
   public boolean isProcessing() {
@@ -53,8 +51,8 @@ public class ScoreManager {
     risingPoints.removeAll(landingPoints);
   }
 
-  public long hereIsScore() {
-    return scoreBoard.getCurrentScore();
+  public long getScore() {
+    return score;
   }
 
   public void render(Graphics g) {
@@ -62,8 +60,8 @@ public class ScoreManager {
       flyingPoint.render(g);
     }
 
-    String value = String.valueOf(scoreBoard.getCurrentScore());
-    g.drawString(value, DISPLAY_COLOR, 450, 30);
+    String value = "Score: " + String.valueOf(score);
+    g.drawString(value, DISPLAY_COLOR, 150, 150);
 
     if (popChainTimer.getCount() > 1) {
       String chainString = popChainTimer.getCount() + " Pop Chain!";
@@ -74,16 +72,9 @@ public class ScoreManager {
     }
   }
 
-  public void onSwap() {
-    scoreBoard.getLevelStats().onSwap();
-    scoreBoard.getGameStats().onSwap();
-  }
-
   public void onBurst(Edge edge) {
     burst.start();
     burstChainTimer.reUp();
-    scoreBoard.getLevelStats().onWallBurst(burstChainTimer.getCount());
-    scoreBoard.getGameStats().onWallBurst(burstChainTimer.getCount());
 
     int points = WALL_BURST_POINTS * burstChainTimer.getCount();
 
@@ -93,8 +84,6 @@ public class ScoreManager {
   public void onPop(PoppedBubble popped) {
     pop.start();
     popChainTimer.reUp();
-    scoreBoard.getLevelStats().onBubblePopped(popChainTimer.getCount());
-    scoreBoard.getGameStats().onBubblePopped(popChainTimer.getCount());
 
     GameStyle gameStyle = popped.getStyle();
     int points = WALL_BURST_POINTS * gameStyle.getPoint();
@@ -105,11 +94,6 @@ public class ScoreManager {
 
   private void addPoint(Point location, int points) {
     risingPoints.add(new RisingPoints(location, points));
-    scoreBoard.addToCurrentScore(points);
-  }
-
-  public void resetCurrentScore() {
-    scoreBoard.resetCurrentScore();
   }
 
   private class RisingPoints {
