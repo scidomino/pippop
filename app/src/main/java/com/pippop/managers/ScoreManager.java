@@ -94,6 +94,7 @@ public class ScoreManager {
 
   private void addPoint(Point location, int points) {
     risingPoints.add(new RisingPoints(location, points));
+    this.score += points;
   }
 
   private class RisingPoints {
