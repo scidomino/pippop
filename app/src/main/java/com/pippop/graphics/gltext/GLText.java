@@ -15,6 +15,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import com.pippop.graphics.Color;
 import com.pippop.graphics.gltext.programs.BatchTextProgram;
 
 public class GLText {
@@ -46,8 +47,8 @@ public class GLText {
 
   // --Constructor--//
   // D: save program + asset manager, create arrays, and initialize the members
-  public GLText(Resources resources, int font, int size, int fontPadX, int fontPadY,
-      boolean outline) {
+  public GLText(
+      Resources resources, int font, int size, int fontPadX, int fontPadY, boolean outline) {
     mProgram = BatchTextProgram.getProgram();
     mColorHandle = GLES20.glGetUniformLocation(mProgram, "u_Color");
     mTextureUniformHandle = GLES20.glGetUniformLocation(mProgram, "u_Texture");
@@ -137,24 +138,15 @@ public class GLText {
   //    alpha - optional alpha value for font (default = 1.0)
   // 	  vpMatrix - View and projection matrix to use
   // R: [none]
-  public void begin(float[] vpMatrix) {
-    begin(1.0f, 1.0f, 1.0f, 1.0f, vpMatrix); // Begin with White Opaque
-  }
-
-  public void begin(float alpha, float[] vpMatrix) {
-    begin(1.0f, 1.0f, 1.0f, alpha, vpMatrix); // Begin with White (Explicit Alpha)
-  }
-
-  public void begin(float red, float green, float blue, float alpha, float[] vpMatrix) {
-    initDraw(red, green, blue, alpha);
+  public void begin(Color color, float[] vpMatrix) {
+    initDraw(color);
     batch.beginBatch(vpMatrix); // Begin Batch
   }
 
-  private void initDraw(float red, float green, float blue, float alpha) {
+  private void initDraw(Color color) {
     GLES20.glUseProgram(mProgram);
 
-    float[] color = {red, green, blue, alpha};
-    GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+    GLES20.glUniform4fv(mColorHandle, 1, color.value, 0);
     GLES20.glEnableVertexAttribArray(mColorHandle);
 
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0); // Set the active texture unit to texture unit 0
@@ -258,7 +250,7 @@ public class GLText {
   //    to draw the texture to the top-left corner.
   //    vpMatrix - View and projection matrix to use
   public void drawTexture(int width, int height, float[] vpMatrix) {
-    initDraw(1.0f, 1.0f, 1.0f, 1.0f);
+    initDraw(Color.WHITE);
 
     batch.beginBatch(vpMatrix); // Begin Batch (Bind Texture)
     float[] idMatrix = new float[16];

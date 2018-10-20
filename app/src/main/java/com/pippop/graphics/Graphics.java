@@ -105,11 +105,30 @@ public class Graphics {
     mVPMatrix[15] = 1;
     GLES20.glEnable(GLES20.GL_BLEND);
     GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-    glText.begin(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha(), mVPMatrix);
+
+    glText.begin(color, mVPMatrix);
     glText.drawC(value, x, y, 0f);
     glText.end();
 
-    glTextOutline.begin(0, 0, 0, 1, mVPMatrix);
+    GLES20.glDisable(GLES20.GL_BLEND);
+  }
+
+  public void drawStringOutlined(
+      String value, Color fillColor, Color outineColor, float x, float y) {
+    float[] mVPMatrix = new float[16];
+    mVPMatrix[0] = transformMatrix[0];
+    mVPMatrix[5] = transformMatrix[3];
+    mVPMatrix[10] = 1;
+    mVPMatrix[15] = 1;
+    GLES20.glEnable(GLES20.GL_BLEND);
+    GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
+    glText.begin(fillColor, mVPMatrix);
+    glText.drawC(value, x, y, 0f);
+    glText.end();
+
+    GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+    glTextOutline.begin(outineColor, mVPMatrix);
     glTextOutline.drawC(value, x, y, 0f);
     glTextOutline.end();
 
