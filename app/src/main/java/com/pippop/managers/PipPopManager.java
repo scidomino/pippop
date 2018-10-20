@@ -5,7 +5,7 @@ import com.pippop.graph.Graph;
 import com.pippop.graphics.Graphics;
 import com.pippop.style.GameStyle;
 
-public class PipPopManager extends GraphManager {
+public class PipPopManager {
 
   private static final long TOTAL_TIME = 2000;
 

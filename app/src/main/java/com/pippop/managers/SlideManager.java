@@ -7,12 +7,17 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class SlideManager extends GraphManager {
+public class SlideManager {
 
   private static final long TIMEOUT = 1000;
   private static final int MIN_LENGTH = 10;
 
   private final Map<Edge, Long> recentlySlid = new HashMap<>();
+  private final BurstManager burst;
+
+  public SlideManager(BurstManager burst) {
+    this.burst = burst;
+  }
 
   public void slideSlidableEdges(Graph graph, int delta) {
     prune(delta);
@@ -20,7 +25,7 @@ public class SlideManager extends GraphManager {
     if (edge != null) {
       graph.slide(edge);
       this.recentlySlid.put(edge, TIMEOUT);
-      burstAll(graph);
+      burst.burstAll(graph);
     }
   }
 

@@ -30,12 +30,12 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class GameView extends GLSurfaceView {
   private final Graph graph = new Graph();
+  private final BurstManager burst = new BurstManager(getContext());
   private final HighlightManager highlight = new HighlightManager();
   private final ShowAndMoveManager showAndMove = new ShowAndMoveManager();
-  private final PopManager pop = new PopManager(getContext());
-  private final SlideManager slide = new SlideManager();
+  private final PopManager pop = new PopManager(burst, getContext());
+  private final SlideManager slide = new SlideManager(burst);
   private final SwapManager swap = new SwapManager();
-  private final BurstManager burst = new BurstManager(getContext());
   private final SpawnManager spawn = new RandomSpawnManager(Colors.getChooser(6), 20, getContext());
   private final PipPopManager pipPop = new PipPopManager();
   private final BlowoutManager blowout = new BlowoutManager();

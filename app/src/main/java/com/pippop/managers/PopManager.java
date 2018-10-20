@@ -19,19 +19,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class PopManager extends GraphManager {
+public class PopManager {
 
   private static final int FREEZE_MILLISECONDS = 500;
   private static final int UNOTICEABLE_SIZE = 10;
 
   private final List<Bubble> deflating = new ArrayList<>();
   private final MediaPlayer sound;
+  private final BurstManager burst;
   private FloatBuffer popShape = Graphics.createVertexBuffer(100);
   private Bubble pending;
   private int pendingTime;
   private GameStyle pendingStyle;
 
-  public PopManager(Context context) {
+  public PopManager(BurstManager burst, Context context) {
+    this.burst = burst;
     this.sound = MediaPlayer.create(context, R.raw.pop);
   }
 
@@ -72,7 +74,7 @@ public class PopManager extends GraphManager {
           if (bubble.sharesExactlyOneEdge(other)) {
             graph.detach(edge.getTwin());
             it.remove();
-            burstAll(graph);
+            burst.burstAll(graph);
             break;
           }
         }

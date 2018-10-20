@@ -21,7 +21,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public abstract class SpawnManager extends GraphManager {
+public abstract class SpawnManager {
 
   private final RandomChooser<Color> colorChooser;
   private final Random random = new Random();

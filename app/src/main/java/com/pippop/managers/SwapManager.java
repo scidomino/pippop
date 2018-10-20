@@ -8,7 +8,7 @@ import com.pippop.graphics.Graphics;
 import com.pippop.style.PlayerStyle;
 import com.pippop.util.SwapPair;
 
-public class SwapManager extends GraphManager {
+public class SwapManager {
 
   private SwapPair pair;
 
