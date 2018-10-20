@@ -32,7 +32,7 @@ public class Graphics {
     this.posHandle = GLES20.glGetAttribLocation(standardProgram, "vPosition");
     this.matrixHandle = GLES20.glGetUniformLocation(standardProgram, "uMVPMatrix");
 
-    glText = new GLText(context.getResources(), R.font.sniglet_extrabold, 30, 0, 0);
+    glText = new GLText(context.getResources(), R.font.sniglet_extrabold, 30, 2, 2);
   }
 
   private static int loadProgram(Context context) {
