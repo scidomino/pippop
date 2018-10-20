@@ -46,7 +46,8 @@ public class GLText {
 
   // --Constructor--//
   // D: save program + asset manager, create arrays, and initialize the members
-  public GLText(Resources resources, int font, int size, int fontPadX, int fontPadY) {
+  public GLText(Resources resources, int font, int size, int fontPadX, int fontPadY,
+      boolean outline) {
     mProgram = BatchTextProgram.getProgram();
     mColorHandle = GLES20.glGetUniformLocation(mProgram, "u_Color");
     mTextureUniformHandle = GLES20.glGetUniformLocation(mProgram, "u_Texture");
@@ -64,9 +65,10 @@ public class GLText {
     paint.setTextSize(size);
     paint.setColor(0xffffffff);
     paint.setTypeface(resources.getFont(font));
-
-    Paint.FontMetrics fm = paint.getFontMetrics();
-    float fontDescent = (float) Math.ceil(Math.abs(fm.descent));
+    if (outline) {
+      paint.setStyle(Paint.Style.STROKE);
+      paint.setStrokeWidth(1);
+    }
 
     float charWidthMax = 0;
     float[] w = new float[2];
@@ -75,6 +77,9 @@ public class GLText {
       charWidths[c - CHAR_START] = w[0];
       charWidthMax = Math.max(charWidthMax, w[0]);
     }
+
+    Paint.FontMetrics fm = paint.getFontMetrics();
+    float fontDescent = (float) Math.ceil(Math.abs(fm.descent));
 
     // set character height to font height
     charHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top)); // Set Character Height
@@ -94,7 +99,7 @@ public class GLText {
     } else if (maxSize <= 80) {
       textureSize = 1024;
     } else {
-      textureSize = 2048; // Set 2048 Texture Size
+      textureSize = 2048;
     }
 
     // create an empty bitmap (alpha only)

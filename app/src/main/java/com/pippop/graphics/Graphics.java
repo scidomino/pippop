@@ -23,6 +23,7 @@ public class Graphics {
 
   private final float[] transformMatrix = new float[4];
   private final GLText glText;
+  private final GLText glTextOutline;
   private float width;
   private float height;
 
@@ -32,7 +33,8 @@ public class Graphics {
     this.posHandle = GLES20.glGetAttribLocation(standardProgram, "vPosition");
     this.matrixHandle = GLES20.glGetUniformLocation(standardProgram, "uMVPMatrix");
 
-    glText = new GLText(context.getResources(), R.font.sniglet_extrabold, 30, 2, 2);
+    glText = new GLText(context.getResources(), R.font.sniglet_extrabold, 30, 2, 2, false);
+    glTextOutline = new GLText(context.getResources(), R.font.sniglet_extrabold, 30, 2, 2, true);
   }
 
   private static int loadProgram(Context context) {
@@ -106,6 +108,11 @@ public class Graphics {
     glText.begin(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha(), mVPMatrix);
     glText.drawC(value, x, y, 0f);
     glText.end();
+
+    glTextOutline.begin(0, 0, 0, 1, mVPMatrix);
+    glTextOutline.drawC(value, x, y, 0f);
+    glTextOutline.end();
+
     GLES20.glDisable(GLES20.GL_BLEND);
   }
 
