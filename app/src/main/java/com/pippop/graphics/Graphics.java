@@ -138,7 +138,6 @@ public class Graphics {
   }
 
   public void drawFill(FloatBuffer buffer, Color color) {
-    //    glowProgram.drawStandard(buffer, color, GLES20.GL_TRIANGLE_FAN, 0, 0, transformMatrix);
     standardProgram.drawStandard(buffer, color, GLES20.GL_TRIANGLE_FAN, 0, 0, transformMatrix);
   }
 
@@ -169,7 +168,7 @@ public class Graphics {
         int start,
         int endClip,
         float[] transformMatrix) {
-      if (color.getAlpha() != 1) {
+      if (color.getAlpha() != 1.0) {
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
       }

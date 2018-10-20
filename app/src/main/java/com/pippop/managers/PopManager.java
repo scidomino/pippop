@@ -113,11 +113,9 @@ public class PopManager {
     float morphRatio = (float) Math.pow(pendingTime / (float) FREEZE_MILLISECONDS, 2);
     updatePopShape(radius, morphRatio);
 
-    GameStyle gameStyle =
-        new GameStyle(
-            pendingStyle.getPoint(), pendingStyle.getColor().withAlpha((morphRatio + 1) / 2f));
+    Color color = pendingStyle.getColor().withAlpha((1 + morphRatio) / 2);
 
-    gameStyle.render(g, popShape, Color.WHITE);
+    new GameStyle(pendingStyle.getPoint(), color).render(g, popShape, Color.WHITE);
   }
 
   private void updatePopShape(double radius, float morphRatio) {

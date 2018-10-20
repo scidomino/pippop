@@ -1,11 +1,13 @@
 package com.pippop.graphics;
 
+import java.util.Arrays;
+
 public class Color {
 
   public static final Color WHITE = new Color(1f, 1f, 1f, 1f);
-  public static final Color GREEN = new Color(0.63671875f, 0.76953125f, 0.22265625f, 1.0f);
-  public static final Color BLUE = new Color(1f, 1f, 0f, 1.0f);
-  public static final Color RED = new Color(1f, 0f, 0f, 1.0f);
+  public static final Color GREEN = new Color(0.63671875f, 0.76953125f, 0.22265625f, 1f);
+  public static final Color BLUE = new Color(1f, 1f, 0f, 1f);
+  public static final Color RED = new Color(1f, 0f, 0f, 1f);
   public static final Color TRANSPARENT_WHITE = new Color(1f, 1f, 1f, .2f);
   public static final Color BLACK = new Color(0, 0, 0, 1);
 
@@ -36,5 +38,10 @@ public class Color {
 
   public Color withAlpha(float alpha) {
     return new Color(value[0], value[1], value[2], alpha);
+  }
+
+  @Override
+  public String toString() {
+    return "Color{" + "value=" + Arrays.toString(value) + '}';
   }
 }
