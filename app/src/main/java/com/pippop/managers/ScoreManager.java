@@ -55,10 +55,10 @@ public class ScoreManager {
 
     if (popChainTimer.getCount() > 1) {
       String chainString = popChainTimer.getCount() + " Pop Chain!";
-      g.drawString(chainString, DISPLAY_COLOR, 250, 450);
+      g.drawStringOutlined(chainString, DISPLAY_COLOR, Color.BLACK, 0, -150);
     } else if (burstChainTimer.getCount() > 1) {
       String chainString = burstChainTimer.getCount() + " Chain!";
-      g.drawString(chainString, DISPLAY_COLOR, 250, 450);
+      g.drawStringOutlined(chainString, DISPLAY_COLOR, Color.BLACK, 0, -150);
     }
   }
 
@@ -105,7 +105,7 @@ public class ScoreManager {
 
     void render(Graphics g) {
       float rise = (time / POINT_DISPLAY_TIME) * POINT_MAX_HEIGHT;
-      g.drawString(this.text, DISPLAY_COLOR, (float) x, y + rise);
+      g.drawStringOutlined(this.text, DISPLAY_COLOR, Color.BLACK, (float) x, y + rise);
     }
   }
 }
