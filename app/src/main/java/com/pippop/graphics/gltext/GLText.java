@@ -16,7 +16,6 @@ import android.graphics.Paint;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import com.pippop.graphics.Color;
-import com.pippop.graphics.gltext.programs.BatchTextProgram;
 
 public class GLText {
 
