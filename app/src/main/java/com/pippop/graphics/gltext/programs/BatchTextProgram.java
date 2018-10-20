@@ -1,8 +1,10 @@
 package com.pippop.graphics.gltext.programs;
 
+import android.opengl.GLES20;
 import com.pippop.graphics.gltext.AttribVariable;
+import com.pippop.graphics.gltext.Utilities;
 
-public class BatchTextProgram extends Program {
+public class BatchTextProgram {
 
   private static final AttribVariable[] programVariables = {
       AttribVariable.A_Position, AttribVariable.A_TexCoordinate, AttribVariable.A_MVPMatrixIndex
@@ -30,8 +32,9 @@ public class BatchTextProgram extends Program {
           + "   gl_FragColor = texture2D(u_Texture, v_TexCoordinate).w * u_Color;\n"
           + "}                             \n";
 
-  @Override
-  public void init() {
-    super.init(vertexShaderCode, fragmentShaderCode, programVariables);
+  public static int getProgram() {
+    int vertexShaderHandle = Utilities.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
+    int fragmentShaderHandle = Utilities.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+    return Utilities.createProgram(vertexShaderHandle, fragmentShaderHandle, programVariables);
   }
 }

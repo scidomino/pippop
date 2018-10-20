@@ -1,11 +1,8 @@
 package com.pippop.graphics.gltext;
 
 import android.opengl.GLES20;
-import android.util.Log;
 
 public class Utilities {
-
-  private static final String TAG = "Utilities";
 
   public static int createProgram(
       int vertexShaderHandle, int fragmentShaderHandle, AttribVariable[] variables) {
@@ -27,7 +24,6 @@ public class Utilities {
     final int[] linkStatus = new int[1];
     GLES20.glGetProgramiv(mProgram, GLES20.GL_LINK_STATUS, linkStatus, 0);
     if (linkStatus[0] == 0) {
-      Log.v(TAG, GLES20.glGetProgramInfoLog(mProgram));
       GLES20.glDeleteProgram(mProgram);
       throw new RuntimeException("Error creating program.");
     }
@@ -47,7 +43,6 @@ public class Utilities {
     final int[] compileStatus = new int[1];
     GLES20.glGetShaderiv(shaderHandle, GLES20.GL_COMPILE_STATUS, compileStatus, 0);
     if (compileStatus[0] == 0) {
-      Log.v(TAG, "Shader fail info: " + GLES20.glGetShaderInfoLog(shaderHandle));
       GLES20.glDeleteShader(shaderHandle);
       throw new RuntimeException("Error creating shader " + type);
     }

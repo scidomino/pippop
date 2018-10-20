@@ -2,7 +2,6 @@ package com.pippop.graphics.gltext;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import com.pippop.graphics.gltext.programs.Program;
 
 class SpriteBatch {
 
@@ -27,7 +26,7 @@ class SpriteBatch {
   // D: prepare the sprite batcher for specified maximum number of sprites
   // A: maxSprites - the maximum allowed sprites per batch
   //    program - program to use when drawing
-  SpriteBatch(int maxSprites, Program program) {
+  SpriteBatch(int maxSprites, int program) {
     this.vertexBuffer = new float[maxSprites * VERTICES_PER_SPRITE * VERTEX_SIZE];
     this.vertices = new Vertices(maxSprites * VERTICES_PER_SPRITE, maxSprites * INDICES_PER_SPRITE);
     this.bufferIndex = 0; // Reset Buffer Index
@@ -46,7 +45,7 @@ class SpriteBatch {
       indices[i + 5] = j; // Calculate Index 5
     }
     vertices.setIndices(indices, len); // Set Index Buffer for Rendering
-    mMVPMatricesHandle = GLES20.glGetUniformLocation(program.getHandle(), "u_MVPMatrix");
+    mMVPMatricesHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix");
   }
 
   void beginBatch(float[] vpMatrix) {
