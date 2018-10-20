@@ -1,4 +1,4 @@
-package com.pippop.managers;
+package com.pippop.util;
 
 import com.pippop.graph.Point;
 import com.pippop.style.GameStyle;

@@ -8,6 +8,7 @@ import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
 import com.pippop.style.GameStyle;
 import com.pippop.style.Style;
+import com.pippop.util.Colors;
 import com.pippop.util.RandomChooser;
 import java.nio.FloatBuffer;
 import java.util.Arrays;

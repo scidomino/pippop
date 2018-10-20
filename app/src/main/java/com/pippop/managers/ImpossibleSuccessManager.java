@@ -2,6 +2,7 @@ package com.pippop.managers;
 
 import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
+import com.pippop.util.PoppedBubble;
 
 public class ImpossibleSuccessManager implements SuccessManager {
 

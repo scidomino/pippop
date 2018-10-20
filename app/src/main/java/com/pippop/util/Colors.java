@@ -1,7 +1,6 @@
-package com.pippop.managers;
+package com.pippop.util;
 
 import com.pippop.graphics.Color;
-import com.pippop.util.RandomChooser;
 import java.util.Arrays;
 import java.util.List;
 

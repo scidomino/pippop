@@ -6,6 +6,7 @@ import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
 import com.pippop.style.GameStyle;
 import com.pippop.util.ChainTimer;
+import com.pippop.util.PoppedBubble;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
