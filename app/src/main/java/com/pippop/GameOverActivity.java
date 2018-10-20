@@ -2,38 +2,42 @@ package com.pippop;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.view.View;
 import android.widget.TextView;
 
 public class GameOverActivity extends Activity {
 
-  private static final String PREFS_NAME = "LocalHighScore";
-  private static final String PREFS_NAME2 = "CurrentScore";
+  public static final String SCORE_PREF = "Score";
+  public static final String HIGH_SCORE = "High";
+  public static final String CURRENT_SCORE = "Current";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_game_over);
 
-    Long highscore = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getLong("highScore", 0);
+    SharedPreferences scorePrefs = getSharedPreferences(SCORE_PREF, MODE_PRIVATE);
+    Long highscore = scorePrefs.getLong(HIGH_SCORE, 0);
     TextView showHigh = findViewById(R.id.showHigh);
     showHigh.setText(getBaseContext().getString(R.string.high_score, highscore));
 
-    Long current = getSharedPreferences(PREFS_NAME2, MODE_PRIVATE).getLong("CurrentScore", 0);
+    Long current = scorePrefs.getLong(CURRENT_SCORE, 0);
     TextView showCurrent = findViewById(R.id.showCurrent);
     showCurrent.setText(getBaseContext().getString(R.string.your_score, current));
 
     if (highscore < current) {
-      getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().putLong("highScore", current).apply();
+      scorePrefs.edit().putLong(HIGH_SCORE, current).apply();
       TextView newHigh = findViewById(R.id.newHigh);
-      newHigh.setText("New High Score!");
+      newHigh.setVisibility(View.VISIBLE);
     }
 
     // Go back to main screen after 4 second count down
     // Add 'new high score!' with score display if/else
     // Add high score entry if/else if w/ name entry later
-    new CountDownTimer(4000, 1000) {
+    new CountDownTimer(10000, 10000) {
       @Override
       public void onFinish() {
         startActivity(new Intent(GameOverActivity.this, MainActivity.class));

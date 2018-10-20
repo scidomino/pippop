@@ -40,7 +40,7 @@ public class GameView extends GLSurfaceView {
   private final PipPopManager pipPop = new PipPopManager();
   private final BlowoutManager blowout = new BlowoutManager();
   private final SuccessManager success = new ImpossibleSuccessManager();
-  private final ScoreManager score = new ScoreManager();
+  private final ScoreManager score = new ScoreManager(getContext());
   private State state = State.NORMAL;
   private Graphics graphics;
 

@@ -29,8 +29,10 @@
     android:layout_below="@id/showHigh"
     android:layout_centerHorizontal="true"
     android:fontFamily="@font/sniglet_extrabold"
+    android:text="@string/new_high_score"
     android:textColor="@color/red"
-    android:textSize="40sp"/>
+    android:textSize="40sp"
+    android:visibility="invisible"/>
 
   <TextView
     android:layout_width="wrap_content"

@@ -1,5 +1,9 @@
 package com.pippop.managers;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.Context;
+import com.pippop.GameOverActivity;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Point;
 import com.pippop.graphics.Color;
@@ -22,8 +26,13 @@ public class ScoreManager {
 
   private final ChainTimer burstChainTimer = new ChainTimer(2000);
   private final ChainTimer popChainTimer = new ChainTimer(2000);
+  private final Context context;
 
   private long score;
+
+  public ScoreManager(Context context) {
+    this.context = context;
+  }
 
   public boolean isProcessing() {
     return !risingPoints.isEmpty();
@@ -84,6 +93,11 @@ public class ScoreManager {
   private void addPoint(Point location, int points) {
     risingPoints.add(new RisingPoints(location, points));
     this.score += points;
+    context
+        .getSharedPreferences(GameOverActivity.SCORE_PREF, MODE_PRIVATE)
+        .edit()
+        .putLong(GameOverActivity.CURRENT_SCORE, score)
+        .apply();
   }
 
   private class RisingPoints {
