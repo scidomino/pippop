@@ -32,4 +32,8 @@ public class Color {
   public float getAlpha() {
     return value[3];
   }
+
+  public Color withAlpha(float alpha) {
+    return new Color(value[0], value[1], value[2], alpha);
+  }
 }

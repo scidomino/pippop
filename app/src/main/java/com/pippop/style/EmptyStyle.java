@@ -6,9 +6,15 @@ import java.nio.FloatBuffer;
 
 public class EmptyStyle implements Style {
 
+  private final double targetArea;
+
+  public EmptyStyle(double targetArea) {
+    this.targetArea = targetArea;
+  }
+
   @Override
   public double getTargetArea() {
-    return 0;
+    return targetArea;
   }
 
   @Override
