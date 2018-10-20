@@ -41,10 +41,6 @@ public class PopManager extends GraphManager {
         if (gameStyle.isPoppable()) {
           pendingTime = FREEZE_MILLISECONDS;
           pending = bubble;
-
-          sound.seekTo(0);
-          sound.start();
-
           return true;
         }
       }
@@ -90,6 +86,9 @@ public class PopManager extends GraphManager {
         new PoppedBubble(pending.getCenter(), (GameStyle) pending.getStyle());
     pending.setStyle(new EmptyStyle());
     pending = null;
+
+    sound.seekTo(0);
+    sound.start();
     return poppedBubble;
   }
 
