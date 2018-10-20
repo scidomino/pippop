@@ -12,10 +12,6 @@ public class PhysicsModel {
   private static final int MAX_VERTICES = 100;
   private static final float FRICTION = .9f;
 
-  private static final float EIGHTY_THIRDS = 80f / 3f;
-  private static final float FOUR_THIRDS = 4f / 3f;
-  private static final float TWO_THIRDS = 2f / 3f;
-
   private final Graph graph;
   private final ForceCalculator forceCalculator = new ForceCalculator();
   private final LookupTableBuilder lookupTableBuilder = new LookupTableBuilder();
@@ -68,10 +64,10 @@ public class PhysicsModel {
     int size = graph.getEdges().size();
     for (int i = 0; i < size; i++) {
       int otherVertex = i % 2 == 0 ? i + 1 : i - 1;
-      ctrlPointAccel[i] = EIGHTY_THIRDS * ctrlPointForce[i];
+      ctrlPointAccel[i] = (80f / 3f) * ctrlPointForce[i];
       ctrlPointAccel[i] -= 20 * ctrlPointForce[otherVertex];
-      ctrlPointAccel[i] -= FOUR_THIRDS * vertexAccel[ctrlPoint2NearVertex[i]];
-      ctrlPointAccel[i] += TWO_THIRDS * vertexAccel[ctrlPoint2FarVertex[i]];
+      ctrlPointAccel[i] -= (4f / 3f) * vertexAccel[ctrlPoint2NearVertex[i]];
+      ctrlPointAccel[i] += (2f / 3f) * vertexAccel[ctrlPoint2FarVertex[i]];
     }
   }
 
@@ -80,10 +76,10 @@ public class PhysicsModel {
       int i = v.getIndex();
       fbaf[i] = vertexForce[i];
       for (int j : vertex2NearCtrlPoints[i]) {
-        fbaf[i] -= FOUR_THIRDS * ctrlPointForce[j];
+        fbaf[i] -= (4f / 3f) * ctrlPointForce[j];
       }
       for (int j : vertex2FarCtrlPoints[i]) {
-        fbaf[i] += TWO_THIRDS * ctrlPointForce[j];
+        fbaf[i] += (2f / 3f) * ctrlPointForce[j];
       }
     }
 
