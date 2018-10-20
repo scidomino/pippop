@@ -119,6 +119,10 @@ public class Graphics {
   }
 
   private void drawStandard(FloatBuffer buffer, Color color, int mode, int start, int endClip) {
+    if (color.getAlpha() != 1) {
+      GLES20.glEnable(GLES20.GL_BLEND);
+      GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+    }
     GLES20.glUseProgram(standardProgram);
     GLES20.glUniform4fv(colorHandle, 1, color.value, 0);
     GLES20.glUniformMatrix2fv(matrixHandle, 1, false, transformMatrix, 0);
@@ -126,5 +130,8 @@ public class Graphics {
     GLES20.glVertexAttribPointer(posHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, buffer);
     GLES20.glDrawArrays(mode, start, buffer.limit() / COORDS_PER_VERTEX - endClip);
     GLES20.glDisableVertexAttribArray(posHandle);
+    if (color.getAlpha() != 1) {
+      GLES20.glDisable(GLES20.GL_BLEND);
+    }
   }
 }

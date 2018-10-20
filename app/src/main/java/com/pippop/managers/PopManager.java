@@ -29,6 +29,7 @@ public class PopManager extends GraphManager {
   private FloatBuffer popShape = Graphics.createVertexBuffer(100);
   private Bubble pending;
   private int pendingTime;
+  private GameStyle pendingStyle;
 
   public PopManager(Context context) {
     this.sound = MediaPlayer.create(context, R.raw.pop);
@@ -41,6 +42,9 @@ public class PopManager extends GraphManager {
         if (gameStyle.isPoppable()) {
           pendingTime = FREEZE_MILLISECONDS;
           pending = bubble;
+          this.pendingStyle = gameStyle;
+          pending.setStyle(new EmptyStyle(this.pendingStyle.getTargetArea()));
+
           return true;
         }
       }
@@ -82,9 +86,8 @@ public class PopManager extends GraphManager {
 
   public PoppedBubble popBubble() {
     deflating.add(pending);
-    PoppedBubble poppedBubble =
-        new PoppedBubble(pending.getCenter(), (GameStyle) pending.getStyle());
-    pending.setStyle(new EmptyStyle());
+    PoppedBubble poppedBubble = new PoppedBubble(pending.getCenter(), pendingStyle);
+    pending.setStyle(new EmptyStyle(0));
     pending = null;
 
     sound.seekTo(0);
@@ -101,12 +104,16 @@ public class PopManager extends GraphManager {
   }
 
   public void render(Graphics g) {
-    GameStyle gameStyle = (GameStyle) pending.getStyle();
-    double radius = 5 * (Math.sqrt(gameStyle.getTargetArea() / Math.PI));
+
+    double radius = 5 * (Math.sqrt(pendingStyle.getTargetArea() / Math.PI));
 
     // closer to 0 closer to full circle
     float morphRatio = (float) Math.pow(pendingTime / (float) FREEZE_MILLISECONDS, 2);
     updatePopShape(radius, morphRatio);
+
+    GameStyle gameStyle =
+        new GameStyle(
+            pendingStyle.getPoint(), pendingStyle.getColor().withAlpha((morphRatio + 1) / 2f));
 
     gameStyle.render(g, popShape, Color.WHITE);
   }
