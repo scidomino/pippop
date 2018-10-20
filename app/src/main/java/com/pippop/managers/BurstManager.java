@@ -62,6 +62,7 @@ public class BurstManager extends GraphManager {
     }
     edge = burstStarter;
     timeLeft = FREEZE_MILLISECONDS;
+
     return true;
   }
 

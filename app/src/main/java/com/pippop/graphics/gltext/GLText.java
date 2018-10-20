@@ -15,163 +15,83 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import com.pippop.graphics.gltext.programs.BatchTextProgram;
-import com.pippop.graphics.gltext.programs.Program;
+import com.pippop.graphics.Color;
 
 public class GLText {
 
-  static final int CHAR_BATCH_SIZE = 24; // Number of Characters to Render Per Batch
-  // --Constants--//
+  static final int CHAR_BATCH_SIZE = 24;
   private static final int CHAR_START = 32; // First Character (ASCII Code)
   private static final int CHAR_END = 126; // Last Character (ASCII Code)
-  private static final int CHAR_CNT =
-      (((CHAR_END - CHAR_START) + 1)
-          + 1); // Character Count (Including Character to use for Unknown)
-  private static final int CHAR_NONE = 32; // Character to Use for Unknown (ASCII Code)
-  private static final int CHAR_UNKNOWN = (CHAR_CNT - 1); // Index of the Unknown Character
-  private static final int FONT_SIZE_MIN = 6; // Minumum Font Size (Pixels)
-  private static final int FONT_SIZE_MAX = 180; // Maximum Font Size (Pixels)
-  // must be the same as the size of u_MVPMatrix
-  // in BatchTextProgram
-  private static final String TAG = "GLTEXT";
-  private final float[] charWidths; // Width of Each Character (Actual; Pixels)
-  // --Members--//
-  private Resources resources; // Asset Manager
-  private SpriteBatch batch; // Batch Renderer
-  private int fontPadX,
-      fontPadY; // Font Padding (Pixels; On Each Side, ie. Doubled on Both X+Y Axis)
-  private float fontHeight; // Font Height (Actual; Pixels)
-  private float fontAscent; // Font Ascent (Above Baseline; Pixels)
-  private float fontDescent; // Font Descent (Below Baseline; Pixels)
-  private int textureId; // Font Texture ID [NOTE: Public for Testing Purposes Only!]
-  private int
-      textureSize; // Texture Size for Font (Square) [NOTE: Public for Testing Purposes Only!]
-  private TextureRegion textureRgn; // Full Texture Region
-  private float charWidthMax; // Character Width (Maximum; Pixels)
-  private float charHeight; // Character Height (Maximum; Pixels)
-  private TextureRegion[] charRgn; // Region of Each Character (Texture Coordinates)
-  private int cellWidth, cellHeight; // Character Cell Width/Height
-  private int rowCnt, colCnt; // Number of Rows/Columns
-  private float scaleX, scaleY; // Font Scale (X,Y Axis)
-  private float spaceX; // Additional (X,Y Axis) Spacing (Unscaled)
+  private static final int CHAR_CNT = CHAR_END - CHAR_START + 1;
+  private static final int FONT_SIZE_MIN = 6;
+  private static final int FONT_SIZE_MAX = 180;
 
-  private Program mProgram; // OpenGL Program object
-  private int mColorHandle; // Shader color handle
-  private int mTextureUniformHandle; // Shader texture handle
+  private final float[] charWidths;
+  private final int fontPadX;
+  private final int fontPadY;
+  private final SpriteBatch batch;
+  private final int textureId;
+  private final int textureSize;
+  private final TextureRegion textureRgn;
+  private final float charHeight;
+  private final TextureRegion[] charRgn;
+  private final int cellWidth, cellHeight;
+  private final int mProgram;
+  private final int mColorHandle;
+  private final int mTextureUniformHandle;
+
+  private float scaleX = 1.0f;
+  private float scaleY = 1.0f;
+  private float spaceX = 0.0f; // Additional (X,Y Axis) Spacing (Unscaled)
 
   // --Constructor--//
   // D: save program + asset manager, create arrays, and initialize the members
-  private GLText(Program program, Resources resources) {
-    if (program == null) {
-      program = new BatchTextProgram();
-      program.init();
-    }
-    this.resources = resources; // Save the Asset Manager Instance
+  public GLText(
+      Resources resources, int font, int size, int fontPadX, int fontPadY, boolean outline) {
+    mProgram = BatchTextProgram.getProgram();
+    mColorHandle = GLES20.glGetUniformLocation(mProgram, "u_Color");
+    mTextureUniformHandle = GLES20.glGetUniformLocation(mProgram, "u_Texture");
 
-    batch = new SpriteBatch(CHAR_BATCH_SIZE, program); // Create Sprite Batch (with Defined Size)
+    batch = new SpriteBatch(CHAR_BATCH_SIZE, mProgram);
 
     charWidths = new float[CHAR_CNT]; // Create the Array of Character Widths
     charRgn = new TextureRegion[CHAR_CNT]; // Create the Array of Character Regions
 
-    // initialize remaining members
-    fontPadX = 0;
-    fontPadY = 0;
+    this.fontPadX = fontPadX;
+    this.fontPadY = fontPadY;
 
-    fontHeight = 0.0f;
-    fontAscent = 0.0f;
-    fontDescent = 0.0f;
-
-    textureId = -1;
-    textureSize = 0;
-
-    charWidthMax = 0;
-    charHeight = 0;
-
-    cellWidth = 0;
-    cellHeight = 0;
-    rowCnt = 0;
-    colCnt = 0;
-
-    scaleX = 1.0f; // Default Scale = 1 (Unscaled)
-    scaleY = 1.0f; // Default Scale = 1 (Unscaled)
-    spaceX = 0.0f;
-
-    // Initialize the color and texture handles
-    mProgram = program;
-    mColorHandle = GLES20.glGetUniformLocation(mProgram.getHandle(), "u_Color");
-    mTextureUniformHandle = GLES20.glGetUniformLocation(mProgram.getHandle(), "u_Texture");
-  }
-
-  // Constructor using the default program (BatchTextProgram)
-  public GLText(Resources resources) {
-    this(null, resources);
-  }
-
-  // --Load Font--//
-  // description
-  //    this will load the specified font file, create a texture for the defined
-  //    character range, and setup all required values used to render with it.
-  // arguments:
-  //    file - Filename of the font (.ttf, .otf) to use. In 'Assets' folder.
-  //    size - Requested pixel size of font (height)
-  //    padX, padY - Extra padding per character (X+Y Axis); to prevent overlapping characters.
-  public boolean load(int font, int size, int padX, int padY) {
-
-    // setup requested values
-    fontPadX = padX; // Set Requested X Axis Padding
-    fontPadY = padY; // Set Requested Y Axis Padding
-
-    // load the font and setup paint instance for drawing
-
-    Paint paint = new Paint(); // Create Android Paint Instance
-    paint.setAntiAlias(true); // Enable Anti Alias
-    paint.setTextSize(size); // Set Text Size
-    paint.setColor(0xffffffff); // Set ARGB (White, Opaque)
-    paint.setTypeface(resources.getFont(font)); // Set Typeface
-
-    // get font metrics
-    Paint.FontMetrics fm = paint.getFontMetrics(); // Get Font Metrics
-    fontHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top)); // Calculate Font Height
-    fontAscent = (float) Math.ceil(Math.abs(fm.ascent)); // Save Font Ascent
-    fontDescent = (float) Math.ceil(Math.abs(fm.descent)); // Save Font Descent
-
-    // determine the width of each character (including unknown character)
-    // also determine the maximum character width
-    char[] s = new char[2]; // Create Character Array
-    charWidthMax = charHeight = 0; // Reset Character Width/Height Maximums
-    float[] w = new float[2]; // Working Width Value
-    int cnt = 0; // Array Counter
-    for (char c = CHAR_START; c <= CHAR_END; c++) { // FOR Each Character
-      s[0] = c; // Set Character
-      paint.getTextWidths(s, 0, 1, w); // Get Character Bounds
-      charWidths[cnt] = w[0]; // Get Width
-      if (charWidths[cnt] > charWidthMax) // IF Width Larger Than Max Width
-      {
-        charWidthMax = charWidths[cnt]; // Save New Max Width
-      }
-      cnt++; // Advance Array Counter
+    Paint paint = new Paint();
+    paint.setAntiAlias(true);
+    paint.setTextSize(size);
+    paint.setColor(0xffffffff);
+    paint.setTypeface(resources.getFont(font));
+    if (outline) {
+      paint.setStyle(Paint.Style.STROKE);
+      paint.setStrokeWidth(1);
     }
-    s[0] = CHAR_NONE; // Set Unknown Character
-    paint.getTextWidths(s, 0, 1, w); // Get Character Bounds
-    charWidths[cnt] = w[0]; // Get Width
-    if (charWidths[cnt] > charWidthMax) {
-      charWidthMax = charWidths[cnt];
+
+    float charWidthMax = 0;
+    float[] w = new float[2];
+    for (char c = CHAR_START; c <= CHAR_END; c++) {
+      paint.getTextWidths(String.valueOf(c), w);
+      charWidths[c - CHAR_START] = w[0];
+      charWidthMax = Math.max(charWidthMax, w[0]);
     }
+
+    Paint.FontMetrics fm = paint.getFontMetrics();
+    float fontDescent = (float) Math.ceil(Math.abs(fm.descent));
 
     // set character height to font height
-    charHeight = fontHeight; // Set Character Height
+    charHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top)); // Set Character Height
 
     // find the maximum size, validate, and setup cell sizes
-    cellWidth = (int) charWidthMax + (2 * fontPadX); // Set Cell Width
-    cellHeight = (int) charHeight + (2 * fontPadY); // Set Cell Height
-    int maxSize = cellWidth > cellHeight ? cellWidth : cellHeight; // Save Max Size (Width/Height)
+    cellWidth = (int) charWidthMax + (2 * this.fontPadX);
+    cellHeight = (int) charHeight + (2 * this.fontPadY);
+    int maxSize = cellWidth > cellHeight ? cellWidth : cellHeight;
     if (maxSize < FONT_SIZE_MIN || maxSize > FONT_SIZE_MAX) {
-      return false;
+      throw new RuntimeException("Font size is outside range");
     }
 
-    // set texture size based on max font size (width or height)
-    // NOTE: these values are fixed, based on the defined characters. when
-    // changing start/end characters (CHAR_START/CHAR_END) this will need adjustment too!
     if (maxSize <= 24) {
       textureSize = 256;
     } else if (maxSize <= 40) {
@@ -179,62 +99,35 @@ public class GLText {
     } else if (maxSize <= 80) {
       textureSize = 1024;
     } else {
-      textureSize = 2048; // Set 2048 Texture Size
+      textureSize = 2048;
     }
 
     // create an empty bitmap (alpha only)
-    Bitmap bitmap =
-        Bitmap.createBitmap(textureSize, textureSize, Bitmap.Config.ALPHA_8); // Create Bitmap
-    Canvas canvas = new Canvas(bitmap); // Create Canvas for Rendering to Bitmap
+    Bitmap bitmap = Bitmap.createBitmap(textureSize, textureSize, Bitmap.Config.ALPHA_8);
     bitmap.eraseColor(0x00000000); // Set Transparent Background (ARGB)
 
-    // calculate rows/columns
-    // NOTE: while not required for anything, these may be useful to have :)
-    colCnt = textureSize / cellWidth; // Calculate Number of Columns
-    rowCnt = (int) Math.ceil((float) CHAR_CNT / (float) colCnt); // Calculate Number of Rows
-
-    // render each of the characters to the canvas (ie. build the font map)
-    float x = fontPadX; // Set Start Position (X)
-    float y = (cellHeight - 1) - fontDescent - fontPadY; // Set Start Position (Y)
-    for (char c = CHAR_START; c <= CHAR_END; c++) { // FOR Each Character
-      s[0] = c; // Set Character to Draw
-      canvas.drawText(s, 0, 1, x, y, paint); // Draw Character
+    Canvas canvas = new Canvas(bitmap);
+    float x = 0;
+    float y = 0;
+    for (char c = CHAR_START; c <= CHAR_END; c++) {
+      canvas.drawText(
+          String.valueOf(c),
+          x + this.fontPadX,
+          y + (cellHeight - 1) - fontDescent - this.fontPadY,
+          paint);
+      charRgn[c - CHAR_START] =
+          new TextureRegion(textureSize, textureSize, x, y, cellWidth - 1, cellHeight - 1);
       x += cellWidth; // Move to Next Character
-      if ((x + cellWidth - fontPadX) > textureSize) { // IF End of Line Reached
-        x = fontPadX; // Set X for New Row
-        y += cellHeight; // Move Down a Row
+      if ((x + cellWidth) > textureSize) {
+        x = 0;
+        y += cellHeight;
       }
     }
-    s[0] = CHAR_NONE; // Set Character to Use for NONE
-    canvas.drawText(s, 0, 1, x, y, paint); // Draw Character
 
-    // save the bitmap in a texture
     textureId = TextureHelper.loadTexture(bitmap);
-
-    // setup the array of character texture regions
-    x = 0; // Initialize X
-    y = 0; // Initialize Y
-    for (int c = 0; c < CHAR_CNT; c++) { // FOR Each Character (On Texture)
-      charRgn[c] =
-          new TextureRegion(
-              textureSize,
-              textureSize,
-              x,
-              y,
-              cellWidth - 1,
-              cellHeight - 1); // Create Region for Character
-      x += cellWidth; // Move to Next Char (Cell)
-      if (x + cellWidth > textureSize) {
-        x = 0; // Reset X Position to Start
-        y += cellHeight; // Move to Next Row (Cell)
-      }
-    }
 
     // create full texture region
     textureRgn = new TextureRegion(textureSize, textureSize, 0, 0, textureSize, textureSize);
-
-    // return success
-    return true; // Return Success
   }
 
   // --Begin/End Text Drawing--//
@@ -244,25 +137,15 @@ public class GLText {
   //    alpha - optional alpha value for font (default = 1.0)
   // 	  vpMatrix - View and projection matrix to use
   // R: [none]
-  public void begin(float[] vpMatrix) {
-    begin(1.0f, 1.0f, 1.0f, 1.0f, vpMatrix); // Begin with White Opaque
-  }
-
-  public void begin(float alpha, float[] vpMatrix) {
-    begin(1.0f, 1.0f, 1.0f, alpha, vpMatrix); // Begin with White (Explicit Alpha)
-  }
-
-  public void begin(float red, float green, float blue, float alpha, float[] vpMatrix) {
-    initDraw(red, green, blue, alpha);
+  public void begin(Color color, float[] vpMatrix) {
+    initDraw(color);
     batch.beginBatch(vpMatrix); // Begin Batch
   }
 
-  private void initDraw(float red, float green, float blue, float alpha) {
-    GLES20.glUseProgram(mProgram.getHandle()); // specify the program to use
+  private void initDraw(Color color) {
+    GLES20.glUseProgram(mProgram);
 
-    // set color TODO: only alpha component works, text is always black #BUG
-    float[] color = {red, green, blue, alpha};
-    GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+    GLES20.glUniform4fv(mColorHandle, 1, color.value, 0);
     GLES20.glEnableVertexAttribArray(mColorHandle);
 
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0); // Set the active texture unit to texture unit 0
@@ -301,7 +184,7 @@ public class GLText {
     for (int i = 0; i < text.length(); i++) { // FOR Each Character in String
       int c = (int) text.charAt(i) - CHAR_START;
       if (c < 0 || c >= CHAR_CNT) {
-        c = CHAR_UNKNOWN;
+        throw new RuntimeException("Unknown Character: " + text.charAt(i));
       }
       // TODO: optimize - applying the same model matrix to all the characters in the string
       batch.drawSprite(letterX, 0, chrWidth, chrHeight, charRgn[c], modelMatrix);
@@ -339,48 +222,6 @@ public class GLText {
     draw(text, x, y - (getCharHeight() / 2.0f)); // Draw Text Centered (Y-Axis Only)
   }
 
-  // --Set Scale--//
-  // D: set the scaling to use for the font
-  // A: scale - uniform scale for both x and y axis scaling
-  //    sx, sy - separate x and y axis scaling factors
-  // R: [none]
-  public void setScale(float scale) {
-    scaleX = scaleY = scale; // Set Uniform Scale
-  }
-
-  public void setScale(float sx, float sy) {
-    scaleX = sx; // Set X Scale
-    scaleY = sy; // Set Y Scale
-  }
-
-  // --Get Scale--//
-  // D: get the current scaling used for the font
-  // A: [none]
-  // R: the x/y scale currently used for scale
-  public float getScaleX() {
-    return scaleX; // Return X Scale
-  }
-
-  public float getScaleY() {
-    return scaleY; // Return Y Scale
-  }
-
-  // --Get Space--//
-  // D: get the current spacing used for the font
-  // A: [none]
-  // R: the x/y space currently used for scale
-  public float getSpace() {
-    return spaceX; // Return X Space
-  }
-
-  // --Set Space--//
-  // D: set the spacing (unscaled; ie. pixel size) to use for the font
-  // A: space - space for x axis spacing
-  // R: [none]
-  public void setSpace(float space) {
-    spaceX = space; // Set Space
-  }
-
   // --Get Length of a String--//
   // D: return the length of the specified string if rendered using current settings
   // A: text - the string to get length for
@@ -394,38 +235,12 @@ public class GLText {
     return len;
   }
 
-  // --Get Width/Height of Character--//
-  // D: return the scaled width/height of a character, or max character width
-  //    NOTE: since all characters are the same height, no character index is required!
-  //    NOTE: excludes spacing!!
-  // A: chr - the character to get width for
-  // R: the requested character size (scaled)
-  public float getCharWidth(char chr) {
+  private float getCharWidth(char chr) {
     return (charWidths[chr - CHAR_START] * scaleX);
-  }
-
-  public float getCharWidthMax() {
-    return (charWidthMax * scaleX); // Return Scaled Max Character Width
   }
 
   private float getCharHeight() {
     return (charHeight * scaleY); // Return Scaled Character Height
-  }
-
-  // --Get Font Metrics--//
-  // D: return the specified (scaled) font metric
-  // A: [none]
-  // R: the requested font metric (scaled)
-  public float getAscent() {
-    return (fontAscent * scaleY); // Return Font Ascent
-  }
-
-  public float getDescent() {
-    return (fontDescent * scaleY); // Return Font Descent
-  }
-
-  public float getHeight() {
-    return (fontHeight * scaleY); // Return Font Height (Actual)
   }
 
   // --Draw Font Texture--//
@@ -434,7 +249,7 @@ public class GLText {
   //    to draw the texture to the top-left corner.
   //    vpMatrix - View and projection matrix to use
   public void drawTexture(int width, int height, float[] vpMatrix) {
-    initDraw(1.0f, 1.0f, 1.0f, 1.0f);
+    initDraw(Color.WHITE);
 
     batch.beginBatch(vpMatrix); // Begin Batch (Bind Texture)
     float[] idMatrix = new float[16];

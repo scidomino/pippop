@@ -5,7 +5,6 @@ import com.pippop.graph.Edge;
 import com.pippop.graph.Point;
 import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
-import com.pippop.style.EmptyStyle;
 import com.pippop.style.Style;
 import java.nio.FloatBuffer;
 
@@ -130,7 +129,7 @@ public class SwapPair {
     out.flip();
   }
 
-  private class WaitingStyle extends EmptyStyle {
+  private class WaitingStyle implements Style {
 
     private final double startTargetArea;
     private final double endTargetArea;
@@ -143,6 +142,10 @@ public class SwapPair {
     @Override
     public double getTargetArea() {
       return (1 - rotation) * startTargetArea + rotation * endTargetArea;
+    }
+
+    @Override
+    public void render(Graphics graphics, FloatBuffer shape, Color outlineColor) {
     }
   }
 }

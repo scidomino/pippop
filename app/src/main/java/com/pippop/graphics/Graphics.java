@@ -16,10 +16,14 @@ public class Graphics {
   private static final int COORDS_PER_VERTEX = 2;
   private static final int VIRTUAL_WIDTH = 300;
 
-  private final StandardProgram standardProgram;
-  private final GlowProgram glowProgram;
+  private final int standardProgram;
+  private final int colorHandle;
+  private final int posHandle;
+  private final int matrixHandle;
+
   private final float[] transformMatrix = new float[4];
   private final GLText glText;
+  private final GLText glTextOutline;
   private float width;
   private float height;
 
@@ -28,6 +32,13 @@ public class Graphics {
     this.glowProgram = new GlowProgram(context);
     this.glText = new GLText(context.getResources());
     this.glText.load(R.font.sniglet_extrabold, 30, 2, 2);
+    this.standardProgram = loadProgram(context);
+    this.colorHandle = GLES20.glGetUniformLocation(standardProgram, "u_Color");
+    this.posHandle = GLES20.glGetAttribLocation(standardProgram, "vPosition");
+    this.matrixHandle = GLES20.glGetUniformLocation(standardProgram, "uMVPMatrix");
+
+    glText = new GLText(context.getResources(), R.font.sniglet_extrabold, 30, 2, 2, false);
+    glTextOutline = new GLText(context.getResources(), R.font.sniglet_extrabold, 30, 2, 2, true);
   }
 
   private static int loadProgram(Context context, int fragmentShader, int vertexShader) {
@@ -104,9 +115,33 @@ public class Graphics {
     mVPMatrix[15] = 1;
     GLES20.glEnable(GLES20.GL_BLEND);
     GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-    glText.begin(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha(), mVPMatrix);
+
+    glText.begin(color, mVPMatrix);
     glText.drawC(value, x, y, 0f);
     glText.end();
+
+    GLES20.glDisable(GLES20.GL_BLEND);
+  }
+
+  public void drawStringOutlined(
+      String value, Color fillColor, Color outineColor, float x, float y) {
+    float[] mVPMatrix = new float[16];
+    mVPMatrix[0] = transformMatrix[0];
+    mVPMatrix[5] = transformMatrix[3];
+    mVPMatrix[10] = 1;
+    mVPMatrix[15] = 1;
+    GLES20.glEnable(GLES20.GL_BLEND);
+    GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
+    glText.begin(fillColor, mVPMatrix);
+    glText.drawC(value, x, y, 0f);
+    glText.end();
+
+    GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+    glTextOutline.begin(outineColor, mVPMatrix);
+    glTextOutline.drawC(value, x, y, 0f);
+    glTextOutline.end();
+
     GLES20.glDisable(GLES20.GL_BLEND);
   }
 
@@ -151,6 +186,23 @@ public class Graphics {
       GLES20.glDisableVertexAttribArray(posHandle);
     }
   }
+  private void drawStandard(FloatBuffer buffer, Color color, int mode, int start, int endClip) {
+    if (color.getAlpha() != 1) {
+      GLES20.glEnable(GLES20.GL_BLEND);
+      GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+    }
+    GLES20.glUseProgram(standardProgram);
+    GLES20.glUniform4fv(colorHandle, 1, color.value, 0);
+    GLES20.glUniformMatrix2fv(matrixHandle, 1, false, transformMatrix, 0);
+    GLES20.glEnableVertexAttribArray(posHandle);
+    GLES20.glVertexAttribPointer(posHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, buffer);
+    GLES20.glDrawArrays(mode, start, buffer.limit() / COORDS_PER_VERTEX - endClip);
+    GLES20.glDisableVertexAttribArray(posHandle);
+    if (color.getAlpha() != 1) {
+      GLES20.glDisable(GLES20.GL_BLEND);
+    }
+  }
+}
 
   private static class GlowProgram {
 

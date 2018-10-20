@@ -53,16 +53,16 @@ public class Edge {
    * Calculates half of the centroid component for this edge. The twin edge's half should be
    * subtracted from this one to get the total centroid component.
    */
-  private static double calculateHalfPartialCentroid(
-      double sx, double sy, double scx, double scy, double ecx, double ecy, double ex, double ey) {
-    double area = scx * ecx * (45 * sy + 27 * scy);
-    area += scx * ex * (12 * sy + 18 * scy);
-    area += sx * scx * (105 * sy - 45 * scy - 45 * ecy - 15 * ey);
-    area += sx * ecx * (30 * sy);
-    area += sx * ex * (5 * sy + 3 * scy);
-    area += scx * scx * (45 * sy - 27 * ecy - 18 * ey);
-    area += sx * sx * (-280 * sy - 105 * scy - 30 * ecy - 5 * ey);
-    return area / 840;
+  private static float calculateHalfPartialCentroid(
+      float sx, float sy, float scx, float scy, float ecx, float ecy, float ex, float ey) {
+    return (scx * ecx * (45 * sy + 27 * scy)
+        + scx * ex * (12 * sy + 18 * scy)
+        + sx * scx * (105 * sy - 45 * scy - 45 * ecy - 15 * ey)
+        + sx * ecx * (30 * sy)
+        + sx * ex * (5 * sy + 3 * scy)
+        + scx * scx * (45 * sy - 27 * ecy - 18 * ey)
+        + sx * sx * (-280 * sy - 105 * scy - 30 * ecy - 5 * ey))
+        / 840;
   }
 
   public Bubble getBubble() {
@@ -156,57 +156,47 @@ public class Edge {
     halfArea = calculateHalfArea();
   }
 
-  /** Calculates half of the area. To get the total subtract the twin edges half. */
-  private double calculateHalfArea() {
-    double sx = getStart().x;
-    double sy = getStart().y;
-    double scx = getStartCtrl().x;
-    double scy = getStartCtrl().y;
+  /**
+   * Calculates half of the area. To get the total subtract the twin edge's half.
+   */
+  private float calculateHalfArea() {
+    Point s = getStart();
+    Point sc = getStartCtrl();
+    Point ec = getEndCtrl();
+    Point e = getEnd();
 
-    double ecy = getEndCtrl().y;
-    double ey = getEnd().y;
-
-    double area = sx * (-10 * sy - 6 * scy - 3 * ecy - ey);
-    area += scx * (6 * sy - 3 * ecy - 3 * ey);
-    return area / 20;
+    return (s.x * (-10 * s.y - 6 * sc.y - 3 * ec.y - e.y) + sc.x * (6 * s.y - 3 * ec.y - 3 * e.y))
+        / 20;
   }
 
+  /** Calculates half of the partial Y Centroid. To get the total subtract the twin edge's half. */
   private double calculateHalfPartialCentroidY() {
-    double sx = getStart().x;
-    double sy = getStart().y;
-    double scx = getStartCtrl().x;
-    double scy = getStartCtrl().y;
+    Point s = getStart();
+    Point sc = getStartCtrl();
+    Point ec = getEndCtrl();
+    Point e = getEnd();
 
-    double ecx = getEndCtrl().x;
-    double ecy = getEndCtrl().y;
-    double ex = getEnd().x;
-    double ey = getEnd().y;
-
-    return calculateHalfPartialCentroid(sy, sx, scy, scx, ecy, ecx, ey, ex);
+    return calculateHalfPartialCentroid(s.y, s.x, sc.y, sc.x, ec.y, ec.x, e.y, e.x);
   }
 
+  /** Calculates half of the partial X Centroid. To get the total subtract the twin edge's half. */
   private double calculateHalfPartialCentroidX() {
-    double sx = getStart().x;
-    double sy = getStart().y;
-    double scx = getStartCtrl().x;
-    double scy = getStartCtrl().y;
+    Point s = getStart();
+    Point sc = getStartCtrl();
+    Point ec = getEndCtrl();
+    Point e = getEnd();
 
-    double ecx = getEndCtrl().x;
-    double ecy = getEndCtrl().y;
-    double ex = getEnd().x;
-    double ey = getEnd().y;
-
-    return calculateHalfPartialCentroid(sx, sy, scx, scy, ecx, ecy, ex, ey);
+    return calculateHalfPartialCentroid(s.x, s.y, sc.x, sc.y, ec.x, ec.y, e.x, e.y);
   }
 
   // flattens this to a buffer *excluding the end point*
   public void flatten(FloatBuffer buffer) {
-    Point p1 = getStart();
-    Point p2 = getStartCtrl();
-    Point p3 = getEndCtrl();
-    Point p4 = getEnd();
+    Point s = getStart();
+    Point sc = getStartCtrl();
+    Point ec = getEndCtrl();
+    Point e = getEnd();
 
-    flatten(buffer, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y);
+    flatten(buffer, s.x, s.y, sc.x, sc.y, ec.x, ec.y, e.x, e.y);
   }
 
   private void flatten(
@@ -229,8 +219,7 @@ public class Edge {
     float d3 = Math.abs(((x3 - x4) * dy - (y3 - y4) * dx));
 
     if ((d2 + d3) * (d2 + d3) < FLATNESS * (dx * dx + dy * dy)) {
-      buffer.put(x1);
-      buffer.put(y1);
+      buffer.put(x1).put(y1);
       return;
     }
 
