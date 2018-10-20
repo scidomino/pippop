@@ -30,7 +30,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class GameView extends GLSurfaceView {
   private final Graph graph = new Graph();
-  private final BurstManager burst = new BurstManager(getContext());
+  private final BurstManager burst = new BurstManager(getContext(), 1);
   private final HighlightManager highlight = new HighlightManager();
   private final ShowAndMoveManager showAndMove = new ShowAndMoveManager();
   private final PopManager pop = new PopManager(burst, getContext());
@@ -167,7 +167,7 @@ public class GameView extends GLSurfaceView {
           }
           break;
         case BURST:
-          burst.update(graph, delta);
+          burst.update(delta);
           if (burst.isDone()) {
             score.onBurst(burst.burstEdge(graph));
             if (!burst.isDone()) {

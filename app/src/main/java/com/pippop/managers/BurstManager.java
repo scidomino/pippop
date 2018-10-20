@@ -21,14 +21,16 @@ public class BurstManager {
   private static final Color HIGHLIGHT_COLOR = Color.TRANSPARENT_WHITE;
   private final Polyline polyline = new Polyline(100);
   private final MediaPlayer sound;
+  private final int threashhold;
   private Edge edge;
   private long timeLeft;
 
-  public BurstManager(Context context) {
+  public BurstManager(Context context, int threashhold) {
     this.sound = MediaPlayer.create(context, R.raw.burst);
+    this.threashhold = threashhold;
   }
 
-  public void update(Graph graph, int delta) {
+  public void update(int delta) {
     timeLeft -= delta;
   }
 
@@ -91,7 +93,7 @@ public class BurstManager {
     }
   }
 
-  void burst(Graph graph, Edge edge) {
+  private void burst(Graph graph, Edge edge) {
     if (!isBurstable(edge)) {
       throw new IllegalStateException("edge is not burstable");
     }
@@ -106,7 +108,7 @@ public class BurstManager {
     graph.detach(edge);
   }
 
-  Edge findBurstStarter(Graph graph) {
+  private Edge findBurstStarter(Graph graph) {
     if (graph.getBubbles().size() <= 5) {
       return null;
     }
@@ -115,13 +117,13 @@ public class BurstManager {
         .getBubbles()
         .stream()
         .map(b -> b.stream().filter(this::isBurstable).collect(toSet()))
-        .filter(burstableEdges -> burstableEdges.size() >= 2)
+        .filter(burstableEdges -> burstableEdges.size() >= threashhold)
         .flatMap(Collection::stream)
         .findAny()
         .orElse(null);
   }
 
-  Edge findBurstableEdge(Bubble bubble) {
+  private Edge findBurstableEdge(Bubble bubble) {
     return bubble.stream().filter(this::isBurstable).findAny().orElse(null);
   }
 
