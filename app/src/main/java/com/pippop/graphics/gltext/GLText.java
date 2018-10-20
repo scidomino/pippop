@@ -68,20 +68,13 @@ public class GLText {
     Paint.FontMetrics fm = paint.getFontMetrics();
     float fontDescent = (float) Math.ceil(Math.abs(fm.descent));
 
-    // determine the width of each character (including unknown character)
-    // also determine the maximum character width
-
+    float charWidthMax = 0;
     float[] w = new float[2];
     for (char c = CHAR_START; c <= CHAR_END; c++) {
       paint.getTextWidths(String.valueOf(c), w);
       charWidths[c - CHAR_START] = w[0];
+      charWidthMax = Math.max(charWidthMax, w[0]);
     }
-
-    float maxWidth = 0;
-    for (float charWidth : charWidths) {
-      maxWidth = Math.max(maxWidth, charWidth);
-    }
-    float charWidthMax = maxWidth;
 
     // set character height to font height
     charHeight = (float) Math.ceil(Math.abs(fm.bottom) + Math.abs(fm.top)); // Set Character Height
@@ -155,7 +148,6 @@ public class GLText {
   private void initDraw(float red, float green, float blue, float alpha) {
     GLES20.glUseProgram(mProgram);
 
-    // set color TODO: only alpha component works, text is always black #BUG
     float[] color = {red, green, blue, alpha};
     GLES20.glUniform4fv(mColorHandle, 1, color, 0);
     GLES20.glEnableVertexAttribArray(mColorHandle);
@@ -232,48 +224,6 @@ public class GLText {
 
   public void drawCY(String text, float x, float y) {
     draw(text, x, y - (getCharHeight() / 2.0f)); // Draw Text Centered (Y-Axis Only)
-  }
-
-  // --Set Scale--//
-  // D: set the scaling to use for the font
-  // A: scale - uniform scale for both x and y axis scaling
-  //    sx, sy - separate x and y axis scaling factors
-  // R: [none]
-  public void setScale(float scale) {
-    scaleX = scaleY = scale; // Set Uniform Scale
-  }
-
-  public void setScale(float sx, float sy) {
-    scaleX = sx; // Set X Scale
-    scaleY = sy; // Set Y Scale
-  }
-
-  // --Get Scale--//
-  // D: get the current scaling used for the font
-  // A: [none]
-  // R: the x/y scale currently used for scale
-  public float getScaleX() {
-    return scaleX; // Return X Scale
-  }
-
-  public float getScaleY() {
-    return scaleY; // Return Y Scale
-  }
-
-  // --Get Space--//
-  // D: get the current spacing used for the font
-  // A: [none]
-  // R: the x/y space currently used for scale
-  public float getSpace() {
-    return spaceX; // Return X Space
-  }
-
-  // --Set Space--//
-  // D: set the spacing (unscaled; ie. pixel size) to use for the font
-  // A: space - space for x axis spacing
-  // R: [none]
-  public void setSpace(float space) {
-    spaceX = space; // Set Space
   }
 
   // --Get Length of a String--//
