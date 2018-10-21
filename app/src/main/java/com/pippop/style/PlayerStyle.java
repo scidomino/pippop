@@ -32,8 +32,4 @@ public class PlayerStyle implements Style {
   public int getPoint() {
     return size;
   }
-
-  public Style combine(PlayerStyle o) {
-    return this;
-  }
 }
