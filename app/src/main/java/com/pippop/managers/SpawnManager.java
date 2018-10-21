@@ -103,7 +103,7 @@ public abstract class SpawnManager {
   private Map<Vertex, Set<Color>> createTouchingMap(Graph graph) {
     Map<Vertex, Set<Color>> map = new HashMap<>();
     for (Vertex vertex : graph.getVertices()) {
-      map.put(vertex, new HashSet<>());
+      map.put(vertex, new HashSet<Color>());
     }
 
     for (Edge edge : graph.getEdges()) {

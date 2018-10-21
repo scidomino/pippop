@@ -63,11 +63,14 @@ public class GameView extends GLSurfaceView {
 
   private void swap(final Point point) {
     queueEvent(
-        () -> {
-          if (state == State.NORMAL) {
-            graphics.convertToBubbleSpacePoint(point);
-            if (swap.swap(graph, point)) {
-              state = State.SWAPPING;
+        new Runnable() {
+          @Override
+          public void run() {
+            if (state == State.NORMAL) {
+              graphics.convertToBubbleSpacePoint(point);
+              if (swap.swap(graph, point)) {
+                state = State.SWAPPING;
+              }
             }
           }
         });

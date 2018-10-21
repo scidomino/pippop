@@ -7,45 +7,51 @@ class SurfaceForce {
 
   private static FloatFunction derStartX(
       float sx, float sy, float scx, float scy, float ecx, float ecy, float ex, float ey) {
-    float ax = 3 * (ecx - scx) + sx - ex;
-    float ay = 3 * (ecy - scy) + sy - ey;
-    float bx = 2 * (ex - 2 * ecx + scx);
-    float by = 2 * (ey - 2 * ecy + scy);
-    float cx = ecx - ex;
-    float cy = ecy - ey;
+    final float ax = 3 * (ecx - scx) + sx - ex;
+    final float ay = 3 * (ecy - scy) + sy - ey;
+    final float bx = 2 * (ex - 2 * ecx + scx);
+    final float by = 2 * (ey - 2 * ecy + scy);
+    final float cx = ecx - ex;
+    final float cy = ecy - ey;
 
-    return p -> {
-      float bezierXDp = cx + p * (bx + p * ax);
-      float bezierYDp = cy + p * (by + p * ay);
+    return new FloatFunction() {
+      @Override
+      public float evaluate(float p) {
+        float bezierXDp = cx + p * (bx + p * ax);
+        float bezierYDp = cy + p * (by + p * ay);
 
-      float hypot = (float) Math.hypot(bezierXDp, bezierYDp);
-      if (hypot == 0) {
-        return 0;
+        float hypot = (float) Math.hypot(bezierXDp, bezierYDp);
+        if (hypot == 0) {
+          return 0;
+        }
+        float bezierYDpDStartX = 3 * p * p;
+        return bezierYDpDStartX * bezierXDp / hypot;
       }
-      float bezierYDpDStartX = 3 * p * p;
-      return bezierYDpDStartX * bezierXDp / hypot;
     };
   }
 
   private static FloatFunction derStartCtrlX(
       float sx, float sy, float scx, float scy, float ecx, float ecy, float ex, float ey) {
-    float ax = 3 * (ecx - scx) + sx - ex;
-    float ay = 3 * (ecy - scy) + sy - ey;
-    float bx = 2 * (ex - 2 * ecx + scx);
-    float by = 2 * (ey - 2 * ecy + scy);
-    float cx = ecx - ex;
-    float cy = ecy - ey;
+    final float ax = 3 * (ecx - scx) + sx - ex;
+    final float ay = 3 * (ecy - scy) + sy - ey;
+    final float bx = 2 * (ex - 2 * ecx + scx);
+    final float by = 2 * (ey - 2 * ecy + scy);
+    final float cx = ecx - ex;
+    final float cy = ecy - ey;
 
-    return p -> {
-      float bezierXDp = cx + p * (bx + p * ax);
-      float bezierYDp = cy + p * (by + p * ay);
+    return new FloatFunction() {
+      @Override
+      public float evaluate(float p) {
+        float bezierXDp = cx + p * (bx + p * ax);
+        float bezierYDp = cy + p * (by + p * ay);
 
-      float hypot = (float) Math.hypot(bezierXDp, bezierYDp);
-      if (hypot == 0) {
-        return 0;
+        float hypot = (float) Math.hypot(bezierXDp, bezierYDp);
+        if (hypot == 0) {
+          return 0;
+        }
+        float bezierYDpDStartCtrlX = p * (6 - 9 * p);
+        return bezierYDpDStartCtrlX * bezierXDp / hypot;
       }
-      float bezierYDpDStartCtrlX = p * (6 - 9 * p);
-      return bezierYDpDStartCtrlX * bezierXDp / hypot;
     };
   }
 
