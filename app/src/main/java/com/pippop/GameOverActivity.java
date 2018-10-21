@@ -20,31 +20,34 @@ public class GameOverActivity extends Activity {
     setContentView(R.layout.activity_game_over);
 
     SharedPreferences scorePrefs = getSharedPreferences(SCORE_PREF, MODE_PRIVATE);
-    Long highscore = scorePrefs.getLong(HIGH_SCORE, 0);
-    TextView showHigh = findViewById(R.id.showHigh);
-    showHigh.setText(getBaseContext().getString(R.string.high_score, highscore));
+    long highScore = scorePrefs.getLong(HIGH_SCORE, 0);
+    long current = scorePrefs.getLong(CURRENT_SCORE, 0);
 
-    Long current = scorePrefs.getLong(CURRENT_SCORE, 0);
     TextView showCurrent = findViewById(R.id.showCurrent);
     showCurrent.setText(getBaseContext().getString(R.string.your_score, current));
 
-    if (highscore < current) {
+    TextView showHigh = findViewById(R.id.highScore);
+    showHigh.setText(getBaseContext().getString(R.string.high_score, highScore));
+
+    if (highScore < current) {
       scorePrefs.edit().putLong(HIGH_SCORE, current).apply();
-      TextView newHigh = findViewById(R.id.newHigh);
-      newHigh.setVisibility(View.VISIBLE);
+      showHigh.setText(getBaseContext().getString(R.string.new_high_score));
+    } else {
+      showHigh.setText(getBaseContext().getString(R.string.high_score, highScore));
     }
 
-    // Go back to main screen after 4 second count down
-    // Add 'new high score!' with score display if/else
-    // Add high score entry if/else if w/ name entry later
     new CountDownTimer(10000, 10000) {
       @Override
       public void onFinish() {
-        startActivity(new Intent(GameOverActivity.this, MainActivity.class));
+        backToMain(null);
         finish();
       }
 
       public void onTick(long millisUntilFinished) {}
     }.start();
+  }
+
+  public void backToMain(View view) {
+    startActivity(new Intent(this, MainActivity.class));
   }
 }

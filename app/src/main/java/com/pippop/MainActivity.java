@@ -17,7 +17,7 @@ public class MainActivity extends Activity {
     setContentView(R.layout.activity_main);
 
     Long highscore = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getLong("highScore", 0);
-    TextView showHigh = findViewById(R.id.showHigh);
+    TextView showHigh = findViewById(R.id.highScore);
     showHigh.setText(getBaseContext().getString(R.string.high_score, highscore));
 
     TextView play = findViewById(R.id.play);

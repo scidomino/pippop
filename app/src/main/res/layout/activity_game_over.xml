@@ -1,47 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:gravity="center"
+  android:onClick="backToMain"
   android:orientation="vertical"
   tools:context=".GameOverActivity">
 
-  <TextView
-    android:id="@+id/showCurrent"
+  <android.support.v7.widget.AppCompatTextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:fontFamily="@font/sniglet_extrabold"
-    android:textColor="@color/orange"
-    android:textSize="40sp"/>
+    android:shadowColor="@color/white"
+    android:shadowDx="-10"
+    android:shadowDy="10"
+    android:shadowRadius="1"
+    android:text="@string/game_over"
+    android:textColor="@color/turquoise"
+    android:textSize="100sp"/>
 
-  <TextView
-    android:id="@+id/showHigh"
-    android:layout_width="wrap_content"
+
+  <android.support.v7.widget.AppCompatTextView
+    android:id="@+id/score"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:fontFamily="@font/sniglet_extrabold"
+    android:layout_margin="10sp"
     android:textColor="@color/white"
     android:textSize="40sp"/>
 
-  <TextView
-    android:id="@+id/newHigh"
-    android:layout_width="wrap_content"
+  <android.support.v7.widget.AppCompatTextView
+    android:id="@+id/highScore"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:fontFamily="@font/sniglet_extrabold"
-    android:text="@string/new_high_score"
-    android:textColor="@color/red"
-    android:textSize="40sp"
-    android:visibility="invisible"/>
-
-  <TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:fontFamily="@font/sniglet_extrabold"
-    android:shadowColor="@color/dark_green"
-    android:shadowDx="-15"
-    android:shadowDy="0"
-    android:shadowRadius="1"
-    android:text="@string/game_over"
-    android:textColor="@color/green"
-    android:textSize="80sp"/>
+    android:layout_margin="10sp"
+    android:textColor="@color/white"
+    android:textSize="40sp"/>
 
 </LinearLayout>
