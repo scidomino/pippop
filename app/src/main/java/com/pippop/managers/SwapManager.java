@@ -19,26 +19,14 @@ public class SwapManager {
     if (bubble == null) {
       return false;
     }
-    Edge edge =
-        bubble
-            .stream()
-            .filter(e -> e.getTwin().getBubble().getStyle() instanceof PlayerStyle)
-            .findFirst()
-            .orElse(null);
+    for (Edge edge : bubble) {
+      if (edge.getTwin().getBubble().getStyle() instanceof PlayerStyle) {
 
-    if (edge == null) {
-      return false;
+        this.pair = new SwapPair(edge, false);
+        return true;
+      }
     }
-
-    //    Bubble top = edge.getTwin().getBubble();
-    //    Bubble bot = edge.getBubble();
-    //
-    //    if (!(top.getStyle() instanceof GameStyle && bot.getStyle() instanceof GameStyle)) {
-    //      return false;
-    //    }
-
-    this.pair = new SwapPair(edge, false);
-    return true;
+    return false;
   }
 
   public void update(Graph graph, int delta) {

@@ -36,11 +36,13 @@ public class RandomChooser<T> {
   }
 
   private int getTotal(Collection<T> excluded) {
-    return map.entrySet()
-        .stream()
-        .filter(entry -> !excluded.contains(entry.getKey()))
-        .mapToInt(Entry::getValue)
-        .sum();
+    int total = 0;
+    for (Entry<T, Integer> e : map.entrySet()) {
+      if (!excluded.contains(e.getKey())) {
+        total += e.getValue();
+      }
+    }
+    return total;
   }
 
   public int getSize() {

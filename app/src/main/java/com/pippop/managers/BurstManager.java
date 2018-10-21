@@ -1,7 +1,5 @@
 package com.pippop.managers;
 
-import static java.util.stream.Collectors.toSet;
-
 import android.content.Context;
 import android.media.MediaPlayer;
 import com.pippop.R;
@@ -13,7 +11,8 @@ import com.pippop.graphics.Graphics;
 import com.pippop.graphics.Polyline;
 import com.pippop.style.GameStyle;
 import com.pippop.style.Style;
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BurstManager {
   private static final int FREEZE_MILLISECONDS = 500;
@@ -112,19 +111,32 @@ public class BurstManager {
     if (graph.getBubbles().size() <= 5) {
       return null;
     }
+    for (Bubble bubble : graph.getBubbles()) {
+      Set<Edge> burstable = findAllBurstable(bubble);
+      if (burstable.size() >= threashhold) {
+        return burstable.iterator().next();
+      }
+    }
+    return null;
+  }
 
-    return graph
-        .getBubbles()
-        .stream()
-        .map(b -> b.stream().filter(this::isBurstable).collect(toSet()))
-        .filter(burstableEdges -> burstableEdges.size() >= threashhold)
-        .flatMap(Collection::stream)
-        .findAny()
-        .orElse(null);
+  private Set<Edge> findAllBurstable(Bubble bubble) {
+    Set<Edge> burstable = new HashSet<>();
+    for (Edge edge : bubble) {
+      if (isBurstable(edge)) {
+        burstable.add(edge);
+      }
+    }
+    return burstable;
   }
 
   private Edge findBurstableEdge(Bubble bubble) {
-    return bubble.stream().filter(this::isBurstable).findAny().orElse(null);
+    for (Edge edge : bubble) {
+      if (isBurstable(edge)) {
+        return edge;
+      }
+    }
+    return null;
   }
 
   private boolean isBurstable(Edge edge) {

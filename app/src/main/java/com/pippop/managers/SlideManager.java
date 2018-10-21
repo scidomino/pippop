@@ -43,15 +43,13 @@ public class SlideManager {
   }
 
   private Edge getFirstSlidable(Graph graph) {
-    return graph
-        .getEdges()
-        .stream()
-        .filter(
-            edge ->
-                edge.getSimpleLength() < MIN_LENGTH
-                    && !this.recentlySlid.containsKey(edge)
-                    && !this.recentlySlid.containsKey(edge.getTwin()))
-        .findFirst()
-        .orElse(null);
+    for (Edge edge : graph.getEdges()) {
+      if (edge.getSimpleLength() < MIN_LENGTH
+          && !this.recentlySlid.containsKey(edge)
+          && !this.recentlySlid.containsKey(edge.getTwin())) {
+        return edge;
+      }
+    }
+    return null;
   }
 }

@@ -1,16 +1,13 @@
 package com.pippop.graph;
 
-import static java.util.stream.Collectors.toSet;
-
 import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
 import com.pippop.style.Style;
 import java.nio.BufferOverflowException;
 import java.nio.FloatBuffer;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * Represents a single bubble. It holds firstEdge which can be viewed as a circularly linked list of
@@ -36,7 +33,9 @@ public class Bubble implements Iterable<Edge> {
     this.firstEdge = firstEdge;
     this.style = style;
     this.buffer = buffer;
-    stream().forEach(edge -> edge.setBubble(this));
+    for (Edge edge : this) {
+      edge.setBubble(this);
+    }
     update();
   }
 
@@ -71,11 +70,21 @@ public class Bubble implements Iterable<Edge> {
   }
 
   public Set<Bubble> getAdjacentBubbles() {
-    return stream().map(edge -> edge.getTwin().getBubble()).collect(toSet());
+    Set<Bubble> adjacents = new HashSet<>();
+    for (Edge edge : this) {
+      adjacents.add(edge.getTwin().getBubble());
+    }
+    return adjacents;
   }
 
-  public Set<Edge> getDegenerateEdges() {
-    return stream().filter(edge -> edge.getTwin().getBubble() == this).collect(toSet());
+  Set<Edge> getDegenerateEdges() {
+    Set<Edge> degenerates = new HashSet<>();
+    for (Edge edge : this) {
+      if (edge.getTwin().getBubble() == this) {
+        degenerates.add(edge);
+      }
+    }
+    return degenerates;
   }
 
   public Style getStyle() {
@@ -142,7 +151,11 @@ public class Bubble implements Iterable<Edge> {
   }
 
   private double calculateArea() {
-    return stream().mapToDouble(Edge::getArea).sum();
+    double area = 0;
+    for (Edge edge : this) {
+      area += edge.getArea();
+    }
+    return area;
   }
 
   private Point calculateCenter() {
@@ -150,8 +163,15 @@ public class Bubble implements Iterable<Edge> {
       return this.firstEdge.getCenter();
     }
 
-    float x = (float) (stream().mapToDouble(Edge::getCentroidComponentX).sum() / area);
-    float y = (float) (-stream().mapToDouble(Edge::getCentroidComponentY).sum() / area);
+    float centroidX = 0;
+    float centroidY = 0;
+    for (Edge edge : this) {
+      centroidX += edge.getCentroidComponentX();
+      centroidY += edge.getCentroidComponentY();
+    }
+
+    float x = (float) (centroidX / area);
+    float y = (float) (-centroidY / area);
     return new Point(x, y);
   }
 
@@ -170,7 +190,13 @@ public class Bubble implements Iterable<Edge> {
   }
 
   public boolean sharesExactlyOneEdge(Bubble o) {
-    return stream().filter(edge -> edge.getTwin().getBubble() == o).count() == 1;
+    int count = 0;
+    for (Edge edge : this) {
+      if (edge.getTwin().getBubble() == o) {
+        count++;
+      }
+    }
+    return count == 1;
   }
 
   public Edge getCorrespondingEdge(Point point) {
@@ -184,10 +210,6 @@ public class Bubble implements Iterable<Edge> {
       prevBelow = below;
     }
     return null;
-  }
-
-  public Stream<Edge> stream() {
-    return StreamSupport.stream(spliterator(), false);
   }
 
   @Override

@@ -122,7 +122,12 @@ public class Graph {
   }
 
   public Bubble getBubble(Point point) {
-    return this.bubbles.stream().filter(b -> b.contains(point)).findFirst().orElse(null);
+    for (Bubble bubble : bubbles) {
+      if (bubble.contains(point)) {
+        return bubble;
+      }
+    }
+    return null;
   }
 
   public OpenAir getOpenAir() {

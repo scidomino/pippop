@@ -1,12 +1,9 @@
 package com.pippop.managers;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-
 import android.content.Context;
 import android.media.MediaPlayer;
 import com.pippop.R;
+import com.pippop.graph.Bubble;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
 import com.pippop.graph.Vertex;
@@ -14,12 +11,14 @@ import com.pippop.graphics.Color;
 import com.pippop.style.GameStyle;
 import com.pippop.style.PlayerStyle;
 import com.pippop.util.RandomChooser;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Stream;
 
 public abstract class SpawnManager {
 
@@ -74,7 +73,11 @@ public abstract class SpawnManager {
   }
 
   private List<Vertex> getOpenAirVertices(Graph graph) {
-    return graph.getOpenAir().stream().map(Edge::getStart).collect(toList());
+    List<Vertex> verticies = new ArrayList<>();
+    for (Edge edge : graph.getOpenAir()) {
+      verticies.add(edge.getStart());
+    }
+    return verticies;
   }
 
   private <T> T getRandom(List<T> list) {
@@ -82,34 +85,39 @@ public abstract class SpawnManager {
   }
 
   private List<Vertex> findOpen(Map<Vertex, Set<Color>> map) {
-    return map.entrySet()
-        .stream()
-        .filter(e -> e.getValue().size() < colorChooser.getSize())
-        .map(Entry::getKey)
-        .collect(toList());
+    List<Vertex> vertices = new ArrayList<>();
+    for (Entry<Vertex, Set<Color>> e : map.entrySet()) {
+      if (e.getValue().size() < colorChooser.getSize()) {
+        vertices.add(e.getKey());
+      }
+    }
+    return vertices;
   }
 
   private void spawn(Graph graph, GameStyle gameStyle, Vertex vertex) {
     graph.spawn(vertex, gameStyle);
+    sound.seekTo(0);
     sound.start();
   }
 
   private Map<Vertex, Set<Color>> createTouchingMap(Graph graph) {
-    return graph
-        .getVertices()
-        .stream()
-        .collect(
-            toMap(
-                v -> v,
-                v1 -> {
-                  Edge e1 = v1.getEdge().getTwin();
-                  Edge e2 = e1.getNext().getTwin();
-                  Edge e3 = e2.getNext().getTwin();
-                  return Stream.of(e1, e2, e3)
-                      .map(e -> e.getBubble().getStyle())
-                      .filter(s -> s instanceof GameStyle)
-                      .map(s -> ((GameStyle) s).getColor())
-                      .collect(toSet());
-                }));
+    Map<Vertex, Set<Color>> map = new HashMap<>();
+    for (Vertex vertex : graph.getVertices()) {
+      map.put(vertex, new HashSet<>());
+    }
+
+    for (Edge edge : graph.getEdges()) {
+      Set<Color> vertexColors = map.get(edge.getStart());
+      addBubbleColor(vertexColors, edge.getBubble());
+      addBubbleColor(vertexColors, edge.getNext().getTwin().getBubble());
+    }
+    return map;
+  }
+
+  private void addBubbleColor(Set<Color> set, Bubble bubble) {
+    if (bubble.getStyle() instanceof GameStyle) {
+      GameStyle gameStyle = (GameStyle) bubble.getStyle();
+      set.add(gameStyle.getColor());
+    }
   }
 }
