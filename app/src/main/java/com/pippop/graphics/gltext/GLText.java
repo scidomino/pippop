@@ -9,12 +9,14 @@
 
 package com.pippop.graphics.gltext;
 
-import android.content.res.Resources;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import android.support.v4.content.res.ResourcesCompat;
 import com.pippop.graphics.Color;
 
 public class GLText {
@@ -46,8 +48,7 @@ public class GLText {
 
   // --Constructor--//
   // D: save program + asset manager, create arrays, and initialize the members
-  public GLText(
-      Resources resources, int font, int size, int fontPadX, int fontPadY, boolean outline) {
+  public GLText(Context context, int font, int size, int fontPadX, int fontPadY, boolean outline) {
     mProgram = BatchTextProgram.getProgram();
     mColorHandle = GLES20.glGetUniformLocation(mProgram, "u_Color");
     mTextureUniformHandle = GLES20.glGetUniformLocation(mProgram, "u_Texture");
@@ -64,7 +65,7 @@ public class GLText {
     paint.setAntiAlias(true);
     paint.setTextSize(size);
     paint.setColor(0xffffffff);
-    paint.setTypeface(resources.getFont(font));
+    paint.setTypeface(ResourcesCompat.getFont(context, font));
     if (outline) {
       paint.setStyle(Paint.Style.STROKE);
       paint.setStrokeWidth(1);

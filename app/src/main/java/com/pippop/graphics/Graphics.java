@@ -29,8 +29,8 @@ public class Graphics {
     this.standardProgram = new StandardProgram(context);
     this.glowProgram = new GlowProgram(context);
 
-    glText = new GLText(context.getResources(), R.font.sniglet_extrabold, 30, 2, 2, false);
-    glTextOutline = new GLText(context.getResources(), R.font.sniglet_extrabold, 30, 2, 2, true);
+    glText = new GLText(context, R.font.sniglet_extrabold, 30, 2, 2, false);
+    glTextOutline = new GLText(context, R.font.sniglet_extrabold, 30, 2, 2, true);
   }
 
   private static int loadProgram(Context context, int fragmentShader, int vertexShader) {

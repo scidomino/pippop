@@ -4,6 +4,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.content.Context;
 import com.pippop.GameOverActivity;
+import com.pippop.R;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Point;
 import com.pippop.graphics.Color;
@@ -60,8 +61,7 @@ public class ScoreManager {
       flyingPoint.render(g);
     }
 
-    String value = "Score: " + String.valueOf(score);
-    g.drawString(value, DISPLAY_COLOR, 150, 150);
+    g.drawString(context.getString(R.string.score, score), DISPLAY_COLOR, 150, 150);
 
     if (popChainTimer.getCount() > 1) {
       String chainString = popChainTimer.getCount() + " Pop Chain!";

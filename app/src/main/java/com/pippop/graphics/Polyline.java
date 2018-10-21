@@ -98,15 +98,15 @@ public class Polyline {
     vertices.flip();
   }
 
-  FloatBuffer getVertices() {
+  public FloatBuffer getVertices() {
     return vertices;
   }
 
-  FloatBuffer getStartCap() {
+  public FloatBuffer getStartCap() {
     return startCap;
   }
 
-  FloatBuffer getEndCap() {
+  public FloatBuffer getEndCap() {
     return endCap;
   }
 }
