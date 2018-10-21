@@ -41,22 +41,18 @@ public class Polyline {
       double angle = Math.atan2(y2 - y1, x2 - x1);
 
       double normalAngle = (Math.PI + lastAngle + angle) / 2;
-      float y = width * (float) Math.sin(normalAngle);
-      float x = width * (float) Math.cos(normalAngle);
-      vertices.put(x2 - x);
-      vertices.put(y2 - y);
-      vertices.put(x2 + x);
-      vertices.put(y2 + y);
+      float dx = width * (float) Math.cos(normalAngle);
+      float dy = width * (float) Math.sin(normalAngle);
+      vertices.put(x2 - dx).put(y2 - dy);
+      vertices.put(x2 + dx).put(y2 + dy);
 
       lastAngle = angle;
     }
     double normal = lastAngle + Math.PI / 2;
-    float y = width * (float) Math.sin(normal);
-    float x = width * (float) Math.cos(normal);
-    vertices.put(x1 - x);
-    vertices.put(y1 - y);
-    vertices.put(x1 + x);
-    vertices.put(y1 + y);
+    float dx = width * (float) Math.cos(normal);
+    float dy = width * (float) Math.sin(normal);
+    vertices.put(x1 - dx).put(y1 - dy);
+    vertices.put(x1 + dx).put(y1 + dy);
 
     vertices.flip();
 
@@ -65,18 +61,13 @@ public class Polyline {
 
   private void populateCap(FloatBuffer cap, float cX, float cY, double startAngle, float width) {
     cap.clear();
-
-    cap.put(cX);
-    cap.put(cY);
-
+    cap.put(cX).put(cY);
     for (int i = 0; i <= CAP_DIVISIONS; i++) {
       double angle = startAngle + i * Math.PI / CAP_DIVISIONS;
       float y = width * (float) Math.sin(angle);
       float x = width * (float) Math.cos(angle);
-      cap.put(cX + x);
-      cap.put(cY + y);
+      cap.put(cX + x).put(cY + y);
     }
-
     cap.flip();
   }
 
@@ -84,29 +75,19 @@ public class Polyline {
     temp.clear();
     edge.flatten(temp);
     Vertex end = edge.getEnd();
-    temp.put(end.x);
-    temp.put(end.y);
+    temp.put(end.x).put(end.y);
     temp.flip();
   }
 
-  public void addPoint(float x, float y) {
-    vertices.put(x);
-    vertices.put(y);
-  }
-
-  public void done() {
-    vertices.flip();
-  }
-
-  public FloatBuffer getVertices() {
+  FloatBuffer getVertices() {
     return vertices;
   }
 
-  public FloatBuffer getStartCap() {
+  FloatBuffer getStartCap() {
     return startCap;
   }
 
-  public FloatBuffer getEndCap() {
+  FloatBuffer getEndCap() {
     return endCap;
   }
 }
