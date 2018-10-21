@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-
-  <!-- Application theme. -->
-  <style name="AppTheme">
-    <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+  <style name="AppTheme" parent="android:Theme.Holo.NoActionBar">
+    <item name="android:fontFamily">@font/sniglet_extrabold</item>
   </style>
-
 </resources>

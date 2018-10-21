@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
@@ -21,7 +20,7 @@ public class MainActivity extends Activity {
     TextView showHigh = findViewById(R.id.showHigh);
     showHigh.setText(getBaseContext().getString(R.string.high_score, highscore));
 
-    Button play = findViewById(R.id.play);
+    TextView play = findViewById(R.id.play);
     play.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale));
   }
 

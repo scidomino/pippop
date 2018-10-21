@@ -1,49 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:gravity="center"
   android:onClick="startPlay"
+  android:orientation="vertical"
   tools:context=".MainActivity">
 
-  <TextView
+  <android.support.v7.widget.AppCompatTextView
     android:id="@+id/showHigh"
-    android:textStyle="bold"
+    android:layout_margin="10sp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:fontFamily="@font/sniglet_extrabold"
+    android:gravity="end"
     android:textColor="@color/white"
     android:textSize="40sp"/>
 
-  <Button
-    android:id="@+id/play"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentEnd="true"
-    android:layout_alignParentStart="true"
-    android:background="@android:color/transparent"
-    android:clickable="true"
-    android:focusable="true"
-    android:fontFamily="@font/sniglet_extrabold"
-    android:shadowColor="@color/white"
-    android:shadowDx="-3"
-    android:shadowDy="3"
-    android:shadowRadius="1"
-    android:text="@string/play"
-    android:textColor="@color/red"
-    android:onClick="startPlay"
-    android:textSize="70sp"/>
-
-  <TextView
-    android:textStyle="bold"
+  <android.support.v7.widget.AppCompatTextView
     android:layout_width="wrap_content"
-    android:layout_height="200dp"
-    android:layout_marginBottom="10dp"
-    android:layout_above="@+id/play"
-    android:layout_centerHorizontal="true"
-    android:fontFamily="@font/sniglet_extrabold"
-    android:maxLines="2"
+    android:layout_height="wrap_content"
     android:shadowColor="@color/white"
     android:shadowDx="-10"
     android:shadowDy="10"
@@ -51,4 +27,21 @@
     android:text="@string/app_name"
     android:textColor="@color/turquoise"
     android:textSize="150sp"/>
-</RelativeLayout>
+
+  <android.support.v7.widget.AppCompatTextView
+    android:id="@+id/play"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:clickable="true"
+    android:focusable="true"
+    android:onClick="startPlay"
+    android:shadowColor="@color/white"
+    android:shadowDx="-3"
+    android:shadowDy="3"
+    android:shadowRadius="1"
+    android:text="@string/play"
+    android:textColor="@color/red"
+    android:textSize="70sp"/>
+
+</LinearLayout>
