@@ -3,6 +3,7 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:onClick="startPlay"
   tools:context=".MainActivity">
 
   <TextView
@@ -25,7 +26,6 @@
     android:clickable="true"
     android:focusable="true"
     android:fontFamily="@font/sniglet_extrabold"
-    android:onClick="startPlay"
     android:shadowColor="@color/white"
     android:shadowDx="-3"
     android:shadowDy="3"
