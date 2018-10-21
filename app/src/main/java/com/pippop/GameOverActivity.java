@@ -23,7 +23,7 @@ public class GameOverActivity extends Activity {
     long highScore = scorePrefs.getLong(HIGH_SCORE, 0);
     long current = scorePrefs.getLong(CURRENT_SCORE, 0);
 
-    TextView showCurrent = findViewById(R.id.showCurrent);
+    TextView showCurrent = findViewById(R.id.score);
     showCurrent.setText(getBaseContext().getString(R.string.your_score, current));
 
     TextView showHigh = findViewById(R.id.highScore);
