@@ -60,7 +60,8 @@ public class ScoreManager {
     for (RisingPoints flyingPoint : risingPoints) {
       flyingPoint.render(g);
     }
-    g.drawString(context.getString(R.string.score, score), DISPLAY_COLOR, 150, 150);
+    String scoreString = context.getString(R.string.score, score);
+    g.drawStringOutlined(scoreString, DISPLAY_COLOR, Color.BLACK, 150, 150);
     if (popChainTimer.getCount() > 1) {
       String chainString = context.getString(R.string.pop_chain, popChainTimer.getCount());
       g.drawStringOutlined(chainString, DISPLAY_COLOR, Color.BLACK, 0, -150);
