@@ -12,9 +12,9 @@ public class SwapPair {
 
   private static final float SWAP_TIME = 200f;
 
-  private final FloatBuffer morphedStart = Graphics.createVertexBuffer(100);
-  private final FloatBuffer morphedEnd = Graphics.createVertexBuffer(100);
-  private final FloatBuffer morphShape = Graphics.createVertexBuffer(100);
+  private final FloatBuffer morphedStart = Graphics.createVertexBuffer(200);
+  private final FloatBuffer morphedEnd = Graphics.createVertexBuffer(200);
+  private final FloatBuffer morphShape = Graphics.createVertexBuffer(200);
 
   private final Edge edge;
   private final Bubble top;

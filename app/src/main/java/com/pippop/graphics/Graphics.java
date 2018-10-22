@@ -66,7 +66,7 @@ public class Graphics {
   }
 
   public static FloatBuffer createVertexBuffer(int size) {
-    return ByteBuffer.allocateDirect(size * 2 * FLOAT_BYTES)
+    return ByteBuffer.allocateDirect(size * FLOAT_BYTES)
         .order(ByteOrder.nativeOrder())
         .asFloatBuffer();
   }

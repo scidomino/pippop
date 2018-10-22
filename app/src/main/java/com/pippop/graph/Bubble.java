@@ -26,7 +26,7 @@ public class Bubble implements Iterable<Edge> {
   private Point center;
 
   public Bubble(Style style, Edge firstEdge) {
-    this(style, firstEdge, Graphics.createVertexBuffer(100));
+    this(style, firstEdge, Graphics.createVertexBuffer(200));
   }
 
   Bubble(Style style, Edge firstEdge, FloatBuffer buffer) {
@@ -133,8 +133,8 @@ public class Bubble implements Iterable<Edge> {
       for (Edge edge : this) {
         edge.flatten(buffer);
       }
-      buffer.put(buffer.get(2));
-      buffer.put(buffer.get(3));
+      buffer.put(firstEdge.getStart().x);
+      buffer.put(firstEdge.getStart().y);
       buffer.flip();
     } catch (BufferOverflowException e) {
       if (buffer.capacity() > 10000) {

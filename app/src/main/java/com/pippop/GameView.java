@@ -54,8 +54,11 @@ public class GameView extends GLSurfaceView {
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     switch (event.getActionMasked()) {
-      case MotionEvent.ACTION_DOWN:
+      case MotionEvent.ACTION_UP:
         swap(new Point(event.getX(), event.getY()));
+        break;
+      case MotionEvent.ACTION_DOWN:
+        highlight.setPoint(new Point(event.getX(), event.getY()));
         break;
     }
     return true;
@@ -138,10 +141,10 @@ public class GameView extends GLSurfaceView {
 
             if (success.hasSucceeded(graph)) {
               if (!score.isProcessing()) {
-                highlight.killHighlight();
+                highlight.setPoint(null);
               }
             } else if (blowout.isGameOver()) {
-              highlight.killHighlight();
+              highlight.setPoint(null);
               Intent gameOverIntent = new Intent(getContext(), GameOverActivity.class);
               getContext().startActivity(gameOverIntent);
             }
