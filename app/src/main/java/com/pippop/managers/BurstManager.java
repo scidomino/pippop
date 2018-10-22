@@ -17,7 +17,7 @@ import java.util.Set;
 public class BurstManager {
   private static final int FREEZE_MILLISECONDS = 500;
   private static final int MAX_WIDTH = 20;
-  private static final Color HIGHLIGHT_COLOR = Color.TRANSPARENT_WHITE;
+
   private final GlowLine glowLine = new GlowLine();
   private final MediaPlayer sound;
   private final int threashhold;
@@ -36,7 +36,7 @@ public class BurstManager {
   public void render(Graphics g) {
     float percentDone = 1 - (timeLeft / (float) FREEZE_MILLISECONDS);
     glowLine.update(edge, MAX_WIDTH * percentDone);
-    g.drawLine(glowLine, HIGHLIGHT_COLOR);
+    g.drawLine(glowLine, Color.WHITE);
   }
 
   public Edge burstEdge(Graph graph) {

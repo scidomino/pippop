@@ -2,6 +2,7 @@ package com.pippop.graphics;
 
 import android.content.Context;
 import android.opengl.GLES20;
+import android.view.MotionEvent;
 import com.pippop.R;
 import com.pippop.graph.Point;
 import com.pippop.graphics.gltext.GLText;
@@ -80,10 +81,10 @@ public class Graphics {
     transformMatrix[3] = ratio / VIRTUAL_WIDTH;
   }
 
-  public void convertToBubbleSpacePoint(Point point) {
-    float glX = (2 * point.x / width) - 1;
-    float glY = -((2 * point.y / height) - 1);
-    point.set(glX / transformMatrix[0], glY / transformMatrix[3]);
+  public Point convertToBubbleSpacePoint(MotionEvent point) {
+    float glX = (2 * point.getX() / width) - 1;
+    float glY = -((2 * point.getY() / height) - 1);
+    return new Point(glX / transformMatrix[0], glY / transformMatrix[3]);
   }
 
   public void drawLine(GlowLine line, Color color) {

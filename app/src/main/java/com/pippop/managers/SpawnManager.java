@@ -41,7 +41,7 @@ public abstract class SpawnManager {
     Color color1 = colorChooser.chooseRanom();
     double angle = random.nextFloat() * Math.PI;
 
-    PlayerStyle style1 = new PlayerStyle(1, Color.WHITE);
+    PlayerStyle style1 = new PlayerStyle(1, Color.TRANSPARENT_WHITE);
     GameStyle style2 = new GameStyle(1, color1);
     graph.reset(style1, style2, 0, 0, angle);
     sound.start();

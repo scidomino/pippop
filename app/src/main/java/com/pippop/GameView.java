@@ -55,10 +55,11 @@ public class GameView extends GLSurfaceView {
   public boolean onTouchEvent(MotionEvent event) {
     switch (event.getActionMasked()) {
       case MotionEvent.ACTION_UP:
-        swap(new Point(event.getX(), event.getY()));
+        swap(graphics.convertToBubbleSpacePoint(event));
         break;
       case MotionEvent.ACTION_DOWN:
-        highlight.setPoint(new Point(event.getX(), event.getY()));
+      case MotionEvent.ACTION_MOVE:
+        highlight.setPoint(graphics.convertToBubbleSpacePoint(event));
         break;
     }
     return true;
@@ -70,10 +71,10 @@ public class GameView extends GLSurfaceView {
           @Override
           public void run() {
             if (state == State.NORMAL) {
-              graphics.convertToBubbleSpacePoint(point);
               if (swap.swap(graph, point)) {
                 state = State.SWAPPING;
               }
+              highlight.setPoint(null);
             }
           }
         });

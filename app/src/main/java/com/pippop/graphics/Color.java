@@ -5,8 +5,7 @@ import java.util.Arrays;
 public class Color {
 
   public static final Color WHITE = new Color(1f, 1f, 1f, 1f);
-  public static final Color RED = new Color(1f, 0f, 0f, 1f);
-  public static final Color TRANSPARENT_WHITE = new Color(1f, 1f, 1f, .2f);
+  public static final Color TRANSPARENT_WHITE = new Color(1f, 1f, 1f, .5f);
   public static final Color BLACK = new Color(0, 0, 0, 1);
 
   public final float[] value = new float[4];

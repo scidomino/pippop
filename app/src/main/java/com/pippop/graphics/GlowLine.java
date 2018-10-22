@@ -112,40 +112,25 @@ public class GlowLine {
     buffer.flip();
   }
 
-  public void update(Bubble bubble, float width) {
+  public void update(Bubble bubble) {
     buffer.clear();
     temp.clear();
-
+    Point center = bubble.getCenter();
     Point start = bubble.getFirstEdge().getStart();
 
     for (Edge edge : bubble) {
       edge.flatten(temp);
     }
-    for (int i = 0; i < 6; i++) {
-      temp.put(temp.get(i));
-    }
+    temp.put(start.x).put(start.y).put(1);
     temp.flip();
 
-    buffer.put(start.x).put(start.y).put(1);
-
-    float px = start.x;
-    float py = start.y;
-    for (int i = 2; i < temp.limit() - 2; i += 2) {
+    for (int i = 0; i < temp.limit() - 2; i += 2) {
       float x = temp.get(i);
       float y = temp.get(i + 1);
-      float nx = temp.get(i + 2);
-      float ny = temp.get(i + 3);
-
-      double normalAngle = (Math.PI / 2) + Math.atan2(ny - py, nx - px);
-
-      buffer
-          .put(x + width * (float) Math.cos(normalAngle))
-          .put(y + width * (float) Math.sin(normalAngle))
-          .put(0);
       buffer.put(x).put(y).put(1);
-      px = x;
-      py = y;
+      buffer.put(center.x).put(center.y).put(0);
     }
+    buffer.flip();
   }
 
   public FloatBuffer getBuffer() {
