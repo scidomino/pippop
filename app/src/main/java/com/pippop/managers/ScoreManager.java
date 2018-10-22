@@ -60,14 +60,12 @@ public class ScoreManager {
     for (RisingPoints flyingPoint : risingPoints) {
       flyingPoint.render(g);
     }
-
     g.drawString(context.getString(R.string.score, score), DISPLAY_COLOR, 150, 150);
-
     if (popChainTimer.getCount() > 1) {
-      String chainString = popChainTimer.getCount() + " Pop Chain!";
+      String chainString = context.getString(R.string.pop_chain, popChainTimer.getCount());
       g.drawStringOutlined(chainString, DISPLAY_COLOR, Color.BLACK, 0, -150);
     } else if (burstChainTimer.getCount() > 1) {
-      String chainString = burstChainTimer.getCount() + " Chain!";
+      String chainString = context.getString(R.string.burst_chain, burstChainTimer.getCount());
       g.drawStringOutlined(chainString, DISPLAY_COLOR, Color.BLACK, 0, -150);
     }
   }

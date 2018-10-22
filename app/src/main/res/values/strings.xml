@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
   <string name="app_name">PipPop</string>
-  <string name="play">Play!</string>
-  <string name="high_score">High Score: %1$d</string>
-  <string name="new_high_score">New High Score!</string>
-  <string name="score">Score: %1$d</string>
-  <string name="your_score">Your Score: %1$d</string>
-  <string name="game_over">Game Over</string>
-
+  <string name="play">Giochi!</string>
+  <string name="high_score">Migliore Punteggi: %1$d</string>
+  <string name="new_high_score">Nuovo Migliore Punteggi!</string>
+  <string name="score">Punteggi: %1$d</string>
+  <string name="your_score">Tuoi Punteggi: %1$d</string>
+  <string name="game_over">Gioco Concluso</string>
+  <string name="burst_chain">%1$d Concatenati!</string>
+  <string name="pop_chain">%1$d Scatti Concatenati!</string>
 </resources>
