@@ -7,8 +7,8 @@ import com.pippop.graph.Bubble;
 import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
 import com.pippop.graphics.Color;
+import com.pippop.graphics.GlowLine;
 import com.pippop.graphics.Graphics;
-import com.pippop.graphics.Polyline;
 import com.pippop.style.GameStyle;
 import com.pippop.style.Style;
 import java.util.HashSet;
@@ -18,7 +18,7 @@ public class BurstManager {
   private static final int FREEZE_MILLISECONDS = 500;
   private static final int MAX_WIDTH = 20;
   private static final Color HIGHLIGHT_COLOR = Color.TRANSPARENT_WHITE;
-  private final Polyline polyline = new Polyline(100);
+  private final GlowLine glowLine = new GlowLine();
   private final MediaPlayer sound;
   private final int threashhold;
   private Edge edge;
@@ -35,10 +35,8 @@ public class BurstManager {
 
   public void render(Graphics g) {
     float percentDone = 1 - (timeLeft / (float) FREEZE_MILLISECONDS);
-    for (int i = 0; i < MAX_WIDTH * percentDone; i++) {
-      polyline.update(edge, i);
-      g.drawLine(polyline, HIGHLIGHT_COLOR);
-    }
+    glowLine.update(edge, MAX_WIDTH * percentDone);
+    g.drawLine(glowLine, HIGHLIGHT_COLOR);
   }
 
   public Edge burstEdge(Graph graph) {

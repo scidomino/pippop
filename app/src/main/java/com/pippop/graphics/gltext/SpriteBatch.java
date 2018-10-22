@@ -34,9 +34,8 @@ class SpriteBatch {
     this.numSprites = 0; // Clear Sprite Counter
 
     short[] indices = new short[maxSprites * INDICES_PER_SPRITE]; // Create Temp Index Buffer
-    int len = indices.length; // Get Index Buffer Length
     short j = 0; // Counter
-    for (int i = 0; i < len; i += INDICES_PER_SPRITE, j += VERTICES_PER_SPRITE) {
+    for (int i = 0; i < indices.length; i += INDICES_PER_SPRITE, j += VERTICES_PER_SPRITE) {
       indices[i] = j; // Calculate Index 0
       indices[i + 1] = (short) (j + 1); // Calculate Index 1
       indices[i + 2] = (short) (j + 2); // Calculate Index 2
@@ -44,7 +43,7 @@ class SpriteBatch {
       indices[i + 4] = (short) (j + 3); // Calculate Index 4
       indices[i + 5] = j; // Calculate Index 5
     }
-    vertices.setIndices(indices, len); // Set Index Buffer for Rendering
+    vertices.setIndices(indices, indices.length); // Set Index Buffer for Rendering
     mMVPMatricesHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix");
   }
 

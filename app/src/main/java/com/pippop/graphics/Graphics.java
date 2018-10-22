@@ -13,7 +13,6 @@ import java.util.Scanner;
 
 public class Graphics {
   private static final int FLOAT_BYTES = 4;
-  private static final int COORDS_PER_VERTEX = 2;
   private static final int VIRTUAL_WIDTH = 300;
 
   private final StandardProgram standardProgram;
@@ -67,7 +66,7 @@ public class Graphics {
   }
 
   public static FloatBuffer createVertexBuffer(int size) {
-    return ByteBuffer.allocateDirect(size * COORDS_PER_VERTEX * FLOAT_BYTES)
+    return ByteBuffer.allocateDirect(size * 2 * FLOAT_BYTES)
         .order(ByteOrder.nativeOrder())
         .asFloatBuffer();
   }
@@ -87,15 +86,10 @@ public class Graphics {
     point.set(glX / transformMatrix[0], glY / transformMatrix[3]);
   }
 
-  public void drawLine(Polyline line, Color color) {
+  public void drawLine(GlowLine line, Color color) {
     GLES20.glEnable(GLES20.GL_BLEND);
     GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-    standardProgram.drawStandard(
-        line.getVertices(), color, GLES20.GL_TRIANGLE_STRIP, 0, 0, transformMatrix);
-    standardProgram.drawStandard(
-        line.getStartCap(), color, GLES20.GL_TRIANGLE_FAN, 0, 0, transformMatrix);
-    standardProgram.drawStandard(
-        line.getEndCap(), color, GLES20.GL_TRIANGLE_FAN, 0, 0, transformMatrix);
+    glowProgram.draw(line.getBuffer(), color, transformMatrix);
     GLES20.glDisable(GLES20.GL_BLEND);
   }
 
@@ -176,8 +170,8 @@ public class Graphics {
       GLES20.glUniform4fv(colorHandle, 1, color.value, 0);
       GLES20.glUniformMatrix2fv(matrixHandle, 1, false, transformMatrix, 0);
       GLES20.glEnableVertexAttribArray(posHandle);
-      GLES20.glVertexAttribPointer(posHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, buffer);
-      GLES20.glDrawArrays(mode, start, buffer.limit() / COORDS_PER_VERTEX - endClip);
+      GLES20.glVertexAttribPointer(posHandle, 2, GLES20.GL_FLOAT, false, 0, buffer);
+      GLES20.glDrawArrays(mode, start, buffer.limit() / 2 - endClip);
       GLES20.glDisableVertexAttribArray(posHandle);
       if (color.getAlpha() != 1) {
         GLES20.glDisable(GLES20.GL_BLEND);
@@ -202,13 +196,7 @@ public class Graphics {
       this.matrixHandle = GLES20.glGetUniformLocation(programHandle, "uMVPMatrix");
     }
 
-    private void drawStandard(
-        FloatBuffer posBuffer,
-        Color color,
-        int mode,
-        int start,
-        int endClip,
-        float[] transformMatrix) {
+    private void draw(FloatBuffer buffer, Color color, float[] transformMatrix) {
       GLES20.glEnable(GLES20.GL_BLEND);
       GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -216,20 +204,15 @@ public class Graphics {
       GLES20.glUniform4fv(colorHandle, 1, color.value, 0);
       GLES20.glUniformMatrix2fv(matrixHandle, 1, false, transformMatrix, 0);
 
+      buffer.position(0);
+      GLES20.glVertexAttribPointer(posHandle, 2, GLES20.GL_FLOAT, false, 12, buffer);
       GLES20.glEnableVertexAttribArray(posHandle);
-      GLES20.glVertexAttribPointer(posHandle, 2, GLES20.GL_FLOAT, false, 0, posBuffer);
 
-      FloatBuffer alphaBuffer = Graphics.createVertexBuffer(posBuffer.limit());
-      alphaBuffer.put(0);
-      for (int i = 1; i < posBuffer.limit() / 2; i++) {
-        alphaBuffer.put(1);
-      }
-      alphaBuffer.flip();
-
+      buffer.position(2);
+      GLES20.glVertexAttribPointer(alphaHandle, 1, GLES20.GL_FLOAT, false, 12, buffer);
       GLES20.glEnableVertexAttribArray(alphaHandle);
-      GLES20.glVertexAttribPointer(alphaHandle, 1, GLES20.GL_FLOAT, false, 0, alphaBuffer);
 
-      GLES20.glDrawArrays(mode, start, posBuffer.limit() / 2 - endClip);
+      GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, buffer.limit() / 3);
 
       GLES20.glDisableVertexAttribArray(posHandle);
       GLES20.glDisableVertexAttribArray(alphaHandle);
