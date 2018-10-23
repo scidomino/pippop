@@ -11,7 +11,7 @@ import com.pippop.graphics.Graphics;
 
 public class HighlightManager {
 
-  private static final int MAX_GLOW_WIDTH = 20;
+  private static final int MAX_GLOW_WIDTH = 10;
   private static final int TEASER_DELAY_MILLIS = 4000;
   private static final int TEASER_THROB_MILLIS = 1000;
   private final GlowLine glowLine = new GlowLine(1000);
