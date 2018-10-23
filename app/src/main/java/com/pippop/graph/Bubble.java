@@ -99,10 +99,6 @@ public class Bubble implements Iterable<Edge> {
     style.render(graphics, buffer, outline);
   }
 
-  public boolean isDeflating() {
-    return style.getTargetArea() == 0;
-  }
-
   public double getArea() {
     return area;
   }

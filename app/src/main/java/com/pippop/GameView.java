@@ -164,7 +164,7 @@ public class GameView extends GLSurfaceView {
           }
           break;
         case SWAPPING:
-          swap.update(graph, delta);
+          swap.update(delta);
           if (swap.isDone()) {
             spawn.swapDone();
             if (burst.findAndSetBurstableEdges(graph)) {

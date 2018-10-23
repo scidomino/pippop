@@ -11,7 +11,7 @@ import android.widget.TextView;
 public class GameOverActivity extends Activity {
 
   public static final String SCORE_PREF = "Score";
-  public static final String HIGH_SCORE = "High";
+  private static final String HIGH_SCORE = "High";
   public static final String CURRENT_SCORE = "Current";
 
   @Override
@@ -47,7 +47,7 @@ public class GameOverActivity extends Activity {
     }.start();
   }
 
-  public void backToMain(View view) {
+  private void backToMain(View view) {
     startActivity(new Intent(this, MainActivity.class));
   }
 }

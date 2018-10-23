@@ -36,7 +36,7 @@ public class IntroSpawnManager {
 
     Style style1 = new IntroStyle(color1);
     Style style2 = new IntroStyle(color2);
-    graph.reset(style1, style2, 250, 250, angle);
+    graph.reset(style1, style2, 0, 0, angle);
   }
 
   public void update(Graph graph, int delta) {

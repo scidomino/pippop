@@ -52,22 +52,18 @@ public class ScoreManager {
     risingPoints.removeAll(landingPoints);
   }
 
-  public long getScore() {
-    return score;
-  }
-
   public void render(Graphics g) {
     for (RisingPoints flyingPoint : risingPoints) {
       flyingPoint.render(g);
     }
     String scoreString = context.getString(R.string.score, score);
-    g.drawStringOutlined(scoreString, DISPLAY_COLOR, Color.BLACK, 150, 150);
+    g.drawString(scoreString, DISPLAY_COLOR, Color.BLACK, 150, 150);
     if (popChainTimer.getCount() > 1) {
       String chainString = context.getString(R.string.pop_chain, popChainTimer.getCount());
-      g.drawStringOutlined(chainString, DISPLAY_COLOR, Color.BLACK, 0, -150);
+      g.drawString(chainString, DISPLAY_COLOR, Color.BLACK, 0, -150);
     } else if (burstChainTimer.getCount() > 1) {
       String chainString = context.getString(R.string.burst_chain, burstChainTimer.getCount());
-      g.drawStringOutlined(chainString, DISPLAY_COLOR, Color.BLACK, 0, -150);
+      g.drawString(chainString, DISPLAY_COLOR, Color.BLACK, 0, -150);
     }
   }
 
@@ -119,7 +115,7 @@ public class ScoreManager {
 
     void render(Graphics g) {
       float rise = (time / POINT_DISPLAY_TIME) * POINT_MAX_HEIGHT;
-      g.drawStringOutlined(this.text, DISPLAY_COLOR, Color.BLACK, (float) x, y + rise);
+      g.drawString(this.text, DISPLAY_COLOR, Color.BLACK, (float) x, y + rise);
     }
   }
 }

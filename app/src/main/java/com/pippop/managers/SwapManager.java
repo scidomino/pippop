@@ -29,7 +29,7 @@ public class SwapManager {
     return false;
   }
 
-  public void update(Graph graph, int delta) {
+  public void update(int delta) {
     this.pair.move(delta);
     if (this.pair.isDone()) {
       this.pair.switchBubbleProps();

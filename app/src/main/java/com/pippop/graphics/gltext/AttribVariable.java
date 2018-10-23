@@ -6,8 +6,8 @@ public enum AttribVariable {
   A_TexCoordinate(2, "a_TexCoordinate"),
   A_MVPMatrixIndex(3, "a_MVPMatrixIndex");
 
-  private int mHandle;
-  private String mName;
+  private final int mHandle;
+  private final String mName;
 
   AttribVariable(int handle, String name) {
     mHandle = handle;

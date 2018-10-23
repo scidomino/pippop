@@ -6,7 +6,7 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
-public class Vertices {
+class Vertices {
 
   // --Constants--//
   private static final int POSITION_CNT_2D = 2; // Number of Components in Vertex Color
@@ -20,7 +20,7 @@ public class Vertices {
   private final ShortBuffer indices;
   private final int[] tmpBuffer;
 
-  private int mTextureCoordinateHandle;
+  private final int mTextureCoordinateHandle;
   private int mPositionHandle;
   private int mMVPIndexHandle;
 

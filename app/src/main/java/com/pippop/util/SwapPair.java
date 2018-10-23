@@ -74,10 +74,6 @@ public class SwapPair {
     return this.top;
   }
 
-  public Bubble getBottom() {
-    return this.bottom;
-  }
-
   private void renderSwapSide(
       Graphics g, Point center, Bubble startBubble, Bubble endBubble, Style style) {
     rotate(center, Math.PI * rotation, startBubble.getBuffer(), morphedStart);

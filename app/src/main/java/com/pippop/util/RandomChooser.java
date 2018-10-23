@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 public class RandomChooser<T> {
 
@@ -47,5 +48,9 @@ public class RandomChooser<T> {
 
   public int getSize() {
     return map.size();
+  }
+
+  public Set<T> getAll() {
+    return map.keySet();
   }
 }

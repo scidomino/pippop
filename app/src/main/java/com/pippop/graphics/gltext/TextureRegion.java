@@ -3,8 +3,10 @@ package com.pippop.graphics.gltext;
 class TextureRegion {
 
   // --Members--//
-  float u1, v1; // Top/Left U,V Coordinates
-  float u2, v2; // Bottom/Right U,V Coordinates
+  final float u1;
+  final float v1; // Top/Left U,V Coordinates
+  final float u2;
+  final float v2; // Bottom/Right U,V Coordinates
 
   // --Constructor--//
   // D: calculate U,V coordinates from specified texture coordinates
