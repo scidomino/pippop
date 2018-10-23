@@ -196,6 +196,11 @@ public class Edge {
     Point ec = getEndCtrl();
     Point e = getEnd();
 
+    //    buffer.put(s.x).put(s.y);
+    //    buffer.put(sc.x).put(sc.y);
+    //    buffer.put(ec.x).put(ec.y);
+    //    buffer.put(e.x).put(e.y);
+
     flatten(buffer, s.x, s.y, sc.x, sc.y, ec.x, ec.y, e.x, e.y);
   }
 
@@ -219,6 +224,18 @@ public class Edge {
     float d3 = Math.abs(((x3 - x4) * dy - (y3 - y4) * dx));
 
     if ((d2 + d3) * (d2 + d3) < FLATNESS * (dx * dx + dy * dy)) {
+      if (buffer.position() > 2) {
+        float px = buffer.get(buffer.position() - 2);
+        float py = buffer.get(buffer.position() - 1);
+
+        Point c = bubble.getCenter();
+
+        if ((c.y - py) * (x1 - c.x) - (y1 - c.y) * (c.x - px) > 0) {
+          // this triangle would be backwards and cause overdraw on the next triangle.
+          return;
+        }
+      }
+
       buffer.put(x1).put(y1);
       return;
     }
