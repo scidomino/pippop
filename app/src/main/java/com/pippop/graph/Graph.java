@@ -2,6 +2,7 @@ package com.pippop.graph;
 
 import com.pippop.graphics.Graphics;
 import com.pippop.physics.PhysicsModel;
+import com.pippop.style.PlayerStyle;
 import com.pippop.style.Style;
 import java.util.ArrayList;
 import java.util.List;
@@ -132,6 +133,15 @@ public class Graph {
 
   public OpenAir getOpenAir() {
     return (OpenAir) this.bubbles.get(0);
+  }
+
+  public Bubble getPlayerBubble() {
+    for (Bubble bubble : bubbles) {
+      if (bubble.getStyle() instanceof PlayerStyle) {
+        return bubble;
+      }
+    }
+    return null;
   }
 
   public void reset(Style style1, Style style2, int x, int y, double angle) {

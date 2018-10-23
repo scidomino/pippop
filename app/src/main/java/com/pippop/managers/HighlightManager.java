@@ -8,8 +8,6 @@ import com.pippop.graph.Point;
 import com.pippop.graphics.Color;
 import com.pippop.graphics.GlowLine;
 import com.pippop.graphics.Graphics;
-import com.pippop.style.PlayerStyle;
-import java.util.List;
 
 public class HighlightManager {
 
@@ -28,7 +26,8 @@ public class HighlightManager {
     if (point == null) {
       return null;
     }
-    Bubble playerBubble = findPlayerBubble(graph.getBubbles());
+
+    Bubble playerBubble = graph.getPlayerBubble();
     Edge edge = closestEdge(playerBubble, point);
     if (edge == null) {
       return null;
@@ -40,27 +39,14 @@ public class HighlightManager {
     return bubble;
   }
 
-  private Bubble findPlayerBubble(List<Bubble> bubbles) {
-    for (Bubble bubble : bubbles) {
-      if (bubble.getStyle() instanceof PlayerStyle) {
-        return bubble;
+  private Edge closestEdge(Bubble playerBubble, Point point) {
+    for (Edge edge : playerBubble) {
+      Bubble bubble = edge.getTwin().getBubble();
+      if (bubble.contains(point) && !(bubble instanceof OpenAir)) {
+        return edge;
       }
     }
-    throw new IllegalStateException("No player bubble!");
-  }
-
-  private Edge closestEdge(Bubble bubble, Point point) {
-    double minDistance = 10000;
-    Edge closest = null;
-    for (Edge edge : bubble) {
-      Point center = edge.getCenter();
-      double distance = Math.hypot(point.x - center.x, point.y - center.y);
-      if (distance < minDistance) {
-        closest = edge;
-        minDistance = distance;
-      }
-    }
-    return closest;
+    return null;
   }
 
   public void setPoint(Point point) {
