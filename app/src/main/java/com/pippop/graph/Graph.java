@@ -110,18 +110,6 @@ public class Graph {
     return physicsModel;
   }
 
-  public Edge getEdge(Point point) {
-    Bubble bubble = getBubble(point);
-    if (bubble == null) {
-      return null;
-    }
-    Edge edge = bubble.getCorrespondingEdge(point);
-    if (edge == null) {
-      return null;
-    }
-    return edge;
-  }
-
   public Bubble getBubble(Point point) {
     for (Bubble bubble : bubbles) {
       if (bubble.contains(point)) {

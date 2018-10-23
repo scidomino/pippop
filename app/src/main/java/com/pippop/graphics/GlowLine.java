@@ -7,7 +7,7 @@ import java.nio.FloatBuffer;
 
 public class GlowLine {
 
-  // Each point is 3 float values: {x,y, alpha}
+  // Each point is 3 float values: {x,y, alphaMultiplier}
   private final FloatBuffer buffer;
   private final FloatBuffer temp;
 
@@ -111,7 +111,7 @@ public class GlowLine {
     buffer.flip();
   }
 
-  public void update(Bubble bubble) {
+  public void update(Bubble bubble, float width) {
     buffer.clear();
     temp.clear();
     Point center = bubble.getCenter();
@@ -126,8 +126,14 @@ public class GlowLine {
     for (int i = 0; i < temp.limit() - 2; i += 2) {
       float x = temp.get(i);
       float y = temp.get(i + 1);
+      float dx = x - center.x;
+      float dy = y - center.y;
+      float hypot = (float) (width / Math.hypot(dx, dy));
+
+      dx *= hypot;
+      dy *= hypot;
       buffer.put(x).put(y).put(1);
-      buffer.put(center.x).put(center.y).put(0);
+      buffer.put(x + dx).put(y + dy).put(0);
     }
     buffer.flip();
   }

@@ -39,14 +39,6 @@ public class Bubble implements Iterable<Edge> {
     update();
   }
 
-  private static boolean isBelow(Point start, Point end, Point point) {
-    float endX = end.x - start.x;
-    float endY = end.y - start.y;
-    float pointX = point.x - start.x;
-    float pointY = point.y - start.y;
-    return endX * pointY < endY * pointX;
-  }
-
   private static boolean intersects(float x1, float y1, float x2, float y2, float x, float y) {
     if (y1 > y2) {
       return intersects(x2, y2, x1, y1, x, y);
@@ -197,19 +189,6 @@ public class Bubble implements Iterable<Edge> {
       }
     }
     return count == 1;
-  }
-
-  public Edge getCorrespondingEdge(Point point) {
-    Point center = getCenter();
-    boolean prevBelow = isBelow(center, firstEdge.getStart(), point);
-    for (Edge edge : this) {
-      boolean below = isBelow(center, edge.getEnd(), point);
-      if (prevBelow && !below) {
-        return edge;
-      }
-      prevBelow = below;
-    }
-    return null;
   }
 
   @Override

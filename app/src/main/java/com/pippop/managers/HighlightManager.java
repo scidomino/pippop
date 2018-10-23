@@ -25,7 +25,7 @@ public class HighlightManager {
     if (point != null) {
       Bubble bubble = closestSwappable(graph, point);
       if (bubble != null) {
-        glowLine.update(bubble);
+        glowLine.update(bubble, 10);
         g.drawLine(glowLine, Color.WHITE);
       }
     } else if (time % TEASER_DELAY > TEASER_DELAY / 2) {
@@ -33,8 +33,8 @@ public class HighlightManager {
       for (Edge edge : graph.getPlayerBubble()) {
         Bubble bubble = edge.getTwin().getBubble();
         if (!(bubble instanceof OpenAir)) {
-          glowLine.update(bubble);
-          g.drawLine(glowLine, Color.WHITE.withAlpha(ratio));
+          glowLine.update(bubble, 20 * ratio);
+          g.drawLine(glowLine, Color.WHITE);
         }
       }
     }
