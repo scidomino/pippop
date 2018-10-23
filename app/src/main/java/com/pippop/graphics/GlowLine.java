@@ -12,7 +12,7 @@ public class GlowLine {
   private final FloatBuffer temp;
 
   public GlowLine() {
-    this(100);
+    this(300);
   }
 
   public GlowLine(int size) {
@@ -45,7 +45,6 @@ public class GlowLine {
     }
 
     // top length
-
     double px = start.x;
     double py = start.y;
     for (int i = 2; i < temp.limit() - 2; i += 2) {

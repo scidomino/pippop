@@ -11,24 +11,37 @@ import com.pippop.graphics.Graphics;
 
 public class HighlightManager {
 
+  private static final int TEASER_DELAY = 4000;
+  private static final int TEASER_THROB_TIME = 1000;
   private final GlowLine glowLine = new GlowLine(1000);
   private Point point;
+  private int time;
+
+  public void update(int delta) {
+    this.time += delta;
+  }
 
   public void render(Graph graph, Graphics g) {
-    Bubble bubble = closestSwappable(graph);
-    if (bubble != null) {
-      glowLine.update(bubble);
-      g.drawLine(glowLine, Color.WHITE);
+    if (point != null) {
+      Bubble bubble = closestSwappable(graph, point);
+      if (bubble != null) {
+        glowLine.update(bubble);
+        g.drawLine(glowLine, Color.WHITE);
+      }
+    } else if (time % TEASER_DELAY > TEASER_DELAY / 2) {
+      float ratio = (float) Math.pow(Math.sin(time * 2 * Math.PI / TEASER_THROB_TIME), 2);
+      for (Edge edge : graph.getPlayerBubble()) {
+        Bubble bubble = edge.getTwin().getBubble();
+        if (!(bubble instanceof OpenAir)) {
+          glowLine.update(bubble);
+          g.drawLine(glowLine, Color.WHITE.withAlpha(ratio));
+        }
+      }
     }
   }
 
-  private Bubble closestSwappable(Graph graph) {
-    if (point == null) {
-      return null;
-    }
-
-    Bubble playerBubble = graph.getPlayerBubble();
-    Edge edge = closestEdge(playerBubble, point);
+  private Bubble closestSwappable(Graph graph, Point point) {
+    Edge edge = closestEdge(graph.getPlayerBubble(), point);
     if (edge == null) {
       return null;
     }
@@ -51,5 +64,6 @@ public class HighlightManager {
 
   public void setPoint(Point point) {
     this.point = point;
+    this.time = 0;
   }
 }

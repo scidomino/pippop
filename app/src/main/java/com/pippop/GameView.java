@@ -134,6 +134,7 @@ public class GameView extends GLSurfaceView {
         case NORMAL:
           slide.slideSlidableEdges(graph, delta);
           spawn.possiblySpawn(graph);
+          highlight.update(delta);
 
           if (pop.deflateBigBubble(graph)) {
             state = State.POPPING;
