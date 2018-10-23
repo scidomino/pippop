@@ -11,8 +11,9 @@ import com.pippop.graphics.Graphics;
 
 public class HighlightManager {
 
-  private static final int TEASER_DELAY = 4000;
-  private static final int TEASER_THROB_TIME = 1000;
+  private static final int MAX_GLOW_WIDTH = 20;
+  private static final int TEASER_DELAY_MILLIS = 4000;
+  private static final int TEASER_THROB_MILLIS = 1000;
   private final GlowLine glowLine = new GlowLine(1000);
   private Point point;
   private int time;
@@ -25,19 +26,22 @@ public class HighlightManager {
     if (point != null) {
       Bubble bubble = closestSwappable(graph, point);
       if (bubble != null) {
-        glowLine.update(bubble, 10);
-        g.drawLine(glowLine, Color.WHITE);
+        glowBubble(g, bubble, 1);
       }
-    } else if (time % TEASER_DELAY > TEASER_DELAY / 2) {
-      float ratio = (float) Math.pow(Math.sin(time * 2 * Math.PI / TEASER_THROB_TIME), 2);
+    } else if (time % TEASER_DELAY_MILLIS > TEASER_DELAY_MILLIS / 2) {
+      float ratio = (float) Math.pow(Math.sin(time * 2 * Math.PI / TEASER_THROB_MILLIS), 2);
       for (Edge edge : graph.getPlayerBubble()) {
         Bubble bubble = edge.getTwin().getBubble();
         if (!(bubble instanceof OpenAir)) {
-          glowLine.update(bubble, 20 * ratio);
-          g.drawLine(glowLine, Color.WHITE);
+          glowBubble(g, bubble, ratio);
         }
       }
     }
+  }
+
+  private void glowBubble(Graphics g, Bubble bubble, float intensityRatio) {
+    glowLine.update(bubble, intensityRatio * MAX_GLOW_WIDTH);
+    g.drawLine(glowLine, Color.WHITE);
   }
 
   private Bubble closestSwappable(Graph graph, Point point) {

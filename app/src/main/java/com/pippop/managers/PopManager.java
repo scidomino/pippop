@@ -22,8 +22,8 @@ import java.util.Set;
 
 public class PopManager {
 
-  private static final int FREEZE_MILLISECONDS = 500;
-  private static final int UNOTICEABLE_SIZE = 10;
+  private static final int POPPING_TIME_MILLIS = 500;
+  private static final int UNOTICEABLE_AREA = 10;
 
   private final List<Bubble> deflating = new ArrayList<>();
   private final MediaPlayer sound;
@@ -43,7 +43,7 @@ public class PopManager {
       if (bubble.getStyle() instanceof GameStyle) {
         GameStyle gameStyle = (GameStyle) bubble.getStyle();
         if (gameStyle.isPoppable()) {
-          pendingTime = FREEZE_MILLISECONDS;
+          pendingTime = POPPING_TIME_MILLIS;
           pending = bubble;
           this.pendingStyle = gameStyle;
           pending.setStyle(new EmptyStyle(this.pendingStyle.getTargetArea()));
@@ -69,7 +69,7 @@ public class PopManager {
             break;
           }
         }
-      } else if (bubble.getArea() < UNOTICEABLE_SIZE) {
+      } else if (bubble.getArea() < UNOTICEABLE_AREA) {
         for (Edge edge : bubble) {
           Bubble other = edge.getTwin().getBubble();
           if (bubble.sharesExactlyOneEdge(other)) {
@@ -111,7 +111,7 @@ public class PopManager {
     double radius = 5 * (Math.sqrt(pendingStyle.getTargetArea() / Math.PI));
 
     // closer to 0 closer to full circle
-    float morphRatio = (float) Math.pow(pendingTime / (float) FREEZE_MILLISECONDS, 2);
+    float morphRatio = (float) Math.pow(pendingTime / (float) POPPING_TIME_MILLIS, 2);
     updatePopShape(radius, morphRatio);
 
     Color color = pendingStyle.getColor().withAlpha((1 + morphRatio) / 2);
