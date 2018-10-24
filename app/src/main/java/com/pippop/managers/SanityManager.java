@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class SanityManager {
+public class SanityManager {
 
   public void sanityCheck(Graph graph) {
     Set<Vertex> vertices = new HashSet<>();

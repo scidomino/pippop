@@ -1,7 +1,9 @@
 package com.pippop.graph;
 
+import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
 import com.pippop.physics.PhysicsModel;
+import com.pippop.style.GameStyle;
 import com.pippop.style.PlayerStyle;
 import com.pippop.style.Style;
 import java.util.ArrayList;
@@ -161,8 +163,79 @@ public class Graph {
     addBothSides(edge3);
 
     bubbles.add(new OpenAir(edge1.getTwin()));
-    bubbles.add(new Bubble(style1, edge1, Graphics.createVertexBuffer(1000)));
-    bubbles.add(new Bubble(style2, middleEdge, Graphics.createVertexBuffer(1000)));
+    bubbles.add(new Bubble(style1, edge1));
+    bubbles.add(new Bubble(style2, middleEdge));
+
+    isModelDirty = true;
+  }
+
+  public void reset(List<Color> colors) {
+    bubbles.clear();
+    edges.clear();
+    vertices.clear();
+
+    int distance = 20;
+
+    List<Edge> openAirEdges = new ArrayList<>();
+    List<Edge> playerEdges = new ArrayList<>();
+
+    Edge firstMiddleEdge = new Edge(new Vertex(2 * distance, 0), new Vertex(distance, 0));
+    addBothSides(firstMiddleEdge);
+    vertices.add(firstMiddleEdge.getStart());
+    vertices.add(firstMiddleEdge.getEnd());
+
+    Edge prevEdge = firstMiddleEdge.getTwin();
+    for (int i = 1; i < colors.size(); i++) {
+      double ratio = -(i * 2 * Math.PI / colors.size());
+
+      float x = (float) (distance * Math.cos(ratio));
+      float y = (float) (distance * Math.sin(ratio));
+
+      Edge middleEdge = new Edge(new Vertex(2 * x, 2 * y), new Vertex(x, y));
+      Edge outerEdge = new Edge(prevEdge.getEnd(), middleEdge.getStart());
+      Edge innerEdge = new Edge(middleEdge.getEnd(), prevEdge.getStart());
+      addBothSides(outerEdge);
+      addBothSides(middleEdge);
+      addBothSides(innerEdge);
+      vertices.add(middleEdge.getStart());
+      vertices.add(middleEdge.getEnd());
+
+      prevEdge.setNext(outerEdge);
+      outerEdge.setNext(middleEdge);
+      middleEdge.setNext(innerEdge);
+      innerEdge.setNext(prevEdge);
+
+      bubbles.add(new Bubble(new GameStyle(1, colors.get(i)), innerEdge));
+
+      openAirEdges.add(0, outerEdge.getTwin());
+      playerEdges.add(innerEdge.getTwin());
+      prevEdge = middleEdge.getTwin();
+    }
+
+    Edge outerEdge = new Edge(prevEdge.getEnd(), firstMiddleEdge.getStart());
+    Edge innerEdge = new Edge(firstMiddleEdge.getEnd(), prevEdge.getStart());
+    addBothSides(outerEdge);
+    addBothSides(innerEdge);
+
+    prevEdge.setNext(outerEdge);
+    outerEdge.setNext(firstMiddleEdge);
+    firstMiddleEdge.setNext(innerEdge);
+    innerEdge.setNext(prevEdge);
+
+    bubbles.add(new Bubble(new GameStyle(1, colors.get(0)), innerEdge));
+
+    openAirEdges.add(outerEdge.getTwin());
+    playerEdges.add(innerEdge.getTwin());
+
+    for (int i = 0; i < playerEdges.size() - 1; i++) {
+      playerEdges.get(i).setNext(playerEdges.get(i + 1));
+      openAirEdges.get(i).setNext(openAirEdges.get(i + 1));
+    }
+    playerEdges.get(playerEdges.size() - 1).setNext(playerEdges.get(0));
+    openAirEdges.get(openAirEdges.size() - 1).setNext(openAirEdges.get(0));
+
+    bubbles.add(new Bubble(new PlayerStyle(1, Color.TRANSPARENT_WHITE), playerEdges.get(0)));
+    bubbles.add(0, new OpenAir(openAirEdges.get(0)));
 
     isModelDirty = true;
   }
