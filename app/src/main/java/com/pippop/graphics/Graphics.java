@@ -1,7 +1,9 @@
 package com.pippop.graphics;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.opengl.GLES20;
+import android.support.v4.content.res.ResourcesCompat;
 import android.view.MotionEvent;
 import com.pippop.R;
 import com.pippop.graph.Point;
@@ -29,8 +31,9 @@ public class Graphics {
     this.standardProgram = new StandardProgram(context);
     this.glowProgram = new GlowProgram(context);
 
-    glText = new GLText(context, R.font.sniglet_extrabold, 30, 2, 2, false);
-    glTextOutline = new GLText(context, R.font.sniglet_extrabold, 30, 2, 2, true);
+    Typeface font = ResourcesCompat.getFont(context, R.font.sniglet_extrabold);
+    glText = new GLText(font, 30, 2, 2, false);
+    glTextOutline = new GLText(font, 30, 2, 2, true);
   }
 
   private static int loadProgram(Context context, int fragmentShader, int vertexShader) {
