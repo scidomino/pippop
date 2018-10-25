@@ -4,7 +4,7 @@ import android.opengl.GLES20;
 import android.opengl.Matrix;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 class SpriteBatch {
@@ -14,11 +14,9 @@ class SpriteBatch {
   private static final int VERTICES_PER_SPRITE = 4; // Vertices Per Sprite
   private static final int INDICES_PER_SPRITE = 6; // Indices Per Sprite
   private static final int INDEX_SIZE = Short.SIZE / 8; // Index Byte Size (Short.SIZE = bits)
-  private final IntBuffer vertices;
+  private final FloatBuffer vertices;
   // --Members--//
   private Vertices oldVertex; // Vertices Instance Used for Rendering
-  private float[] vertexBuffer; // Vertex Buffer
-  private int bufferIndex; // Vertex Buffer Start Index
   private int maxSprites; // Maximum Sprites Allowed in Buffer
   private int numSprites; // Number of Sprites Currently in Buffer
   private float[] mVPMatrix; // View and projection matrix specified at begin
@@ -32,107 +30,72 @@ class SpriteBatch {
   // A: maxSprites - the maximum allowed sprites per batch
   //    program - program to use when drawing
   SpriteBatch(int maxSprites, int program) {
-    this.vertexBuffer = new float[maxSprites * VERTICES_PER_SPRITE * VERTEX_SIZE];
+    this.maxSprites = maxSprites;
+    this.numSprites = 0;
 
     this.vertices =
-        ByteBuffer.allocateDirect(maxSprites * VERTICES_PER_SPRITE * VERTEX_SIZE)
+        ByteBuffer.allocateDirect(maxSprites * VERTICES_PER_SPRITE * VERTEX_SIZE * 4)
             .order(ByteOrder.nativeOrder())
-            .asIntBuffer();
+            .asFloatBuffer();
+    ShortBuffer indices = getIndices(maxSprites);
 
-    this.bufferIndex = 0; // Reset Buffer Index
-    this.maxSprites = maxSprites; // Save Maximum Sprites
-    this.numSprites = 0; // Clear Sprite Counter
-
-    ShortBuffer indices =
-        ByteBuffer.allocateDirect(maxSprites * INDICES_PER_SPRITE * INDEX_SIZE)
-            .order(ByteOrder.nativeOrder())
-            .asShortBuffer();
-    for (int i = 0; i < maxSprites; i++) {
-      int j = i * VERTICES_PER_SPRITE;
-      indices.put((short) j);
-      indices.put((short) (j + 1));
-      indices.put((short) (j + 2));
-      indices.put((short) (j + 2));
-      indices.put((short) (j + 3));
-      indices.put((short) j);
-    }
-    indices.flip();
-
-    this.oldVertex = new Vertices(maxSprites * VERTICES_PER_SPRITE, indices);
+    this.oldVertex = new Vertices(indices);
 
     mMVPMatricesHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix");
   }
 
+  private ShortBuffer getIndices(int maxSprites) {
+    ShortBuffer indices =
+        ByteBuffer.allocateDirect(maxSprites * INDICES_PER_SPRITE * INDEX_SIZE)
+            .order(ByteOrder.nativeOrder())
+            .asShortBuffer();
+    for (int i = 0; i < maxSprites; i += VERTICES_PER_SPRITE) {
+      indices.put((short) i);
+      indices.put((short) (i + 1));
+      indices.put((short) (i + 2));
+      indices.put((short) (i + 2));
+      indices.put((short) (i + 3));
+      indices.put((short) i);
+    }
+    indices.flip();
+    return indices;
+  }
+
   void beginBatch(float[] vpMatrix) {
     numSprites = 0; // Empty Sprite Counter
-    bufferIndex = 0; // Reset Buffer Index (Empty)
     mVPMatrix = vpMatrix;
   }
 
-  // --End Batch--//
-  // D: signal the end of a batch. render the batched sprites
-  // A: [none]
-  // R: [none]
   void endBatch() {
     if (numSprites > 0) {
       GLES20.glUniformMatrix4fv(mMVPMatricesHandle, numSprites, false, uMVPMatrices, 0);
       GLES20.glEnableVertexAttribArray(mMVPMatricesHandle);
-      oldVertex.setVertices(vertexBuffer, bufferIndex);
-      oldVertex.bind();
+      vertices.flip();
+      oldVertex.bind(vertices);
       oldVertex.draw(GLES20.GL_TRIANGLES, 0, numSprites * INDICES_PER_SPRITE);
       oldVertex.unbind();
+      vertices.clear();
     }
   }
 
-  // --Draw Sprite to Batch--//
-  // D: batch specified sprite to batch. adds oldVertex for sprite to vertex buffer
-  //    NOTE: MUST be called after beginBatch(), and before endBatch()!
-  //    NOTE: if the batch overflows, this will render the current batch, restart it,
-  //          and then batch this sprite.
-  // A: x, y - the x,y position of the sprite (center)
-  //    width, height - the width and height of the sprite
-  //    region - the texture region to use for sprite
-  //    modelMatrix - the model matrix to assign to the sprite
-  // R: [none]
   void drawSprite(
       float x, float y, float width, float height, TextureRegion region, float[] modelMatrix) {
-    if (numSprites == maxSprites) { // IF Sprite Buffer is Full
-      endBatch(); // End Batch
-      // NOTE: leave current texture bound!!
-      numSprites = 0; // Empty Sprite Counter
-      bufferIndex = 0; // Reset Buffer Index (Empty)
+    if (numSprites == maxSprites) {
+      endBatch();
+      numSprites = 0;
     }
 
-    float halfWidth = width / 2.0f; // Calculate Half Width
-    float halfHeight = height / 2.0f; // Calculate Half Height
-    float x1 = x - halfWidth; // Calculate Left X
-    float y1 = y - halfHeight; // Calculate Bottom Y
-    float x2 = x + halfWidth; // Calculate Right X
-    float y2 = y + halfHeight; // Calculate Top Y
+    float halfWidth = width / 2.0f;
+    float halfHeight = height / 2.0f;
+    float x1 = x - halfWidth;
+    float y1 = y - halfHeight;
+    float x2 = x + halfWidth;
+    float y2 = y + halfHeight;
 
-    vertexBuffer[bufferIndex++] = x1; // Add X for Vertex 0
-    vertexBuffer[bufferIndex++] = y1; // Add Y for Vertex 0
-    vertexBuffer[bufferIndex++] = region.u1; // Add U for Vertex 0
-    vertexBuffer[bufferIndex++] = region.v2; // Add V for Vertex 0
-    vertexBuffer[bufferIndex++] = numSprites;
-
-    vertexBuffer[bufferIndex++] = x2; // Add X for Vertex 1
-    vertexBuffer[bufferIndex++] = y1; // Add Y for Vertex 1
-    vertexBuffer[bufferIndex++] = region.u2; // Add U for Vertex 1
-    vertexBuffer[bufferIndex++] = region.v2; // Add V for Vertex 1
-    vertexBuffer[bufferIndex++] = numSprites;
-
-    vertexBuffer[bufferIndex++] = x2; // Add X for Vertex 2
-    vertexBuffer[bufferIndex++] = y2; // Add Y for Vertex 2
-    vertexBuffer[bufferIndex++] = region.u2; // Add U for Vertex 2
-    vertexBuffer[bufferIndex++] = region.v1; // Add V for Vertex 2
-    vertexBuffer[bufferIndex++] = numSprites;
-
-    vertexBuffer[bufferIndex++] = x1; // Add X for Vertex 3
-    vertexBuffer[bufferIndex++] = y2; // Add Y for Vertex 3
-    vertexBuffer[bufferIndex++] = region.u1; // Add U for Vertex 3
-    vertexBuffer[bufferIndex++] = region.v1; // Add V for Vertex 3
-    vertexBuffer[bufferIndex++] = numSprites;
+    vertices.put(x1).put(y1).put(region.u1).put(region.v2).put(numSprites);
+    vertices.put(x2).put(y1).put(region.u2).put(region.v2).put(numSprites);
+    vertices.put(x2).put(y2).put(region.u2).put(region.v1).put(numSprites);
+    vertices.put(x1).put(y2).put(region.u1).put(region.v1).put(numSprites);
 
     Matrix.multiplyMM(mMVPMatrix, 0, mVPMatrix, 0, modelMatrix, 0);
     System.arraycopy(mMVPMatrix, 0, uMVPMatrices, numSprites * 16, 16);

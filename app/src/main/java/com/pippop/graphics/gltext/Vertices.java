@@ -1,8 +1,6 @@
 package com.pippop.graphics.gltext;
 
 import android.opengl.GLES20;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
@@ -16,7 +14,6 @@ class Vertices {
   private static final int VERTEX_SIZE =
       (POSITION_CNT_2D + TEXCOORD_CNT + MVP_MATRIX_INDEX_CNT) * 4;
 
-  private final FloatBuffer vertices;
   private final ShortBuffer indices;
 
   private final int mTextureCoordinateHandle;
@@ -27,12 +24,7 @@ class Vertices {
   // D: create the vertices/indices as specified (for 2d/3d)
   // A: maxVertices - maximum vertices allowed in buffer
   //    maxIndices - maximum indices allowed in buffer
-  Vertices(int maxVertices, ShortBuffer indices) {
-    this.vertices =
-        ByteBuffer.allocateDirect(maxVertices * VERTEX_SIZE)
-            .order(ByteOrder.nativeOrder())
-            .asFloatBuffer();
-
+  Vertices(ShortBuffer indices) {
     this.indices = indices;
 
     mTextureCoordinateHandle = AttribVariable.A_TexCoordinate.getHandle();
@@ -40,26 +32,12 @@ class Vertices {
     mPositionHandle = AttribVariable.A_Position.getHandle();
   }
 
-  // --Set Vertices--//
-  // D: set the specified vertices in the vertex buffer
-  //    NOTE: optimized to use integer buffer!
-  // A: vertices - array of vertices (floats) to set
-  //    offset - offset to first vertex in array
-  //    length - number of floats in the vertex array (total)
-  //             for easy setting use: vtx_cnt * (this.VERTEX_SIZE / 4)
-  // R: [none]
-  void setVertices(float[] vertices, int length) {
-    this.vertices.clear();
-    this.vertices.put(vertices, 0, length);
-    this.vertices.flip();
-  }
-
   // --Bind--//
   // D: perform all required binding/state changes before rendering batches.
   //    USAGE: call once before calling draw() multiple times for this buffer.
   // A: [none]
   // R: [none]
-  void bind() {
+  void bind(FloatBuffer vertices) {
     // bind vertex position pointer
     vertices.position(0); // Set Vertex Buffer to Position
     GLES20.glVertexAttribPointer(
