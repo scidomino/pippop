@@ -92,6 +92,28 @@ public class Graph {
     return new Point(x, y);
   }
 
+  public Edge getClosestSwappable(Point point) {
+    Bubble playerBubble = getPlayerBubble();
+    float minDistance = Float.MAX_VALUE;
+    Edge closestEdge = null;
+    for (Edge edge : playerBubble) {
+      Bubble bubble = edge.getTwin().getBubble();
+      if (!(bubble.getStyle() instanceof GameStyle)) {
+        continue;
+      }
+      float distance = distance(bubble.getCenter(), point);
+      if (distance < minDistance) {
+        closestEdge = edge.getTwin();
+        minDistance = distance;
+      }
+    }
+    return closestEdge;
+  }
+
+  private float distance(Point a, Point b) {
+    return (float) Math.hypot(a.x - b.x, a.y - b.y);
+  }
+
   public List<Vertex> getVertices() {
     return vertices;
   }
@@ -110,15 +132,6 @@ public class Graph {
       isModelDirty = false;
     }
     return physicsModel;
-  }
-
-  public Bubble getBubble(Point point) {
-    for (Bubble bubble : bubbles) {
-      if (bubble.contains(point)) {
-        return bubble;
-      }
-    }
-    return null;
   }
 
   public OpenAir getOpenAir() {

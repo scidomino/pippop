@@ -24,7 +24,7 @@ public class HighlightManager {
 
   public void render(Graph graph, Graphics g) {
     if (point != null) {
-      Bubble bubble = closestSwappable(graph, point);
+      Bubble bubble = graph.getClosestSwappable(point).getBubble();
       if (bubble != null) {
         glowBubble(g, bubble, 1);
       }
@@ -42,28 +42,6 @@ public class HighlightManager {
   private void glowBubble(Graphics g, Bubble bubble, float intensityRatio) {
     glowLine.update(bubble, intensityRatio * MAX_GLOW_WIDTH);
     g.drawLine(glowLine, Color.WHITE);
-  }
-
-  private Bubble closestSwappable(Graph graph, Point point) {
-    Edge edge = closestEdge(graph.getPlayerBubble(), point);
-    if (edge == null) {
-      return null;
-    }
-    Bubble bubble = edge.getTwin().getBubble();
-    if (bubble instanceof OpenAir) {
-      return null;
-    }
-    return bubble;
-  }
-
-  private Edge closestEdge(Bubble playerBubble, Point point) {
-    for (Edge edge : playerBubble) {
-      Bubble bubble = edge.getTwin().getBubble();
-      if (bubble.contains(point) && !(bubble instanceof OpenAir)) {
-        return edge;
-      }
-    }
-    return null;
   }
 
   public void setPoint(Point point) {

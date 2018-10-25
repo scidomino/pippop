@@ -5,7 +5,6 @@ import com.pippop.graph.Edge;
 import com.pippop.graph.Graph;
 import com.pippop.graph.Point;
 import com.pippop.graphics.Graphics;
-import com.pippop.style.PlayerStyle;
 import com.pippop.util.SwapPair;
 
 public class SwapManager {
@@ -15,16 +14,15 @@ public class SwapManager {
   public SwapManager() {}
 
   public boolean swap(Graph graph, Point point) {
-    Bubble bubble = graph.getBubble(point);
-    if (bubble == null) {
+    Bubble playerBubble = graph.getPlayerBubble();
+    if (playerBubble.contains(point)) {
       return false;
     }
-    for (Edge edge : bubble) {
-      if (edge.getTwin().getBubble().getStyle() instanceof PlayerStyle) {
 
-        this.pair = new SwapPair(edge, false);
-        return true;
-      }
+    Edge edge = graph.getClosestSwappable(point);
+    if (edge != null) {
+      this.pair = new SwapPair(edge, false);
+      return true;
     }
     return false;
   }

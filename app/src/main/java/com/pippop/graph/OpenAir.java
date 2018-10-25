@@ -14,7 +14,4 @@ public class OpenAir extends Bubble {
     return -1;
   }
 
-  public boolean contains(Point p) {
-    return false;
-  }
 }
