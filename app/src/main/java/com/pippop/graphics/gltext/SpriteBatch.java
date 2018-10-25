@@ -72,7 +72,7 @@ class SpriteBatch {
       GLES20.glEnableVertexAttribArray(mMVPMatricesHandle);
       vertices.flip();
       oldVertex.bind(vertices);
-      oldVertex.draw(GLES20.GL_TRIANGLES, 0, numSprites * INDICES_PER_SPRITE);
+      oldVertex.draw(numSprites * INDICES_PER_SPRITE);
       oldVertex.unbind();
       vertices.clear();
     }
