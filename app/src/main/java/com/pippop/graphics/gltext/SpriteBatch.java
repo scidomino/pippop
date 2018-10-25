@@ -9,26 +9,20 @@ import java.nio.ShortBuffer;
 
 class SpriteBatch {
 
-  // --Constants--//
   private static final int VERTEX_SIZE = 5;
-  private static final int VERTICES_PER_SPRITE = 4; // Vertices Per Sprite
-  private static final int INDICES_PER_SPRITE = 6; // Indices Per Sprite
-  private static final int INDEX_SIZE = Short.SIZE / 8; // Index Byte Size (Short.SIZE = bits)
+  private static final int VERTICES_PER_SPRITE = 4;
+  private static final int INDICES_PER_SPRITE = 6;
+  private static final int INDEX_SIZE = Short.SIZE / 8;
   private final FloatBuffer vertices;
-  // --Members--//
-  private Vertices oldVertex; // Vertices Instance Used for Rendering
-  private int maxSprites; // Maximum Sprites Allowed in Buffer
-  private int numSprites; // Number of Sprites Currently in Buffer
-  private float[] mVPMatrix; // View and projection matrix specified at begin
-  private float[] uMVPMatrices =
-      new float[GLText.CHAR_BATCH_SIZE * 16]; // MVP matrix array to pass to shader
-  private int mMVPMatricesHandle; // shader handle of the MVP matrix array
-  private float[] mMVPMatrix = new float[16]; // used to calculate MVP matrix of each sprite
 
-  // --Constructor--//
-  // D: prepare the sprite batcher for specified maximum number of sprites
-  // A: maxSprites - the maximum allowed sprites per batch
-  //    program - program to use when drawing
+  private Vertices oldVertex;
+  private int maxSprites;
+  private int numSprites;
+  private float[] mVPMatrix;
+  private float[] uMVPMatrices = new float[GLText.CHAR_BATCH_SIZE * 16];
+  private int mMVPMatricesHandle;
+  private float[] mMVPMatrix = new float[16];
+
   SpriteBatch(int maxSprites, int program) {
     this.maxSprites = maxSprites;
     this.numSprites = 0;
