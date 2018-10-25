@@ -8,6 +8,8 @@ import android.view.MotionEvent;
 import com.pippop.R;
 import com.pippop.graph.Point;
 import com.pippop.graphics.gltext.GLText;
+import com.pippop.graphics.program.GlowProgram;
+import com.pippop.graphics.program.StandardProgram;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -119,90 +121,11 @@ public class Graphics {
   }
 
   public void drawFill(FloatBuffer buffer, Color color) {
-    standardProgram.drawStandard(buffer, color, GLES20.GL_TRIANGLE_FAN, 0, 0, transformMatrix);
+    standardProgram.draw(buffer, color, GLES20.GL_TRIANGLE_FAN, 0, 0, transformMatrix);
   }
 
   public void draw(FloatBuffer buffer, Color color, float width) {
     GLES20.glLineWidth(width);
-    standardProgram.drawStandard(buffer, color, GLES20.GL_LINE_LOOP, 1, 1, transformMatrix);
-  }
-
-  private static class StandardProgram {
-
-    private final int programHandle;
-    private final int colorHandle;
-    private final int posHandle;
-    private final int matrixHandle;
-
-    StandardProgram(Context context) {
-      this.programHandle =
-          loadProgram(context, R.raw.standard_fragment_shader, R.raw.standard_vertex_shader);
-      this.colorHandle = GLES20.glGetUniformLocation(programHandle, "uColor");
-      this.posHandle = GLES20.glGetAttribLocation(programHandle, "vPosition");
-      this.matrixHandle = GLES20.glGetUniformLocation(programHandle, "uMVPMatrix");
-    }
-
-    private void drawStandard(
-        FloatBuffer buffer,
-        Color color,
-        int mode,
-        int start,
-        int endClip,
-        float[] transformMatrix) {
-      if (color.getAlpha() != 1.0) {
-        GLES20.glEnable(GLES20.GL_BLEND);
-        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-      }
-      GLES20.glUseProgram(programHandle);
-      GLES20.glUniform4fv(colorHandle, 1, color.value, 0);
-      GLES20.glUniformMatrix2fv(matrixHandle, 1, false, transformMatrix, 0);
-      GLES20.glEnableVertexAttribArray(posHandle);
-      GLES20.glVertexAttribPointer(posHandle, 2, GLES20.GL_FLOAT, false, 0, buffer);
-      GLES20.glDrawArrays(mode, start, buffer.limit() / 2 - endClip);
-      GLES20.glDisableVertexAttribArray(posHandle);
-      if (color.getAlpha() != 1) {
-        GLES20.glDisable(GLES20.GL_BLEND);
-      }
-    }
-  }
-
-  private static class GlowProgram {
-
-    private final int programHandle;
-    private final int colorHandle;
-    private final int posHandle;
-    private final int alphaHandle;
-    private final int matrixHandle;
-
-    GlowProgram(Context context) {
-      this.programHandle =
-          loadProgram(context, R.raw.glow_fragment_shader, R.raw.glow_vertex_shader);
-      this.colorHandle = GLES20.glGetUniformLocation(programHandle, "uColor");
-      this.posHandle = GLES20.glGetAttribLocation(programHandle, "vPosition");
-      this.alphaHandle = GLES20.glGetAttribLocation(programHandle, "vAlpha");
-      this.matrixHandle = GLES20.glGetUniformLocation(programHandle, "uMVPMatrix");
-    }
-
-    private void draw(FloatBuffer buffer, Color color, float[] transformMatrix) {
-      GLES20.glEnable(GLES20.GL_BLEND);
-      GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-
-      GLES20.glUseProgram(programHandle);
-      GLES20.glUniform4fv(colorHandle, 1, color.value, 0);
-      GLES20.glUniformMatrix2fv(matrixHandle, 1, false, transformMatrix, 0);
-
-      buffer.position(0);
-      GLES20.glVertexAttribPointer(posHandle, 2, GLES20.GL_FLOAT, false, 12, buffer);
-      GLES20.glEnableVertexAttribArray(posHandle);
-
-      buffer.position(2);
-      GLES20.glVertexAttribPointer(alphaHandle, 1, GLES20.GL_FLOAT, false, 12, buffer);
-      GLES20.glEnableVertexAttribArray(alphaHandle);
-
-      GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, buffer.limit() / 3);
-
-      GLES20.glDisableVertexAttribArray(posHandle);
-      GLES20.glDisableVertexAttribArray(alphaHandle);
-    }
+    standardProgram.draw(buffer, color, GLES20.GL_LINE_LOOP, 1, 1, transformMatrix);
   }
 }
