@@ -16,12 +16,12 @@ import android.graphics.Typeface;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import com.pippop.graphics.Color;
+import com.pippop.graphics.program.BatchTextureProgram;
 
 public class GLText {
 
-  static final int CHAR_BATCH_SIZE = 24;
-  private static final int CHAR_START = 32; // First Character (ASCII Code)
-  private static final int CHAR_END = 126; // Last Character (ASCII Code)
+  private static final int CHAR_START = 32;
+  private static final int CHAR_END = 126;
   private static final int CHAR_CNT = CHAR_END - CHAR_START + 1;
   private static final int FONT_SIZE_MIN = 6;
   private static final int FONT_SIZE_MAX = 180;
@@ -36,9 +36,11 @@ public class GLText {
   private final float charHeight;
   private final TextureRegion[] charRgn;
   private final int cellWidth, cellHeight;
+
   private final int mProgram;
   private final int mColorHandle;
   private final int mTextureUniformHandle;
+  private final BatchTextureProgram program;
 
   private float scaleX = 1.0f;
   private float scaleY = 1.0f;
@@ -46,12 +48,19 @@ public class GLText {
 
   // --Constructor--//
   // D: save program + asset manager, create arrays, and initialize the members
-  public GLText(Typeface font, int size, int fontPadX, int fontPadY, boolean outline) {
+  public GLText(
+      BatchTextureProgram program,
+      Typeface font,
+      int size,
+      int fontPadX,
+      int fontPadY,
+      boolean outline) {
+    this.program = program;
     mProgram = BatchTextProgram.getProgram();
     mColorHandle = GLES20.glGetUniformLocation(mProgram, "u_Color");
     mTextureUniformHandle = GLES20.glGetUniformLocation(mProgram, "u_Texture");
 
-    batch = new SpriteBatch(CHAR_BATCH_SIZE, mProgram);
+    batch = new SpriteBatch(24, mProgram);
 
     charWidths = new float[CHAR_CNT]; // Create the Array of Character Widths
     charRgn = new TextureRegion[CHAR_CNT]; // Create the Array of Character Regions
@@ -143,16 +152,11 @@ public class GLText {
 
   private void initDraw(Color color) {
     GLES20.glUseProgram(mProgram);
-
     GLES20.glUniform4fv(mColorHandle, 1, color.value, 0);
     GLES20.glEnableVertexAttribArray(mColorHandle);
-
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0); // Set the active texture unit to texture unit 0
-
     GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId); // Bind the texture to this unit
-
-    // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit
-    // 0
+    // Tell the texture sampler to use this texture in the shader by binding to texture unit 0
     GLES20.glUniform1i(mTextureUniformHandle, 0);
   }
 
@@ -185,7 +189,6 @@ public class GLText {
       if (c < 0 || c >= CHAR_CNT) {
         throw new RuntimeException("Unknown Character: " + text.charAt(i));
       }
-      // TODO: optimize - applying the same model matrix to all the characters in the string
       batch.drawSprite(letterX, 0, chrWidth, chrHeight, charRgn[c], modelMatrix);
       letterX += (charWidths[c] + spaceX) * scaleX;
     }

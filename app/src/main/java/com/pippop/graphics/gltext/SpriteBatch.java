@@ -9,33 +9,42 @@ import java.nio.ShortBuffer;
 
 class SpriteBatch {
 
-  private static final int VERTEX_SIZE = 5;
+  private static final int POSITION_CNT_2D = 2;
+  private static final int TEXCOORD_CNT = 2;
+  private static final int MVP_MATRIX_INDEX_CNT = 1;
+  private static final int VERTEX_SIZE =
+      (POSITION_CNT_2D + TEXCOORD_CNT + MVP_MATRIX_INDEX_CNT) * 4;
   private static final int VERTICES_PER_SPRITE = 4;
   private static final int INDICES_PER_SPRITE = 6;
   private static final int INDEX_SIZE = Short.SIZE / 8;
-  private final FloatBuffer vertices;
 
-  private Vertices oldVertex;
+  private final FloatBuffer vertices;
+  private final ShortBuffer indices;
+  private final int mTextureCoordinateHandle;
+  private final int mPositionHandle;
+  private final int mMVPIndexHandle;
   private int maxSprites;
   private int numSprites;
   private float[] mVPMatrix;
-  private float[] uMVPMatrices = new float[GLText.CHAR_BATCH_SIZE * 16];
+  private float[] uMVPMatrices;
   private int mMVPMatricesHandle;
   private float[] mMVPMatrix = new float[16];
 
   SpriteBatch(int maxSprites, int program) {
     this.maxSprites = maxSprites;
     this.numSprites = 0;
+    this.uMVPMatrices = new float[maxSprites * 16];
 
     this.vertices =
-        ByteBuffer.allocateDirect(maxSprites * VERTICES_PER_SPRITE * VERTEX_SIZE * 4)
+        ByteBuffer.allocateDirect(maxSprites * VERTICES_PER_SPRITE * 5 * 4)
             .order(ByteOrder.nativeOrder())
             .asFloatBuffer();
-    ShortBuffer indices = getIndices(maxSprites);
-
-    this.oldVertex = new Vertices(indices);
+    indices = getIndices(maxSprites);
 
     mMVPMatricesHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix");
+    mTextureCoordinateHandle = AttribVariable.A_TexCoordinate.getHandle();
+    mMVPIndexHandle = AttribVariable.A_MVPMatrixIndex.getHandle();
+    mPositionHandle = AttribVariable.A_Position.getHandle();
   }
 
   private ShortBuffer getIndices(int maxSprites) {
@@ -43,7 +52,7 @@ class SpriteBatch {
         ByteBuffer.allocateDirect(maxSprites * INDICES_PER_SPRITE * INDEX_SIZE)
             .order(ByteOrder.nativeOrder())
             .asShortBuffer();
-    for (int i = 0; i < maxSprites; i += VERTICES_PER_SPRITE) {
+    for (int i = 0; i < maxSprites * VERTICES_PER_SPRITE; i += VERTICES_PER_SPRITE) {
       indices.put((short) i);
       indices.put((short) (i + 1));
       indices.put((short) (i + 2));
@@ -62,12 +71,30 @@ class SpriteBatch {
 
   void endBatch() {
     if (numSprites > 0) {
+      vertices.flip();
+
       GLES20.glUniformMatrix4fv(mMVPMatricesHandle, numSprites, false, uMVPMatrices, 0);
       GLES20.glEnableVertexAttribArray(mMVPMatricesHandle);
-      vertices.flip();
-      oldVertex.bind(vertices);
-      oldVertex.draw(numSprites * INDICES_PER_SPRITE);
-      oldVertex.unbind();
+
+      GLES20.glVertexAttribPointer(
+          mPositionHandle, POSITION_CNT_2D, GLES20.GL_FLOAT, false, VERTEX_SIZE, vertices);
+      GLES20.glEnableVertexAttribArray(mPositionHandle);
+
+      vertices.position(POSITION_CNT_2D);
+      GLES20.glVertexAttribPointer(
+          mTextureCoordinateHandle, TEXCOORD_CNT, GLES20.GL_FLOAT, false, VERTEX_SIZE, vertices);
+      GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);
+
+      vertices.position(POSITION_CNT_2D + TEXCOORD_CNT);
+      GLES20.glVertexAttribPointer(
+          mMVPIndexHandle, MVP_MATRIX_INDEX_CNT, GLES20.GL_FLOAT, false, VERTEX_SIZE, vertices);
+      GLES20.glEnableVertexAttribArray(mMVPIndexHandle);
+
+      GLES20.glDrawElements(
+          GLES20.GL_TRIANGLES, numSprites * INDICES_PER_SPRITE, GLES20.GL_UNSIGNED_SHORT, indices);
+
+      GLES20.glDisableVertexAttribArray(mTextureCoordinateHandle);
+
       vertices.clear();
     }
   }

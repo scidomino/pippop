@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 import com.pippop.R;
 import com.pippop.graph.Point;
 import com.pippop.graphics.gltext.GLText;
+import com.pippop.graphics.program.BatchTextureProgram;
 import com.pippop.graphics.program.GlowProgram;
 import com.pippop.graphics.program.StandardProgram;
 import java.io.InputStream;
@@ -32,10 +33,10 @@ public class Graphics {
   public Graphics(Context context) {
     this.standardProgram = new StandardProgram(context);
     this.glowProgram = new GlowProgram(context);
-
+    BatchTextureProgram batchTextureProgram = new BatchTextureProgram(context);
     Typeface font = ResourcesCompat.getFont(context, R.font.sniglet_extrabold);
-    glText = new GLText(font, 30, 2, 2, false);
-    glTextOutline = new GLText(font, 30, 2, 2, true);
+    glText = new GLText(batchTextureProgram, font, 30, 2, 2, false);
+    glTextOutline = new GLText(batchTextureProgram, font, 30, 2, 2, true);
   }
 
   private static int loadProgram(Context context, int fragmentShader, int vertexShader) {
