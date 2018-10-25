@@ -3,7 +3,7 @@ package com.pippop.graphics.gltext;
 import android.opengl.GLES20;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 class Vertices {
@@ -16,9 +16,8 @@ class Vertices {
   private static final int VERTEX_SIZE =
       (POSITION_CNT_2D + TEXCOORD_CNT + MVP_MATRIX_INDEX_CNT) * 4;
 
-  private final IntBuffer vertices;
+  private final FloatBuffer vertices;
   private final ShortBuffer indices;
-  private final int[] tmpBuffer;
 
   private final int mTextureCoordinateHandle;
   private int mPositionHandle;
@@ -28,18 +27,13 @@ class Vertices {
   // D: create the vertices/indices as specified (for 2d/3d)
   // A: maxVertices - maximum vertices allowed in buffer
   //    maxIndices - maximum indices allowed in buffer
-  Vertices(int maxVertices, int maxIndices) {
+  Vertices(int maxVertices, ShortBuffer indices) {
     this.vertices =
         ByteBuffer.allocateDirect(maxVertices * VERTEX_SIZE)
             .order(ByteOrder.nativeOrder())
-            .asIntBuffer();
+            .asFloatBuffer();
 
-    this.indices =
-        ByteBuffer.allocateDirect(maxIndices * INDEX_SIZE)
-            .order(ByteOrder.nativeOrder())
-            .asShortBuffer();
-
-    this.tmpBuffer = new int[maxVertices * VERTEX_SIZE / 4];
+    this.indices = indices;
 
     mTextureCoordinateHandle = AttribVariable.A_TexCoordinate.getHandle();
     mMVPIndexHandle = AttribVariable.A_MVPMatrixIndex.getHandle();
@@ -56,23 +50,8 @@ class Vertices {
   // R: [none]
   void setVertices(float[] vertices, int length) {
     this.vertices.clear();
-    for (int i = 0; i < length; i++) {
-      tmpBuffer[i] = Float.floatToRawIntBits(vertices[i]);
-    }
-    this.vertices.put(tmpBuffer, 0, length);
+    this.vertices.put(vertices, 0, length);
     this.vertices.flip();
-  }
-
-  // --Set Indices--//
-  // D: set the specified indices in the index buffer
-  // A: indices - array of indices (shorts) to set
-  //    offset - offset to first index in array
-  //    length - number of indices in array (from offset)
-  // R: [none]
-  void setIndices(short[] indices, int length) {
-    this.indices.clear(); // Clear Existing Indices
-    this.indices.put(indices, 0, length); // Set New Indices
-    this.indices.flip(); // Flip Index Buffer\
   }
 
   // --Bind--//

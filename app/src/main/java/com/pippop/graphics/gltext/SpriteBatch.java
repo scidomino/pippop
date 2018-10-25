@@ -2,6 +2,10 @@ package com.pippop.graphics.gltext;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 class SpriteBatch {
 
@@ -9,9 +13,10 @@ class SpriteBatch {
   private static final int VERTEX_SIZE = 5;
   private static final int VERTICES_PER_SPRITE = 4; // Vertices Per Sprite
   private static final int INDICES_PER_SPRITE = 6; // Indices Per Sprite
-
+  private static final int INDEX_SIZE = Short.SIZE / 8; // Index Byte Size (Short.SIZE = bits)
+  private final IntBuffer vertices;
   // --Members--//
-  private Vertices vertices; // Vertices Instance Used for Rendering
+  private Vertices oldVertex; // Vertices Instance Used for Rendering
   private float[] vertexBuffer; // Vertex Buffer
   private int bufferIndex; // Vertex Buffer Start Index
   private int maxSprites; // Maximum Sprites Allowed in Buffer
@@ -28,21 +33,33 @@ class SpriteBatch {
   //    program - program to use when drawing
   SpriteBatch(int maxSprites, int program) {
     this.vertexBuffer = new float[maxSprites * VERTICES_PER_SPRITE * VERTEX_SIZE];
-    this.vertices = new Vertices(maxSprites * VERTICES_PER_SPRITE, maxSprites * INDICES_PER_SPRITE);
+
+    this.vertices =
+        ByteBuffer.allocateDirect(maxSprites * VERTICES_PER_SPRITE * VERTEX_SIZE)
+            .order(ByteOrder.nativeOrder())
+            .asIntBuffer();
+
     this.bufferIndex = 0; // Reset Buffer Index
     this.maxSprites = maxSprites; // Save Maximum Sprites
     this.numSprites = 0; // Clear Sprite Counter
 
-    short[] indices = new short[maxSprites * INDICES_PER_SPRITE]; // Create Temp Index Buffer
-    for (int i = 0, j = 0; i < indices.length; i += INDICES_PER_SPRITE, j += VERTICES_PER_SPRITE) {
-      indices[i] = (short) j;
-      indices[i + 1] = (short) (j + 1);
-      indices[i + 2] = (short) (j + 2);
-      indices[i + 3] = (short) (j + 2);
-      indices[i + 4] = (short) (j + 3);
-      indices[i + 5] = (short) j;
+    ShortBuffer indices =
+        ByteBuffer.allocateDirect(maxSprites * INDICES_PER_SPRITE * INDEX_SIZE)
+            .order(ByteOrder.nativeOrder())
+            .asShortBuffer();
+    for (int i = 0; i < maxSprites; i++) {
+      int j = i * VERTICES_PER_SPRITE;
+      indices.put((short) j);
+      indices.put((short) (j + 1));
+      indices.put((short) (j + 2));
+      indices.put((short) (j + 2));
+      indices.put((short) (j + 3));
+      indices.put((short) j);
     }
-    vertices.setIndices(indices, indices.length); // Set Index Buffer for Rendering
+    indices.flip();
+
+    this.oldVertex = new Vertices(maxSprites * VERTICES_PER_SPRITE, indices);
+
     mMVPMatricesHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix");
   }
 
@@ -60,15 +77,15 @@ class SpriteBatch {
     if (numSprites > 0) {
       GLES20.glUniformMatrix4fv(mMVPMatricesHandle, numSprites, false, uMVPMatrices, 0);
       GLES20.glEnableVertexAttribArray(mMVPMatricesHandle);
-      vertices.setVertices(vertexBuffer, bufferIndex);
-      vertices.bind();
-      vertices.draw(GLES20.GL_TRIANGLES, 0, numSprites * INDICES_PER_SPRITE);
-      vertices.unbind();
+      oldVertex.setVertices(vertexBuffer, bufferIndex);
+      oldVertex.bind();
+      oldVertex.draw(GLES20.GL_TRIANGLES, 0, numSprites * INDICES_PER_SPRITE);
+      oldVertex.unbind();
     }
   }
 
   // --Draw Sprite to Batch--//
-  // D: batch specified sprite to batch. adds vertices for sprite to vertex buffer
+  // D: batch specified sprite to batch. adds oldVertex for sprite to vertex buffer
   //    NOTE: MUST be called after beginBatch(), and before endBatch()!
   //    NOTE: if the batch overflows, this will render the current batch, restart it,
   //          and then batch this sprite.
