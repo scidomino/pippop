@@ -14,7 +14,7 @@ public class GlowProgram extends GraphicsProgram {
   private final int matrixHandle;
 
   public GlowProgram(Context context) {
-    super(context, R.raw.standard_fragment_shader, R.raw.standard_vertex_shader);
+    super(context, R.raw.glow_fragment_shader, R.raw.glow_vertex_shader);
     this.colorHandle = GLES20.glGetUniformLocation(program, "uColor");
     this.posHandle = GLES20.glGetAttribLocation(program, "vPosition");
     this.alphaHandle = GLES20.glGetAttribLocation(program, "vAlpha");
