@@ -182,7 +182,7 @@ public class Graph {
     isModelDirty = true;
   }
 
-  public void reset(List<Color> colors) {
+  public void reset(List<Color> colors, Style centerStyle) {
     bubbles.clear();
     edges.clear();
     vertices.clear();
@@ -247,7 +247,7 @@ public class Graph {
     playerEdges.get(playerEdges.size() - 1).setNext(playerEdges.get(0));
     openAirEdges.get(openAirEdges.size() - 1).setNext(openAirEdges.get(0));
 
-    bubbles.add(new Bubble(new PlayerStyle(1, Color.TRANSPARENT_WHITE), playerEdges.get(0)));
+    bubbles.add(new Bubble(centerStyle, playerEdges.get(0)));
     bubbles.add(0, new OpenAir(openAirEdges.get(0)));
 
     isModelDirty = true;
@@ -281,7 +281,7 @@ public class Graph {
     ne3.update();
     ne3.getTwin().update();
 
-    bubbles.add(new Bubble(style, ne1.getTwin(), Graphics.createVertexBuffer(1000)));
+    bubbles.add(new Bubble(style, ne1.getTwin(), Graphics.createFloatBuffer(1000)));
 
     addBothSides(ne1);
     addBothSides(ne2);

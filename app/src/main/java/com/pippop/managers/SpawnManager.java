@@ -9,6 +9,7 @@ import com.pippop.graph.Graph;
 import com.pippop.graph.Vertex;
 import com.pippop.graphics.Color;
 import com.pippop.style.GameStyle;
+import com.pippop.style.PlayerStyle;
 import com.pippop.util.RandomChooser;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,8 +37,8 @@ public abstract class SpawnManager {
 
   public void swapDone() {}
 
-  public void reset(Graph graph) {
-    graph.reset(new ArrayList<>(colorChooser.getAll()));
+  public void reset(Graph graph, PlayerStyle centerStyle) {
+    graph.reset(new ArrayList<>(colorChooser.getAll()), centerStyle);
     sound.start();
   }
 

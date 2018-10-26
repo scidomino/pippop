@@ -1,12 +1,12 @@
-package com.pippop.graphics.gltext;
+package com.pippop.util;
 
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
-class TextureHelper {
+public class TextureHelper {
 
-  static int loadTexture(Bitmap bitmap) {
+  public static int loadTexture(Bitmap bitmap) {
     final int[] textureHandle = new int[1];
     GLES20.glGenTextures(1, textureHandle, 0);
     if (textureHandle[0] == 0) {

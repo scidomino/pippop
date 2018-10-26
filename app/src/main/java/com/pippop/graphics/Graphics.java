@@ -11,11 +11,10 @@ import com.pippop.graphics.gltext.GLText;
 import com.pippop.graphics.program.BatchTextureProgram;
 import com.pippop.graphics.program.GlowProgram;
 import com.pippop.graphics.program.StandardProgram;
-import java.io.InputStream;
+import com.pippop.graphics.program.TextureProgram;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.Scanner;
 
 public class Graphics {
   private static final int FLOAT_BYTES = 4;
@@ -27,52 +26,23 @@ public class Graphics {
   private final float[] transformMatrix = new float[4];
   private final GLText glText;
   private final GLText glTextOutline;
+  private final TextureProgram textureProgram;
+
   private float width;
   private float height;
 
   public Graphics(Context context) {
     this.standardProgram = new StandardProgram(context);
     this.glowProgram = new GlowProgram(context);
+    this.textureProgram = new TextureProgram(context);
+
     BatchTextureProgram batchTextureProgram = new BatchTextureProgram(context);
     Typeface font = ResourcesCompat.getFont(context, R.font.sniglet_extrabold);
     glText = new GLText(batchTextureProgram, font, 30, 2, 2, false);
     glTextOutline = new GLText(batchTextureProgram, font, 30, 2, 2, true);
   }
 
-  private static int loadProgram(Context context, int fragmentShader, int vertexShader) {
-    int program = GLES20.glCreateProgram();
-    GLES20.glAttachShader(program, loadShader(GLES20.GL_VERTEX_SHADER, context, vertexShader));
-    GLES20.glAttachShader(program, loadShader(GLES20.GL_FRAGMENT_SHADER, context, fragmentShader));
-    GLES20.glLinkProgram(program);
-
-    final int[] status = new int[1];
-    GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, status, 0);
-    if (status[0] == 0) {
-      throw new RuntimeException("Error creating program: " + GLES20.glGetProgramInfoLog(program));
-    }
-    return program;
-  }
-
-  private static int loadShader(int type, Context context, int resourceId) {
-    int shader = GLES20.glCreateShader(type);
-    GLES20.glShaderSource(shader, loadResource(context, resourceId));
-    GLES20.glCompileShader(shader);
-
-    int[] status = new int[1];
-    GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0);
-    if (status[0] == 0) {
-      String log = GLES20.glGetShaderInfoLog(shader);
-      throw new RuntimeException("Could not compile shader : " + log);
-    }
-    return shader;
-  }
-
-  private static String loadResource(Context context, int resourceId) {
-    InputStream stream = context.getResources().openRawResource(resourceId);
-    return new Scanner(stream, "UTF-8").useDelimiter("\\A").next();
-  }
-
-  public static FloatBuffer createVertexBuffer(int size) {
+  public static FloatBuffer createFloatBuffer(int size) {
     return ByteBuffer.allocateDirect(size * FLOAT_BYTES)
         .order(ByteOrder.nativeOrder())
         .asFloatBuffer();
@@ -91,6 +61,11 @@ public class Graphics {
     float glX = (2 * point.getX() / width) - 1;
     float glY = -((2 * point.getY() / height) - 1);
     return new Point(glX / transformMatrix[0], glY / transformMatrix[3]);
+  }
+
+  public void drawTexture(FloatBuffer buffer, int textureId) {
+
+    textureProgram.draw(buffer, textureId, transformMatrix);
   }
 
   public void drawLine(GlowLine line, Color color) {

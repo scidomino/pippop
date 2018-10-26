@@ -16,6 +16,7 @@ import android.graphics.Typeface;
 import android.opengl.Matrix;
 import com.pippop.graphics.Color;
 import com.pippop.graphics.program.BatchTextureProgram;
+import com.pippop.util.TextureHelper;
 
 public class GLText {
 

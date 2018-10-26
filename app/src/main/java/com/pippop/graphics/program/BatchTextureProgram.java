@@ -32,6 +32,15 @@ public class BatchTextureProgram extends GraphicsProgram {
     textureHandle = GLES20.glGetUniformLocation(program, "u_Texture");
   }
 
+  public void start(Color color, int textureId) {
+    GLES20.glUseProgram(program);
+    GLES20.glUniform4fv(colorHandle, 1, color.value, 0);
+    GLES20.glEnableVertexAttribArray(colorHandle);
+    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+    GLES20.glUniform1i(textureHandle, 0);
+  }
+
   public void end(
       int numSprites, float[] uMVPMatrices, FloatBuffer vertices, ShortBuffer indices) {
 
@@ -58,12 +67,4 @@ public class BatchTextureProgram extends GraphicsProgram {
     GLES20.glDisableVertexAttribArray(colorHandle);
   }
 
-  public void start(Color color, int textureId) {
-    GLES20.glUseProgram(program);
-    GLES20.glUniform4fv(colorHandle, 1, color.value, 0);
-    GLES20.glEnableVertexAttribArray(colorHandle);
-    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
-    GLES20.glUniform1i(textureHandle, 0);
-  }
 }

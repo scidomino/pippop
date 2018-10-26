@@ -7,7 +7,7 @@ import com.pippop.style.EmptyStyle;
 public class OpenAir extends Bubble {
 
   public OpenAir(Edge start) {
-    super(new EmptyStyle(0), start, Graphics.createVertexBuffer(1000));
+    super(new EmptyStyle(0), start, Graphics.createFloatBuffer(1000));
   }
 
   public double getPressureRatio(double speedBump) {

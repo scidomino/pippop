@@ -28,7 +28,7 @@ public class PopManager {
   private final List<Bubble> deflating = new ArrayList<>();
   private final MediaPlayer sound;
   private final BurstManager burst;
-  private FloatBuffer popShape = Graphics.createVertexBuffer(200);
+  private FloatBuffer popShape = Graphics.createFloatBuffer(200);
   private Bubble pending;
   private int pendingTime;
   private GameStyle pendingStyle;
@@ -128,7 +128,7 @@ public class PopManager {
 
     FloatBuffer buffer = pending.getBuffer();
     if (popShape.capacity() < buffer.limit()) {
-      popShape = Graphics.createVertexBuffer(buffer.capacity());
+      popShape = Graphics.createFloatBuffer(buffer.capacity());
     }
     popShape.clear();
     popShape.put(center.x);

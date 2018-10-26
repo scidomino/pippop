@@ -19,12 +19,6 @@ public class RandomSpawnManager extends SpawnManager {
   }
 
   @Override
-  public void reset(Graph graph) {
-    super.reset(graph);
-    totalPlayTime = 0;
-  }
-
-  @Override
   public void update(Graph graph, int delta) {
     totalPlayTime += delta;
     nextSpawnTime -= delta;

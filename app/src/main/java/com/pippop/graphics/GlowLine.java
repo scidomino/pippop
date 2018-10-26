@@ -16,8 +16,8 @@ public class GlowLine {
   }
 
   public GlowLine(int size) {
-    buffer = Graphics.createVertexBuffer(3 * size);
-    temp = Graphics.createVertexBuffer(2 * size);
+    buffer = Graphics.createFloatBuffer(3 * size);
+    temp = Graphics.createFloatBuffer(2 * size);
   }
 
   public void update(Edge edge, float width) {

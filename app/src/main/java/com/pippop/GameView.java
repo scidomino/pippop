@@ -23,6 +23,7 @@ import com.pippop.managers.SlideManager;
 import com.pippop.managers.SpawnManager;
 import com.pippop.managers.SuccessManager;
 import com.pippop.managers.SwapManager;
+import com.pippop.style.PlayerStyle;
 import com.pippop.util.Colors;
 import com.pippop.util.PoppedBubble;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -93,7 +94,7 @@ public class GameView extends GLSurfaceView {
     private long startTime = System.currentTimeMillis();
 
     GameRenderer() {
-      spawn.reset(graph);
+      spawn.reset(graph, new PlayerStyle(getContext()));
       success.reset();
       blowout.reset();
     }
