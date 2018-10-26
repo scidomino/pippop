@@ -31,8 +31,6 @@ public class GLText {
   private final int fontPadY;
   private final SpriteBatch batch;
   private final int textureId;
-  private final int textureSize;
-  private final TextureRegion textureRgn;
   private final float charHeight;
   private final TextureRegion[] charRgn;
   private final int cellWidth, cellHeight;
@@ -100,6 +98,7 @@ public class GLText {
       throw new RuntimeException("Font size is outside range");
     }
 
+    int textureSize;
     if (maxSize <= 24) {
       textureSize = 256;
     } else if (maxSize <= 40) {
@@ -133,101 +132,8 @@ public class GLText {
     }
 
     textureId = TextureHelper.loadTexture(bitmap);
-
-    // create full texture region
-    textureRgn = new TextureRegion(textureSize, textureSize, 0, 0, textureSize, textureSize);
   }
 
-  // --Begin/End Text Drawing--//
-  // D: call these methods before/after (respectively all draw() calls using a text instance
-  //    NOTE: color is set on a per-batch basis, and fonts should be 8-bit alpha only!!!
-  // A: red, green, blue - RGB values for font (default = 1.0)
-  //    alpha - optional alpha value for font (default = 1.0)
-  // 	  vpMatrix - View and projection matrix to use
-  // R: [none]
-  public void begin(Color color, float[] vpMatrix) {
-    initDraw(color);
-    batch.beginBatch(vpMatrix); // Begin Batch
-  }
-
-  private void initDraw(Color color) {
-    GLES20.glUseProgram(mProgram);
-    GLES20.glUniform4fv(mColorHandle, 1, color.value, 0);
-    GLES20.glEnableVertexAttribArray(mColorHandle);
-    GLES20.glActiveTexture(GLES20.GL_TEXTURE0); // Set the active texture unit to texture unit 0
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId); // Bind the texture to this unit
-    // Tell the texture sampler to use this texture in the shader by binding to texture unit 0
-    GLES20.glUniform1i(mTextureUniformHandle, 0);
-  }
-
-  public void end() {
-    batch.endBatch(); // End Batch
-    GLES20.glDisableVertexAttribArray(mColorHandle);
-  }
-
-  // --Draw Text--//
-  // D: draw text at the specified x,y position
-  // A: text - the string to draw
-  //    x, y, z - the x, y, z position to draw text at (bottom left of text; including descent)
-  //    angleDeg - angle to rotate the text
-  // R: [none]
-  public void draw(String text, float x, float y, float angle) {
-    float chrHeight = cellHeight * scaleY; // Calculate Scaled Character Height
-    float chrWidth = cellWidth * scaleX; // Calculate Scaled Character Width
-    x += (chrWidth / 2.0f) - (fontPadX * scaleX); // Adjust Start X
-    y += (chrHeight / 2.0f) - (fontPadY * scaleY); // Adjust Start Y
-
-    // create a model matrix based on x, y and angleDeg
-    float[] modelMatrix = new float[16];
-    Matrix.setIdentityM(modelMatrix, 0);
-    Matrix.translateM(modelMatrix, 0, x, y, 1);
-    Matrix.rotateM(modelMatrix, 0, angle, 0, 0, 1);
-
-    float letterX = 0;
-    for (int i = 0; i < text.length(); i++) { // FOR Each Character in String
-      int c = (int) text.charAt(i) - CHAR_START;
-      if (c < 0 || c >= CHAR_CNT) {
-        throw new RuntimeException("Unknown Character: " + text.charAt(i));
-      }
-      batch.drawSprite(letterX, 0, chrWidth, chrHeight, charRgn[c], modelMatrix);
-      letterX += (charWidths[c] + spaceX) * scaleX;
-    }
-  }
-
-  public void draw(String text, float x, float y) {
-    draw(text, x, y, 0);
-  }
-
-  // --Draw Text Centered--//
-  // D: draw text CENTERED at the specified x,y position
-  // A: text - the string to draw
-  //    x, y, z - the x, y, z position to draw text at (bottom left of text)
-  //    angleDeg - angle to rotate the text
-  // R: the total width of the text that was drawn
-  public float drawC(String text, float x, float y, float angle) {
-    float len = getLength(text); // Get Text Length
-    draw(text, x - (len / 2.0f), y - (getCharHeight() / 2.0f), angle); // Draw Text Centered
-    return len; // Return Length
-  }
-
-  public float drawC(String text, float x, float y) {
-    return drawC(text, x, y, 0f);
-  }
-
-  public float drawCX(String text, float x, float y) {
-    float len = getLength(text); // Get Text Length
-    draw(text, x - (len / 2.0f), y); // Draw Text Centered (X-Axis Only)
-    return len; // Return Length
-  }
-
-  public void drawCY(String text, float x, float y) {
-    draw(text, x, y - (getCharHeight() / 2.0f)); // Draw Text Centered (Y-Axis Only)
-  }
-
-  // --Get Length of a String--//
-  // D: return the length of the specified string if rendered using current settings
-  // A: text - the string to get length for
-  // R: the length of the specified string (pixels)
   private float getLength(String text) {
     float len = 0.0f; // Working Length
     for (int i = 0; i < text.length(); i++) { // For Each Character in String (Except Last
@@ -245,24 +151,50 @@ public class GLText {
     return (charHeight * scaleY); // Return Scaled Character Height
   }
 
-  // --Draw Font Texture--//
-  // D: draw the entire font texture (NOTE: for testing purposes only)
-  // A: width, height - the width and height of the area to draw to. this is used
-  //    to draw the texture to the top-left corner.
-  //    vpMatrix - View and projection matrix to use
-  public void drawTexture(int width, int height, float[] vpMatrix) {
-    initDraw(Color.WHITE);
+  public void drawCentered(
+      String value, Color fillColor, float x, float y, float[] mVPMatrix, float angle) {
+    draw(
+        value,
+        fillColor,
+        mVPMatrix,
+        angle,
+        x - (getLength(value) / 2.0f),
+        y - (getCharHeight() / 2.0f));
+  }
 
-    batch.beginBatch(vpMatrix); // Begin Batch (Bind Texture)
-    float[] idMatrix = new float[16];
-    Matrix.setIdentityM(idMatrix, 0);
-    batch.drawSprite(
-        width - (textureSize / 2),
-        height - (textureSize / 2),
-        textureSize,
-        textureSize,
-        textureRgn,
-        idMatrix); // Draw
-    batch.endBatch(); // End Batch
+  private void draw(String value, Color color, float[] mVPMatrix, float angle, float x, float y) {
+    GLES20.glUseProgram(mProgram);
+    GLES20.glUniform4fv(mColorHandle, 1, color.value, 0);
+    GLES20.glEnableVertexAttribArray(mColorHandle);
+    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+    GLES20.glUniform1i(mTextureUniformHandle, 0);
+
+    batch.beginBatch();
+
+    float chrHeight = cellHeight * scaleY; // Calculate Scaled Character Height
+    float chrWidth = cellWidth * scaleX; // Calculate Scaled Character Width
+    x += (chrWidth / 2.0f) - (fontPadX * scaleX); // Adjust Start X
+    y += (chrHeight / 2.0f) - (fontPadY * scaleY); // Adjust Start Y
+
+    // create a model matrix based on x, y and angleDeg
+    float[] modelMatrix = new float[16];
+    Matrix.setIdentityM(modelMatrix, 0);
+    Matrix.translateM(modelMatrix, 0, x, y, 1);
+    Matrix.rotateM(modelMatrix, 0, angle, 0, 0, 1);
+
+    float letterX = 0;
+    for (int i = 0; i < value.length(); i++) { // FOR Each Character in String
+      int c = (int) value.charAt(i) - CHAR_START;
+      if (c < 0 || c >= CHAR_CNT) {
+        throw new RuntimeException("Unknown Character: " + value.charAt(i));
+      }
+      batch.drawSprite(letterX, 0, chrWidth, chrHeight, charRgn[c], modelMatrix, mVPMatrix);
+      letterX += (charWidths[c] + spaceX) * scaleX;
+    }
+
+    batch.endBatch();
+
+    GLES20.glDisableVertexAttribArray(mColorHandle);
   }
 }

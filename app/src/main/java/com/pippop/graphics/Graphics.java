@@ -109,14 +109,8 @@ public class Graphics {
     GLES20.glEnable(GLES20.GL_BLEND);
     GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
-    glText.begin(fillColor, mVPMatrix);
-    glText.drawC(value, x, y, 0f);
-    glText.end();
-
-    GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-    glTextOutline.begin(outineColor, mVPMatrix);
-    glTextOutline.drawC(value, x, y, 0f);
-    glTextOutline.end();
+    glText.drawCentered(value, fillColor, x, y, mVPMatrix, 0f);
+    glTextOutline.drawCentered(value, outineColor, x, y, mVPMatrix, 0f);
 
     GLES20.glDisable(GLES20.GL_BLEND);
   }

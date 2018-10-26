@@ -23,12 +23,11 @@ class SpriteBatch {
   private final int mTextureCoordinateHandle;
   private final int mPositionHandle;
   private final int mMVPIndexHandle;
-  private int maxSprites;
+  private final int maxSprites;
+  private final float[] uMVPMatrices;
+  private final int mMVPMatricesHandle;
+
   private int numSprites;
-  private float[] mVPMatrix;
-  private float[] uMVPMatrices;
-  private int mMVPMatricesHandle;
-  private float[] mMVPMatrix = new float[16];
 
   SpriteBatch(int maxSprites, int program) {
     this.maxSprites = maxSprites;
@@ -64,9 +63,8 @@ class SpriteBatch {
     return indices;
   }
 
-  void beginBatch(float[] vpMatrix) {
-    numSprites = 0; // Empty Sprite Counter
-    mVPMatrix = vpMatrix;
+  void beginBatch() {
+    numSprites = 0;
   }
 
   void endBatch() {
@@ -100,7 +98,13 @@ class SpriteBatch {
   }
 
   void drawSprite(
-      float x, float y, float width, float height, TextureRegion region, float[] modelMatrix) {
+      float x,
+      float y,
+      float width,
+      float height,
+      TextureRegion region,
+      float[] modelMatrix,
+      float[] vpMatrix) {
     if (numSprites == maxSprites) {
       endBatch();
       numSprites = 0;
@@ -118,8 +122,7 @@ class SpriteBatch {
     vertices.put(x2).put(y2).put(region.u2).put(region.v1).put(numSprites);
     vertices.put(x1).put(y2).put(region.u1).put(region.v1).put(numSprites);
 
-    Matrix.multiplyMM(mMVPMatrix, 0, mVPMatrix, 0, modelMatrix, 0);
-    System.arraycopy(mMVPMatrix, 0, uMVPMatrices, numSprites * 16, 16);
+    Matrix.multiplyMM(uMVPMatrices, numSprites * 16, vpMatrix, 0, modelMatrix, 0);
 
     numSprites++;
   }
