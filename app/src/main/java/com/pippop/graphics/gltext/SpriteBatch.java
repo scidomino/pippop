@@ -1,8 +1,8 @@
 package com.pippop.graphics.gltext;
 
-import android.opengl.GLES20;
 import android.opengl.Matrix;
 import com.pippop.graphics.Color;
+import com.pippop.graphics.program.BatchTextureProgram;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -10,11 +10,6 @@ import java.nio.ShortBuffer;
 
 class SpriteBatch {
 
-  private static final int POSITION_CNT_2D = 2;
-  private static final int TEXCOORD_CNT = 2;
-  private static final int MVP_MATRIX_INDEX_CNT = 1;
-  private static final int VERTEX_SIZE =
-      (POSITION_CNT_2D + TEXCOORD_CNT + MVP_MATRIX_INDEX_CNT) * 4;
   private static final int VERTICES_PER_SPRITE = 4;
   private static final int INDICES_PER_SPRITE = 6;
   private static final int INDEX_SIZE = Short.SIZE / 8;
@@ -23,18 +18,11 @@ class SpriteBatch {
   private final ShortBuffer indices;
   private final int maxSprites;
 
-  private final int program;
-  private final int textureCoorHandle;
-  private final int posHandle;
-  private final int matrixIndexHandle;
-  private final int matrixHandle;
-  private final int colorHandle;
-  private final int textureHandle;
-
+  private final BatchTextureProgram program;
   private final float[] uMVPMatrices;
   private int numSprites;
 
-  SpriteBatch(int maxSprites, int program) {
+  SpriteBatch(int maxSprites, BatchTextureProgram program) {
     this.maxSprites = maxSprites;
     this.numSprites = 0;
     this.uMVPMatrices = new float[maxSprites * 16];
@@ -46,12 +34,6 @@ class SpriteBatch {
     indices = getIndices(maxSprites);
 
     this.program = program;
-    matrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix");
-    textureCoorHandle = AttribVariable.A_TexCoordinate.getHandle();
-    matrixIndexHandle = AttribVariable.A_MVPMatrixIndex.getHandle();
-    posHandle = AttribVariable.A_Position.getHandle();
-    colorHandle = GLES20.glGetUniformLocation(program, "u_Color");
-    textureHandle = GLES20.glGetUniformLocation(program, "u_Texture");
   }
 
   private ShortBuffer getIndices(int maxSprites) {
@@ -73,44 +55,15 @@ class SpriteBatch {
 
   void beginBatch(Color color, int textureId) {
     numSprites = 0;
-
-    GLES20.glUseProgram(program);
-    GLES20.glUniform4fv(colorHandle, 1, color.value, 0);
-    GLES20.glEnableVertexAttribArray(colorHandle);
-    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
-    GLES20.glUniform1i(textureHandle, 0);
+    program.start(color, textureId);
   }
 
   void endBatch() {
     if (numSprites > 0) {
       vertices.flip();
-
-      GLES20.glUniformMatrix4fv(matrixHandle, numSprites, false, uMVPMatrices, 0);
-      GLES20.glEnableVertexAttribArray(matrixHandle);
-
-      GLES20.glVertexAttribPointer(
-          posHandle, POSITION_CNT_2D, GLES20.GL_FLOAT, false, VERTEX_SIZE, vertices);
-      GLES20.glEnableVertexAttribArray(posHandle);
-
-      vertices.position(POSITION_CNT_2D);
-      GLES20.glVertexAttribPointer(
-          textureCoorHandle, TEXCOORD_CNT, GLES20.GL_FLOAT, false, VERTEX_SIZE, vertices);
-      GLES20.glEnableVertexAttribArray(textureCoorHandle);
-
-      vertices.position(POSITION_CNT_2D + TEXCOORD_CNT);
-      GLES20.glVertexAttribPointer(
-          matrixIndexHandle, MVP_MATRIX_INDEX_CNT, GLES20.GL_FLOAT, false, VERTEX_SIZE, vertices);
-      GLES20.glEnableVertexAttribArray(matrixIndexHandle);
-
-      GLES20.glDrawElements(
-          GLES20.GL_TRIANGLES, numSprites * INDICES_PER_SPRITE, GLES20.GL_UNSIGNED_SHORT, indices);
-
-      GLES20.glDisableVertexAttribArray(textureCoorHandle);
-
+      program.end(numSprites, uMVPMatrices, vertices, indices);
       vertices.clear();
     }
-    GLES20.glDisableVertexAttribArray(colorHandle);
   }
 
   void drawSprite(

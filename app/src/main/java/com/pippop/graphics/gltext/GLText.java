@@ -34,8 +34,6 @@ public class GLText {
   private final TextureRegion[] charRgn;
   private final int cellWidth, cellHeight;
 
-  private final BatchTextureProgram program;
-
   private float scaleX = 1.0f;
   private float scaleY = 1.0f;
   private float spaceX = 0.0f; // Additional (X,Y Axis) Spacing (Unscaled)
@@ -49,10 +47,7 @@ public class GLText {
       int fontPadX,
       int fontPadY,
       boolean outline) {
-    this.program = program;
-    int mProgram = BatchTextProgram.getProgram();
-
-    batch = new SpriteBatch(24, mProgram);
+    batch = new SpriteBatch(24, program);
 
     charWidths = new float[CHAR_CNT]; // Create the Array of Character Widths
     charRgn = new TextureRegion[CHAR_CNT]; // Create the Array of Character Regions
