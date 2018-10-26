@@ -2,6 +2,7 @@ package com.pippop.graphics.gltext;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import com.pippop.graphics.Color;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -20,13 +21,17 @@ class SpriteBatch {
 
   private final FloatBuffer vertices;
   private final ShortBuffer indices;
-  private final int mTextureCoordinateHandle;
-  private final int mPositionHandle;
-  private final int mMVPIndexHandle;
   private final int maxSprites;
-  private final float[] uMVPMatrices;
-  private final int mMVPMatricesHandle;
 
+  private final int program;
+  private final int textureCoorHandle;
+  private final int posHandle;
+  private final int matrixIndexHandle;
+  private final int matrixHandle;
+  private final int colorHandle;
+  private final int textureHandle;
+
+  private final float[] uMVPMatrices;
   private int numSprites;
 
   SpriteBatch(int maxSprites, int program) {
@@ -40,10 +45,13 @@ class SpriteBatch {
             .asFloatBuffer();
     indices = getIndices(maxSprites);
 
-    mMVPMatricesHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix");
-    mTextureCoordinateHandle = AttribVariable.A_TexCoordinate.getHandle();
-    mMVPIndexHandle = AttribVariable.A_MVPMatrixIndex.getHandle();
-    mPositionHandle = AttribVariable.A_Position.getHandle();
+    this.program = program;
+    matrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix");
+    textureCoorHandle = AttribVariable.A_TexCoordinate.getHandle();
+    matrixIndexHandle = AttribVariable.A_MVPMatrixIndex.getHandle();
+    posHandle = AttribVariable.A_Position.getHandle();
+    colorHandle = GLES20.glGetUniformLocation(program, "u_Color");
+    textureHandle = GLES20.glGetUniformLocation(program, "u_Texture");
   }
 
   private ShortBuffer getIndices(int maxSprites) {
@@ -63,38 +71,46 @@ class SpriteBatch {
     return indices;
   }
 
-  void beginBatch() {
+  void beginBatch(Color color, int textureId) {
     numSprites = 0;
+
+    GLES20.glUseProgram(program);
+    GLES20.glUniform4fv(colorHandle, 1, color.value, 0);
+    GLES20.glEnableVertexAttribArray(colorHandle);
+    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+    GLES20.glUniform1i(textureHandle, 0);
   }
 
   void endBatch() {
     if (numSprites > 0) {
       vertices.flip();
 
-      GLES20.glUniformMatrix4fv(mMVPMatricesHandle, numSprites, false, uMVPMatrices, 0);
-      GLES20.glEnableVertexAttribArray(mMVPMatricesHandle);
+      GLES20.glUniformMatrix4fv(matrixHandle, numSprites, false, uMVPMatrices, 0);
+      GLES20.glEnableVertexAttribArray(matrixHandle);
 
       GLES20.glVertexAttribPointer(
-          mPositionHandle, POSITION_CNT_2D, GLES20.GL_FLOAT, false, VERTEX_SIZE, vertices);
-      GLES20.glEnableVertexAttribArray(mPositionHandle);
+          posHandle, POSITION_CNT_2D, GLES20.GL_FLOAT, false, VERTEX_SIZE, vertices);
+      GLES20.glEnableVertexAttribArray(posHandle);
 
       vertices.position(POSITION_CNT_2D);
       GLES20.glVertexAttribPointer(
-          mTextureCoordinateHandle, TEXCOORD_CNT, GLES20.GL_FLOAT, false, VERTEX_SIZE, vertices);
-      GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);
+          textureCoorHandle, TEXCOORD_CNT, GLES20.GL_FLOAT, false, VERTEX_SIZE, vertices);
+      GLES20.glEnableVertexAttribArray(textureCoorHandle);
 
       vertices.position(POSITION_CNT_2D + TEXCOORD_CNT);
       GLES20.glVertexAttribPointer(
-          mMVPIndexHandle, MVP_MATRIX_INDEX_CNT, GLES20.GL_FLOAT, false, VERTEX_SIZE, vertices);
-      GLES20.glEnableVertexAttribArray(mMVPIndexHandle);
+          matrixIndexHandle, MVP_MATRIX_INDEX_CNT, GLES20.GL_FLOAT, false, VERTEX_SIZE, vertices);
+      GLES20.glEnableVertexAttribArray(matrixIndexHandle);
 
       GLES20.glDrawElements(
           GLES20.GL_TRIANGLES, numSprites * INDICES_PER_SPRITE, GLES20.GL_UNSIGNED_SHORT, indices);
 
-      GLES20.glDisableVertexAttribArray(mTextureCoordinateHandle);
+      GLES20.glDisableVertexAttribArray(textureCoorHandle);
 
       vertices.clear();
     }
+    GLES20.glDisableVertexAttribArray(colorHandle);
   }
 
   void drawSprite(

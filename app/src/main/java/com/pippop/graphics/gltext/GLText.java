@@ -13,7 +13,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.opengl.GLES20;
 import android.opengl.Matrix;
 import com.pippop.graphics.Color;
 import com.pippop.graphics.program.BatchTextureProgram;
@@ -35,9 +34,6 @@ public class GLText {
   private final TextureRegion[] charRgn;
   private final int cellWidth, cellHeight;
 
-  private final int mProgram;
-  private final int mColorHandle;
-  private final int mTextureUniformHandle;
   private final BatchTextureProgram program;
 
   private float scaleX = 1.0f;
@@ -54,9 +50,7 @@ public class GLText {
       int fontPadY,
       boolean outline) {
     this.program = program;
-    mProgram = BatchTextProgram.getProgram();
-    mColorHandle = GLES20.glGetUniformLocation(mProgram, "u_Color");
-    mTextureUniformHandle = GLES20.glGetUniformLocation(mProgram, "u_Texture");
+    int mProgram = BatchTextProgram.getProgram();
 
     batch = new SpriteBatch(24, mProgram);
 
@@ -163,14 +157,8 @@ public class GLText {
   }
 
   private void draw(String value, Color color, float[] mVPMatrix, float angle, float x, float y) {
-    GLES20.glUseProgram(mProgram);
-    GLES20.glUniform4fv(mColorHandle, 1, color.value, 0);
-    GLES20.glEnableVertexAttribArray(mColorHandle);
-    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
-    GLES20.glUniform1i(mTextureUniformHandle, 0);
 
-    batch.beginBatch();
+    batch.beginBatch(color, textureId);
 
     float chrHeight = cellHeight * scaleY; // Calculate Scaled Character Height
     float chrWidth = cellWidth * scaleX; // Calculate Scaled Character Width
@@ -194,7 +182,5 @@ public class GLText {
     }
 
     batch.endBatch();
-
-    GLES20.glDisableVertexAttribArray(mColorHandle);
   }
 }
