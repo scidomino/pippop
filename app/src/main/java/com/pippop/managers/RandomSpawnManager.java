@@ -27,7 +27,7 @@ public class RandomSpawnManager extends SpawnManager {
   @Override
   public void possiblySpawn(Graph graph) {
     if (nextSpawnTime < 0) {
-      spawn(graph, false);
+      spawn(graph);
       this.nextSpawnTime = getNextSpawnTime(graph);
     }
   }

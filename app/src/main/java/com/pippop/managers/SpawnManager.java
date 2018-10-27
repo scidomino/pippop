@@ -12,11 +12,8 @@ import com.pippop.style.GameStyle;
 import com.pippop.style.PlayerStyle;
 import com.pippop.util.RandomChooser;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
@@ -42,29 +39,29 @@ public abstract class SpawnManager {
     sound.start();
   }
 
-  void spawn(Graph graph, boolean openAirOnly) {
-    Vertex vertex;
-    Color color;
+  private void spawn(Graph graph, GameStyle gameStyle, Vertex vertex) {
+    graph.spawn(vertex, gameStyle);
+    sound.seekTo(0);
+    sound.start();
+  }
 
-    Map<Vertex, Set<Color>> map = createTouchingMap(graph);
-    List<Vertex> vertices = findOpen(map);
+  void spawn(Graph graph) {
+    Vertex vertex = getRandom(getOpenAirVertices(graph));
 
-    if (openAirOnly) {
-      vertices.retainAll(getOpenAirVertices(graph));
-    }
+    Set<Color> colors = new HashSet<>();
+    addColor(colors, vertex.getEdge().getBubble());
+    addColor(colors, vertex.getEdge().getTwin().getBubble());
+    addColor(colors, vertex.getEdge().getTwin().getNext().getTwin().getBubble());
 
-    if (!vertices.isEmpty()) {
-      vertex = getRandom(vertices);
-      color = colorChooser.chooseRanom(map.get(vertex));
-    } else {
-      vertex = getRandom(graph.getVertices());
-      if (openAirOnly) {
-        vertices.retainAll(getOpenAirVertices(graph));
-      }
-      color = colorChooser.chooseRanom();
-    }
+    Color color = colorChooser.chooseRanom(colors);
 
     spawn(graph, new GameStyle(1, color), vertex);
+  }
+
+  private void addColor(Set<Color> colors, Bubble bubble) {
+    if (bubble.getStyle() instanceof GameStyle) {
+      colors.add(((GameStyle) bubble.getStyle()).getColor());
+    }
   }
 
   private List<Vertex> getOpenAirVertices(Graph graph) {
@@ -77,42 +74,5 @@ public abstract class SpawnManager {
 
   private <T> T getRandom(List<T> list) {
     return list.get(random.nextInt(list.size()));
-  }
-
-  private List<Vertex> findOpen(Map<Vertex, Set<Color>> map) {
-    List<Vertex> vertices = new ArrayList<>();
-    for (Entry<Vertex, Set<Color>> e : map.entrySet()) {
-      if (e.getValue().size() < colorChooser.getSize()) {
-        vertices.add(e.getKey());
-      }
-    }
-    return vertices;
-  }
-
-  private void spawn(Graph graph, GameStyle gameStyle, Vertex vertex) {
-    graph.spawn(vertex, gameStyle);
-    sound.seekTo(0);
-    sound.start();
-  }
-
-  private Map<Vertex, Set<Color>> createTouchingMap(Graph graph) {
-    Map<Vertex, Set<Color>> map = new HashMap<>();
-    for (Vertex vertex : graph.getVertices()) {
-      map.put(vertex, new HashSet<Color>());
-    }
-
-    for (Edge edge : graph.getEdges()) {
-      Set<Color> vertexColors = map.get(edge.getStart());
-      addBubbleColor(vertexColors, edge.getBubble());
-      addBubbleColor(vertexColors, edge.getNext().getTwin().getBubble());
-    }
-    return map;
-  }
-
-  private void addBubbleColor(Set<Color> set, Bubble bubble) {
-    if (bubble.getStyle() instanceof GameStyle) {
-      GameStyle gameStyle = (GameStyle) bubble.getStyle();
-      set.add(gameStyle.getColor());
-    }
   }
 }
