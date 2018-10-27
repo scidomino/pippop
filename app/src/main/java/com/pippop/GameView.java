@@ -1,6 +1,7 @@
 package com.pippop;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.opengl.GLES20;
@@ -27,6 +28,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class GameView extends GLSurfaceView {
   private final Graph graph = new Graph();
+
   private final BurstManager burst = new BurstManager(getContext(), 1);
   private final HighlightManager highlight = new HighlightManager();
   private final ShowAndMoveManager showAndMove = new ShowAndMoveManager();
@@ -36,8 +38,8 @@ public class GameView extends GLSurfaceView {
   private final RandomSpawnManager spawn =
       new RandomSpawnManager(Colors.getChooser(6), 20, getContext());
   private final BlowoutManager blowout = new BlowoutManager();
-
   private final ScoreManager score = new ScoreManager(getContext());
+
   private State state = State.NORMAL;
   private Graphics graphics;
 
@@ -100,19 +102,18 @@ public class GameView extends GLSurfaceView {
     }
 
     public void onSurfaceChanged(GL10 gl, int w, int h) {
-      // makes adjustments for screen ratio
       graphics.updateDimensions(w, h);
     }
 
     public void onDrawFrame(GL10 gl) {
       long elapsed = Math.min(System.currentTimeMillis() - startTime, 1000);
-      long dt = elapsed - MILIS_PER_FRAME;
-      try {
-        if (dt > 0) {
-          Thread.sleep(dt);
+
+      if (elapsed > MILIS_PER_FRAME) {
+        try {
+          Thread.sleep(elapsed - MILIS_PER_FRAME);
+        } catch (InterruptedException e) {
+          throw new IllegalStateException(e);
         }
-      } catch (InterruptedException e) {
-        throw new IllegalStateException(e);
       }
 
       startTime = System.currentTimeMillis();
@@ -138,8 +139,8 @@ public class GameView extends GLSurfaceView {
 
             if (blowout.isGameOver()) {
               highlight.setPoint(null);
-              Intent gameOverIntent = new Intent(getContext(), GameOverActivity.class);
-              getContext().startActivity(gameOverIntent);
+              ((Activity) getContext()).finish();
+              getContext().startActivity(new Intent(getContext(), GameOverActivity.class));
             }
           }
           break;

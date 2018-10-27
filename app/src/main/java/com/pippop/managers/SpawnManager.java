@@ -30,6 +30,7 @@ public class SpawnManager {
 
   public void reset(Graph graph, PlayerStyle centerStyle) {
     graph.reset(new ArrayList<>(colorChooser.getAll()), centerStyle);
+    sound.seekTo(0);
     sound.start();
   }
 

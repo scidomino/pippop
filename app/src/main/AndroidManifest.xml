@@ -26,12 +26,15 @@
     </activity>
     <activity
       android:name=".GameActivity"
+      android:parentActivityName=".MainActivity"
       android:screenOrientation="landscape"/>
     <activity
       android:name=".GameOverActivity"
+      android:parentActivityName=".MainActivity"
       android:screenOrientation="landscape"/>
     <activity
       android:name=".HighScoreActivity"
+      android:parentActivityName=".MainActivity"
       android:screenOrientation="landscape"/>
   </application>
 
