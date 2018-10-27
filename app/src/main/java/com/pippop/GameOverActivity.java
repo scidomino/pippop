@@ -47,7 +47,7 @@ public class GameOverActivity extends Activity {
     }.start();
   }
 
-  private void backToMain(View view) {
+  public void backToMain(View view) {
     startActivity(new Intent(this, MainActivity.class));
   }
 }
