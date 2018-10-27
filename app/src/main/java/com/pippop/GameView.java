@@ -13,15 +13,12 @@ import com.pippop.graphics.Graphics;
 import com.pippop.managers.BlowoutManager;
 import com.pippop.managers.BurstManager;
 import com.pippop.managers.HighlightManager;
-import com.pippop.managers.ImpossibleSuccessManager;
-import com.pippop.managers.PipPopManager;
 import com.pippop.managers.PopManager;
 import com.pippop.managers.RandomSpawnManager;
 import com.pippop.managers.ScoreManager;
 import com.pippop.managers.ShowAndMoveManager;
 import com.pippop.managers.SlideManager;
 import com.pippop.managers.SpawnManager;
-import com.pippop.managers.SuccessManager;
 import com.pippop.managers.SwapManager;
 import com.pippop.style.PlayerStyle;
 import com.pippop.util.Colors;
@@ -38,9 +35,8 @@ public class GameView extends GLSurfaceView {
   private final SlideManager slide = new SlideManager(burst);
   private final SwapManager swap = new SwapManager();
   private final SpawnManager spawn = new RandomSpawnManager(Colors.getChooser(6), 20, getContext());
-  private final PipPopManager pipPop = new PipPopManager();
   private final BlowoutManager blowout = new BlowoutManager();
-  private final SuccessManager success = new ImpossibleSuccessManager();
+
   private final ScoreManager score = new ScoreManager(getContext());
   private State state = State.NORMAL;
   private Graphics graphics;
@@ -85,8 +81,7 @@ public class GameView extends GLSurfaceView {
     NORMAL,
     SWAPPING,
     BURST,
-    POPPING,
-    PIPPOP
+    POPPING
   }
 
   private class GameRenderer implements Renderer {
@@ -95,7 +90,6 @@ public class GameView extends GLSurfaceView {
 
     GameRenderer() {
       spawn.reset(graph, new PlayerStyle(getContext()));
-      success.reset();
       blowout.reset();
     }
 
@@ -142,11 +136,7 @@ public class GameView extends GLSurfaceView {
           } else {
             blowout.update(graph, delta);
 
-            if (success.hasSucceeded(graph)) {
-              if (!score.isProcessing()) {
-                highlight.setPoint(null);
-              }
-            } else if (blowout.isGameOver()) {
+            if (blowout.isGameOver()) {
               highlight.setPoint(null);
               Intent gameOverIntent = new Intent(getContext(), GameOverActivity.class);
               getContext().startActivity(gameOverIntent);
@@ -160,7 +150,6 @@ public class GameView extends GLSurfaceView {
           if (pop.isDone()) {
             PoppedBubble popped = pop.popBubble();
             score.onPop(popped);
-            success.onPop(popped);
             state = State.NORMAL;
           }
           break;
@@ -183,18 +172,9 @@ public class GameView extends GLSurfaceView {
               state = State.BURST;
             } else if (burst.findAndSetBurstableEdges(graph)) {
               state = State.BURST;
-            } else if (pipPop.hasPipPop(graph)) {
-              pipPop.reset();
-              state = State.PIPPOP;
             } else {
               state = State.NORMAL;
             }
-          }
-          break;
-        case PIPPOP:
-          pipPop.update(delta);
-          if (pipPop.isDone()) {
-            state = State.NORMAL;
           }
           break;
       }
@@ -212,9 +192,6 @@ public class GameView extends GLSurfaceView {
           break;
         case BURST:
           burst.render(g);
-          break;
-        case PIPPOP:
-          pipPop.render(g);
           break;
         case NORMAL:
           highlight.render(graph, g);
