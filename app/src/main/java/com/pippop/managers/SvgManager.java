@@ -1,6 +1,5 @@
 package com.pippop.managers;
 
-import android.content.Context;
 import android.os.Environment;
 import com.pippop.graph.Bubble;
 import com.pippop.graph.Edge;
@@ -20,7 +19,7 @@ import java.util.Date;
 
 class SvgManager {
 
-  public void write(Graph graph, Context context) {
+  public void write(Graph graph) {
     try {
       File dir =
           new File(
