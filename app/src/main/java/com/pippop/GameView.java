@@ -18,7 +18,6 @@ import com.pippop.managers.RandomSpawnManager;
 import com.pippop.managers.ScoreManager;
 import com.pippop.managers.ShowAndMoveManager;
 import com.pippop.managers.SlideManager;
-import com.pippop.managers.SpawnManager;
 import com.pippop.managers.SwapManager;
 import com.pippop.style.PlayerStyle;
 import com.pippop.util.Colors;
@@ -34,7 +33,8 @@ public class GameView extends GLSurfaceView {
   private final PopManager pop = new PopManager(burst, getContext());
   private final SlideManager slide = new SlideManager(burst);
   private final SwapManager swap = new SwapManager();
-  private final SpawnManager spawn = new RandomSpawnManager(Colors.getChooser(6), 20, getContext());
+  private final RandomSpawnManager spawn =
+      new RandomSpawnManager(Colors.getChooser(6), 20, getContext());
   private final BlowoutManager blowout = new BlowoutManager();
 
   private final ScoreManager score = new ScoreManager(getContext());
@@ -122,7 +122,7 @@ public class GameView extends GLSurfaceView {
 
     void update(int delta) {
       showAndMove.update(graph, 0, 0);
-      spawn.update(graph, delta);
+      spawn.update(delta);
       score.update(delta);
       pop.removeDeflated(graph);
       switch (state) {
@@ -142,9 +142,7 @@ public class GameView extends GLSurfaceView {
               getContext().startActivity(gameOverIntent);
             }
           }
-
           break;
-
         case POPPING:
           pop.update(delta);
           if (pop.isDone()) {
@@ -156,7 +154,6 @@ public class GameView extends GLSurfaceView {
         case SWAPPING:
           swap.update(delta);
           if (swap.isDone()) {
-            spawn.swapDone();
             if (burst.findAndSetBurstableEdges(graph)) {
               state = State.BURST;
             } else {

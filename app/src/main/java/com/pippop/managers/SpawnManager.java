@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-public abstract class SpawnManager {
+public class SpawnManager {
 
   private final RandomChooser<Color> colorChooser;
   private final Random random = new Random();
@@ -27,12 +27,6 @@ public abstract class SpawnManager {
     this.colorChooser = colorChooser;
     this.sound = MediaPlayer.create(context, R.raw.spawn);
   }
-
-  public abstract void update(Graph graph, int delta);
-
-  public abstract void possiblySpawn(Graph graph);
-
-  public void swapDone() {}
 
   public void reset(Graph graph, PlayerStyle centerStyle) {
     graph.reset(new ArrayList<>(colorChooser.getAll()), centerStyle);

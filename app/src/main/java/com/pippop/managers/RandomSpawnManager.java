@@ -18,13 +18,11 @@ public class RandomSpawnManager extends SpawnManager {
     this.minBubbles = minBubbles;
   }
 
-  @Override
-  public void update(Graph graph, int delta) {
+  public void update(int delta) {
     totalPlayTime += delta;
     nextSpawnTime -= delta;
   }
 
-  @Override
   public void possiblySpawn(Graph graph) {
     if (nextSpawnTime < 0) {
       spawn(graph);
