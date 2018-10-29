@@ -10,8 +10,8 @@ import com.pippop.graph.Vertex;
 import com.pippop.graphics.Color;
 import com.pippop.style.GameStyle;
 import com.pippop.style.PlayerStyle;
-import com.pippop.util.RandomChooser;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -19,17 +19,17 @@ import java.util.Set;
 
 public class SpawnManager {
 
-  private final RandomChooser<Color> colorChooser;
   private final Random random = new Random();
   private final MediaPlayer sound;
+  private final List<Color> colors;
 
-  SpawnManager(RandomChooser<Color> colorChooser, Context context) {
-    this.colorChooser = colorChooser;
+  SpawnManager(List<Color> colors, Context context) {
+    this.colors = colors;
     this.sound = MediaPlayer.create(context, R.raw.spawn);
   }
 
   public void reset(Graph graph, PlayerStyle centerStyle) {
-    graph.reset(new ArrayList<>(colorChooser.getAll()), centerStyle);
+    graph.reset(colors, centerStyle);
     sound.seekTo(0);
     sound.start();
   }
@@ -43,20 +43,29 @@ public class SpawnManager {
   void spawn(Graph graph) {
     Vertex vertex = getRandom(getOpenAirVertices(graph));
 
-    Set<Color> colors = new HashSet<>();
-    addColor(colors, vertex.getEdge().getBubble());
-    addColor(colors, vertex.getEdge().getTwin().getBubble());
-    addColor(colors, vertex.getEdge().getTwin().getNext().getTwin().getBubble());
-
-    Color color = colorChooser.chooseRanom(colors);
-
+    Set<Color> choices = getDistantColors(vertex);
+    Color color = getRandom(new ArrayList<>(choices));
     spawn(graph, new GameStyle(1, color), vertex);
   }
 
-  private void addColor(Set<Color> colors, Bubble bubble) {
-    if (bubble.getStyle() instanceof GameStyle) {
-      colors.add(((GameStyle) bubble.getStyle()).getColor());
+  private Set<Color> getDistantColors(Vertex vertex) {
+    Set<Color> colors = new HashSet<>(this.colors);
+
+    Edge edge = vertex.getEdge();
+    for (Edge e :
+        Arrays.asList(
+            edge,
+            edge.getTwin(),
+            edge.getPrev().getTwin(),
+            edge.getNext().getTwin(),
+            edge.getPrev().getPrev().getTwin(),
+            edge.getTwin().getNext().getNext().getTwin())) {
+      Bubble bubble = e.getBubble();
+      if (bubble.getStyle() instanceof GameStyle) {
+        colors.remove(((GameStyle) bubble.getStyle()).getColor());
+      }
     }
+    return colors;
   }
 
   private List<Vertex> getOpenAirVertices(Graph graph) {

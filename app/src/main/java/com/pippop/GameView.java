@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import com.pippop.graph.Graph;
 import com.pippop.graph.Point;
+import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
 import com.pippop.managers.BlowoutManager;
 import com.pippop.managers.BurstManager;
@@ -21,7 +22,6 @@ import com.pippop.managers.ShowAndMoveManager;
 import com.pippop.managers.SlideManager;
 import com.pippop.managers.SwapManager;
 import com.pippop.style.PlayerStyle;
-import com.pippop.util.Colors;
 import com.pippop.util.PoppedBubble;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -36,7 +36,7 @@ public class GameView extends GLSurfaceView {
   private final SlideManager slide = new SlideManager(burst);
   private final SwapManager swap = new SwapManager();
   private final RandomSpawnManager spawn =
-      new RandomSpawnManager(Colors.getChooser(6), 20, getContext());
+      new RandomSpawnManager(Color.getGroup(6), 20, getContext());
   private final BlowoutManager blowout = new BlowoutManager();
   private final ScoreManager score = new ScoreManager(getContext());
 
