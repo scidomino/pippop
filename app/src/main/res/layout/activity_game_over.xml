@@ -11,6 +11,8 @@
   <android.support.v7.widget.AppCompatTextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:lineSpacingMultiplier="0.6"
     android:shadowColor="@color/white"
     android:shadowDx="-10"
     android:shadowDy="10"
