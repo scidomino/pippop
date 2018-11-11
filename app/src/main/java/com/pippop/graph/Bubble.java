@@ -88,7 +88,7 @@ public class Bubble implements Iterable<Edge> {
     return firstEdge;
   }
 
-  public void setFirstEdge(Edge start) {
+  void setFirstEdge(Edge start) {
     this.firstEdge = start;
   }
 
@@ -140,7 +140,7 @@ public class Bubble implements Iterable<Edge> {
     for (Edge edge : this) {
       area += edge.getArea();
     }
-    return area;
+    return Math.max(area, 1); // ensure always positive
   }
 
   private Point calculateCenter() {
