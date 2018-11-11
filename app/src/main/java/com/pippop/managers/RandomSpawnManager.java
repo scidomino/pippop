@@ -2,8 +2,6 @@ package com.pippop.managers;
 
 import android.content.Context;
 import com.pippop.graph.Graph;
-import com.pippop.graphics.Color;
-import java.util.List;
 import java.util.Random;
 
 public class RandomSpawnManager extends SpawnManager {
@@ -13,8 +11,8 @@ public class RandomSpawnManager extends SpawnManager {
   private int nextSpawnTime = 1000;
   private long totalPlayTime = 0;
 
-  public RandomSpawnManager(List<Color> colors, int minBubbles, Context context) {
-    super(colors, context);
+  public RandomSpawnManager(int colorCount, int minBubbles, Context context) {
+    super(colorCount, context);
     this.minBubbles = minBubbles;
   }
 
@@ -32,9 +30,9 @@ public class RandomSpawnManager extends SpawnManager {
 
   private int getNextSpawnTime(Graph graph) {
     if (graph.getBubbles().size() < minBubbles) {
-      return 1000;
+      return (int) (1000 * Math.min(Math.abs(random.nextGaussian()), 2));
     }
     double averageWait = 1000 * (1 + 1.5 * Math.exp(-totalPlayTime / 200000f));
-    return (int) (-averageWait * Math.log(1 - random.nextDouble()));
+    return (int) (averageWait * -Math.log(random.nextDouble()));
   }
 }

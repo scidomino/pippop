@@ -23,8 +23,8 @@ public class SpawnManager {
   private final MediaPlayer sound;
   private final List<Color> colors;
 
-  SpawnManager(List<Color> colors, Context context) {
-    this.colors = colors;
+  SpawnManager(int  colorCount, Context context) {
+    this.colors = Color.getGroup(colorCount);
     this.sound = MediaPlayer.create(context, R.raw.spawn);
   }
 

@@ -10,7 +10,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import com.pippop.graph.Graph;
 import com.pippop.graph.Point;
-import com.pippop.graphics.Color;
 import com.pippop.graphics.Graphics;
 import com.pippop.managers.BlowoutManager;
 import com.pippop.managers.BurstManager;
@@ -35,8 +34,7 @@ public class GameView extends GLSurfaceView {
   private final PopManager pop = new PopManager(burst, getContext());
   private final SlideManager slide = new SlideManager(burst);
   private final SwapManager swap = new SwapManager();
-  private final RandomSpawnManager spawn =
-      new RandomSpawnManager(Color.getGroup(6), 20, getContext());
+  private final RandomSpawnManager spawn = new RandomSpawnManager(6, 20, getContext());
   private final BlowoutManager blowout = new BlowoutManager();
   private final ScoreManager score = new ScoreManager(getContext());
 
