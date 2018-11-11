@@ -15,10 +15,11 @@ import com.pippop.managers.BlowoutManager;
 import com.pippop.managers.BurstManager;
 import com.pippop.managers.HighlightManager;
 import com.pippop.managers.PopManager;
-import com.pippop.managers.RandomSpawnManager;
+import com.pippop.managers.RatchetSpawnTimer;
 import com.pippop.managers.ScoreManager;
 import com.pippop.managers.ShowAndMoveManager;
 import com.pippop.managers.SlideManager;
+import com.pippop.managers.SpawnManager;
 import com.pippop.managers.SwapManager;
 import com.pippop.style.PlayerStyle;
 import com.pippop.util.PoppedBubble;
@@ -34,7 +35,8 @@ public class GameView extends GLSurfaceView {
   private final PopManager pop = new PopManager(burst, getContext());
   private final SlideManager slide = new SlideManager(burst);
   private final SwapManager swap = new SwapManager();
-  private final RandomSpawnManager spawn = new RandomSpawnManager(6, 20, getContext());
+  private final SpawnManager spawn =
+      new SpawnManager(6, new RatchetSpawnTimer(2000, 120000), getContext());
   private final BlowoutManager blowout = new BlowoutManager();
   private final ScoreManager score = new ScoreManager(getContext());
 

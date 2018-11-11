@@ -55,7 +55,7 @@ public class Bubble implements Iterable<Edge> {
   }
 
   public double getPressureRatio() {
-    return style.getTargetArea() / area;
+    return style.getTargetArea() / Math.max(area, 0);
   }
 
   public Set<Bubble> getAdjacentBubbles() {
@@ -88,7 +88,7 @@ public class Bubble implements Iterable<Edge> {
     return firstEdge;
   }
 
-  void setFirstEdge(Edge start) {
+  public void setFirstEdge(Edge start) {
     this.firstEdge = start;
   }
 
@@ -140,7 +140,7 @@ public class Bubble implements Iterable<Edge> {
     for (Edge edge : this) {
       area += edge.getArea();
     }
-    return Math.max(area, 1); // ensure always positive
+    return area;
   }
 
   private Point calculateCenter() {

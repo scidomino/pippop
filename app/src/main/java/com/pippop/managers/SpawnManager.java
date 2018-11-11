@@ -21,11 +21,17 @@ public class SpawnManager {
 
   private final Random random = new Random();
   private final MediaPlayer sound;
+  private final SpawnTimer spawnTimer;
   private final List<Color> colors;
 
-  SpawnManager(int  colorCount, Context context) {
+  private int nextSpawnTime;
+  private long totalPlayTime = 0;
+
+  public SpawnManager(int colorCount, SpawnTimer spawnTimer, Context context) {
     this.colors = Color.getGroup(colorCount);
     this.sound = MediaPlayer.create(context, R.raw.spawn);
+    this.spawnTimer = spawnTimer;
+    this.nextSpawnTime = getNextSpawnTime(3);
   }
 
   public void reset(Graph graph, PlayerStyle centerStyle) {
@@ -40,7 +46,7 @@ public class SpawnManager {
     sound.start();
   }
 
-  void spawn(Graph graph) {
+  private void spawn(Graph graph) {
     Vertex vertex = getRandom(getOpenAirVertices(graph));
 
     Set<Color> choices = getDistantColors(vertex);
@@ -48,6 +54,7 @@ public class SpawnManager {
     spawn(graph, new GameStyle(1, color), vertex);
   }
 
+  // Colors from bubbles touching this vertex or bubbles touching bubbles that touch this vertex.
   private Set<Color> getDistantColors(Vertex vertex) {
     Set<Color> colors = new HashSet<>(this.colors);
 
@@ -78,5 +85,26 @@ public class SpawnManager {
 
   private <T> T getRandom(List<T> list) {
     return list.get(random.nextInt(list.size()));
+  }
+
+  public void update(int delta) {
+    totalPlayTime += delta;
+    nextSpawnTime -= delta;
+  }
+
+  public void possiblySpawn(Graph graph) {
+    if (nextSpawnTime < 0) {
+      spawn(graph);
+      this.nextSpawnTime = getNextSpawnTime(graph.getBubbles().size());
+    }
+  }
+
+  private int getNextSpawnTime(int bubbleCount) {
+    double averageWait = spawnTimer.getAverageWait(bubbleCount, totalPlayTime);
+    return (int) (averageWait * -Math.log(random.nextDouble()));
+  }
+
+  public interface SpawnTimer {
+    double getAverageWait(int bubbleCount, long totalPlayTime);
   }
 }
