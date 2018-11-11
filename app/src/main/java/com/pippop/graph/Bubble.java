@@ -54,11 +54,8 @@ public class Bubble implements Iterable<Edge> {
         && (x < Math.min(x1, x2) || (y - y1) / (x - x1) >= (y2 - y1) / (x2 - x1));
   }
 
-  public double getPressureRatio(double speedBump) {
-    if (area * speedBump < style.getTargetArea()) {
-      return -speedBump;
-    }
-    return -style.getTargetArea() / area;
+  public double getPressureRatio() {
+    return style.getTargetArea() / area;
   }
 
   public Set<Bubble> getAdjacentBubbles() {

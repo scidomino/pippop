@@ -38,7 +38,7 @@ class ForceCalculator {
       Graph graph) {
     Arrays.fill(vertexForce, 0, graph.getVertices().size(), 0f);
     for (Edge edge : graph.getEdges()) {
-      double pressureDiff = edge.getPressure(PRESSURE_SPEED_BUMP);
+      double pressureDiff = clamp(edge.getPressure(), PRESSURE_SPEED_BUMP);
 
       float vForce = gravity;
       vForce -= SURFACE_TENSION * surface.getVertex(edge);
@@ -50,5 +50,9 @@ class ForceCalculator {
       cpForce -= PRESSURE_TENSION * pressureDiff * pressure.getCtrl(edge);
       ctrlPointForce[edge.getStartCtrl().getIndex()] = cpForce;
     }
+  }
+
+  private double clamp(double value, float clampValue) {
+    return Math.max(-clampValue, Math.min(value, clampValue));
   }
 }

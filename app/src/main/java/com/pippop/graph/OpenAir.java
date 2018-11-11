@@ -10,8 +10,8 @@ public class OpenAir extends Bubble {
     super(new EmptyStyle(0), start, Graphics.createFloatBuffer(1000));
   }
 
-  public double getPressureRatio(double speedBump) {
-    return -1;
+  public double getPressureRatio() {
+    return 1;
   }
 
 }

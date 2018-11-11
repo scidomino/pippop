@@ -28,8 +28,7 @@ public class GameStyle implements Style {
   public void render(Graphics g, FloatBuffer buffer, Color outlineColor) {
     g.drawFill(buffer, this.color);
     g.draw(buffer, outlineColor, 4);
-    g.drawString(String.valueOf(size), Color.WHITE, Color.BLACK, buffer.get(0),
-        buffer.get(1));
+    g.drawString(String.valueOf(size), Color.WHITE, Color.BLACK, buffer.get(0), buffer.get(1));
   }
 
   @Override

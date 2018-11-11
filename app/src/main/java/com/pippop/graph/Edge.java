@@ -56,12 +56,12 @@ public class Edge {
   private static float calculateHalfPartialCentroid(
       float sx, float sy, float scx, float scy, float ecx, float ecy, float ex, float ey) {
     return (scx * ecx * (45 * sy + 27 * scy)
-        + scx * ex * (12 * sy + 18 * scy)
-        + sx * scx * (105 * sy - 45 * scy - 45 * ecy - 15 * ey)
-        + sx * ecx * (30 * sy)
-        + sx * ex * (5 * sy + 3 * scy)
-        + scx * scx * (45 * sy - 27 * ecy - 18 * ey)
-        + sx * sx * (-280 * sy - 105 * scy - 30 * ecy - 5 * ey))
+            + scx * ex * (12 * sy + 18 * scy)
+            + sx * scx * (105 * sy - 45 * scy - 45 * ecy - 15 * ey)
+            + sx * ecx * (30 * sy)
+            + sx * ex * (5 * sy + 3 * scy)
+            + scx * scx * (45 * sy - 27 * ecy - 18 * ey)
+            + sx * sx * (-280 * sy - 105 * scy - 30 * ecy - 5 * ey))
         / 840;
   }
 
@@ -133,9 +133,8 @@ public class Edge {
     return (int) Math.hypot(start.x - getEnd().x, start.y - getEnd().y);
   }
 
-  public double getPressure(double speedBump) {
-    Bubble otherBubble = getTwin().getBubble();
-    return getBubble().getPressureRatio(speedBump) - otherBubble.getPressureRatio(speedBump);
+  public double getPressure() {
+    return getTwin().getBubble().getPressureRatio() - getBubble().getPressureRatio();
   }
 
   public double getArea() {
@@ -156,9 +155,7 @@ public class Edge {
     halfArea = calculateHalfArea();
   }
 
-  /**
-   * Calculates half of the area. To get the total subtract the twin edge's half.
-   */
+  /** Calculates half of the area. To get the total subtract the twin edge's half. */
   private float calculateHalfArea() {
     Point s = getStart();
     Point sc = getStartCtrl();
