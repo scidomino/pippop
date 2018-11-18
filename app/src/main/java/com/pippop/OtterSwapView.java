@@ -26,7 +26,7 @@ import com.pippop.util.PoppedBubble;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class GameView extends GLSurfaceView {
+public class OtterSwapView extends GLSurfaceView {
   private final Graph graph = new Graph();
 
   private final BurstManager burst = new BurstManager(getContext(), 1);
@@ -43,7 +43,7 @@ public class GameView extends GLSurfaceView {
   private State state = State.NORMAL;
   private Graphics graphics;
 
-  public GameView(Context context, AttributeSet attrs) {
+  public OtterSwapView(Context context, AttributeSet attrs) {
     super(context, attrs);
     setEGLContextClientVersion(2);
     setRenderer(new GameRenderer());

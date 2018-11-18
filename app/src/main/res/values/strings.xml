@@ -9,4 +9,8 @@
   <string name="game_over">Gioco Concluso</string>
   <string name="burst_chain">%1$d Concatenati!</string>
   <string name="pop_chain">%1$d Scatti Concatenati!</string>
+  <string name="choose_mode">Choose Mode</string>
+  <string name="zen">Zen</string>
+  <string name="three_zen">Three Zen</string>
+  <string name="otter_swap">Otter Swap</string>
 </resources>

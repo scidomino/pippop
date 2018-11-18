@@ -25,6 +25,6 @@ public class MainActivity extends Activity {
   }
 
   public void startPlay(View view) {
-    startActivity(new Intent(this, GameActivity.class));
+    startActivity(new Intent(this, MapActivity.class));
   }
 }

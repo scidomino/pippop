@@ -1,0 +1,11 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  tools:context=".ThreeZenActivity">
+
+  <com.pippop.ThreeZenView
+    android:id="@+id/fullscreen_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true"/>
+
+</merge>

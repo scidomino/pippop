@@ -10,9 +10,9 @@
 
   <android.support.v7.widget.AppCompatTextView
     android:id="@+id/highScore"
-    android:layout_margin="10sp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="10sp"
     android:gravity="end"
     android:textColor="@color/white"
     android:textSize="40sp"/>
