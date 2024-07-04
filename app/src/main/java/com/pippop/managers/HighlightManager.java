@@ -24,7 +24,7 @@ public class HighlightManager {
 
   public void render(Graph graph, Graphics g) {
     if (point != null) {
-      Bubble bubble = graph.getClosestSwappable(point).getBubble();
+      Bubble bubble = graph.getClosestOtterSwappable(point).getBubble();
       if (bubble != null) {
         glowBubble(g, bubble, 1);
       }

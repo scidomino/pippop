@@ -13,12 +13,21 @@ public class SwapManager {
 
   public SwapManager() {}
 
-  public boolean swap(Graph graph, Point point) {
+  public boolean otterSwap(Graph graph, Point point) {
     Bubble playerBubble = graph.getPlayerBubble();
     if (playerBubble.contains(point)) {
       return false;
     }
 
+    Edge edge = graph.getClosestOtterSwappable(point);
+    if (edge != null) {
+      this.pair = new SwapPair(edge, false);
+      return true;
+    }
+    return false;
+  }
+
+  public boolean swap(Graph graph, Point point) {
     Edge edge = graph.getClosestSwappable(point);
     if (edge != null) {
       this.pair = new SwapPair(edge, false);

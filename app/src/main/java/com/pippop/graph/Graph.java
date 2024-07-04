@@ -92,7 +92,7 @@ public class Graph {
     return new Point(x, y);
   }
 
-  public Edge getClosestSwappable(Point point) {
+  public Edge getClosestOtterSwappable(Point point) {
     Bubble playerBubble = getPlayerBubble();
     float minDistance = Float.MAX_VALUE;
     Edge closestEdge = null;
@@ -108,6 +108,25 @@ public class Graph {
       }
     }
     return closestEdge;
+  }
+
+  public Edge getClosestSwappable(Point point) {
+    float minDistance = Float.MAX_VALUE;
+    Edge closestEdge = null;
+    for (Edge edge : edges) {
+      float distance = distance(edge, point);
+      if (distance < minDistance) {
+        closestEdge = edge.getTwin();
+        minDistance = distance;
+      }
+    }
+    return closestEdge;
+  }
+
+  private float distance(Edge edge, Point point) {
+    return Math.min(
+        Math.min(distance(edge.getStart(), point), distance(edge.getEnd(), point)),
+        distance(edge.getCenter(), point));
   }
 
   private float distance(Point a, Point b) {

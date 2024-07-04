@@ -70,7 +70,7 @@ public class OtterSwapView extends GLSurfaceView {
           @Override
           public void run() {
             if (state == State.NORMAL) {
-              if (swap.swap(graph, point)) {
+              if (swap.otterSwap(graph, point)) {
                 state = State.SWAPPING;
               }
               highlight.setPoint(null);

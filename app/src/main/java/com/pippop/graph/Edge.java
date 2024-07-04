@@ -124,8 +124,8 @@ public class Edge {
   }
 
   public Point getCenter() {
-    float x = (2 * start.x + 2 * getEnd().x + startCtrl.x + getEndCtrl().x) / 6;
-    float y = (2 * start.y + 2 * getEnd().y + startCtrl.y + getEndCtrl().y) / 6;
+    float x = ((start.x + getEnd().x) + 3 * (startCtrl.x + getEndCtrl().x)) / 8;
+    float y = ((start.y + getEnd().y) + 3 * (startCtrl.y + getEndCtrl().y)) / 8;
     return new Point(x, y);
   }
 
