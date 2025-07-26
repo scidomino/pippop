@@ -1,8 +1,9 @@
 // rust_core/src/graph/bubble.rs
 
+use crate::graph::EdgeKey;
+
 #[derive(Debug)]
 pub struct Bubble {
-    /// The ID of the first edge in the cycle forming this bubble's boundary.
-    pub first_edge_id: usize,
+    pub first_edge_key: EdgeKey,
     pub pressure: f64,
 }

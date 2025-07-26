@@ -1,6 +1,11 @@
 [package]
 name = "rust_core"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+
+[lib]
+name = "pippop_rust"
+crate-type = ["cdylib"]
 
 [dependencies]
+slotmap = "1.0.7"
