@@ -1,11 +1,14 @@
 pub mod bubble;
 pub mod edge;
+pub mod point;
 pub mod vertex;
 
 use bubble::{Bubble, BubbleKey};
 use edge::{Edge, EdgeKey};
 use slotmap::SlotMap;
 use vertex::{Vertex, VertexKey};
+
+use crate::graph::point::Point;
 
 pub struct RelationManager {
     pub vertecies: SlotMap<VertexKey, Vertex>,
@@ -24,8 +27,8 @@ impl RelationManager {
         self.vertecies.clear();
         self.bubbles.clear();
 
-        let vkey1 = self.vertecies.insert(Vertex::new());
-        let vkey2 = self.vertecies.insert(Vertex::new());
+        let vkey1 = self.vertecies.insert(Vertex::new(Point::new(50.0, 0.0)));
+        let vkey2 = self.vertecies.insert(Vertex::new(Point::new(50.0, 100.0)));
         let ekeys1 = vkey1.edge_keys();
         let ekeys2 = vkey2.edge_keys();
 
@@ -40,13 +43,6 @@ impl RelationManager {
         let b2 = self.bubbles.insert(Bubble::new(false));
         self.rebubble(b2, ekeys1[2]);
     }
-
-    // pub fn spawn_bubble(&mut self, vkey: VertexKey) -> BubbleKey {
-
-    //  let a = self.vertecies.insert(Vertex::new());
-    //  let b = self.vertecies.insert(Vertex::new());
-
-    // }
 
     pub fn remove_edge(&mut self, ekey: EdgeKey) {
         let twin = self.get_edge(ekey).twin;

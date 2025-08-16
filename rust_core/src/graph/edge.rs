@@ -1,5 +1,6 @@
 use super::vertex::VertexKey;
 use super::bubble::BubbleKey;
+use super::point::Point;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct EdgeKey {
@@ -19,6 +20,7 @@ impl EdgeKey {
         EdgeKey { vertex, offset }
     }
 
+    // Returns the next edge key on the vertex in a clockwise direction
     pub fn next_on_vertex(&self) -> EdgeKey {
         EdgeKey {
             vertex: self.vertex,
@@ -26,6 +28,7 @@ impl EdgeKey {
         }
     }
 
+    // Returns the previous edge key on the vertex in a clockwise direction
     pub fn prev_on_vertex(&self) -> EdgeKey {
         EdgeKey {
             vertex: self.vertex,
@@ -36,13 +39,15 @@ impl EdgeKey {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Edge {
+    pub point: Point,
     pub twin: EdgeKey,
     pub bubble: BubbleKey,
 }
 
 impl Edge {
-    pub fn new() -> Self {
+    pub fn new(point: Point) -> Self {
         Edge {
+            point: point,
             twin: EdgeKey::default(),
             bubble: BubbleKey::default(),
         }

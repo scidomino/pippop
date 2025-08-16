@@ -1,3 +1,4 @@
+use super::point::Point;
 use super::edge::{Edge, EdgeKey};
 use slotmap::new_key_type;
 
@@ -18,13 +19,15 @@ impl VertexKey {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vertex {
+    pub point: Point,
     pub edges: [Edge; 3],
 }
 
 impl Vertex {
-    pub fn new() -> Self {
+    pub fn new(point: Point) -> Self {
         Vertex {
-            edges: [Edge::new(), Edge::new(), Edge::new()],
+            point,
+            edges: [Edge::new(point), Edge::new(point), Edge::new(point)],
         }
     }
 }
