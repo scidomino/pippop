@@ -1,6 +1,7 @@
-use super::vertex::VertexKey;
 use super::bubble::BubbleKey;
 use super::point::Point;
+use super::vertex::Vertex;
+use super::vertex::VertexKey;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct EdgeKey {
@@ -51,5 +52,17 @@ impl Edge {
             twin: EdgeKey::default(),
             bubble: BubbleKey::default(),
         }
+    }
+
+    pub fn get_half_area(&self, vertex: &Vertex, twin: &Edge, twin_vertex: &Vertex) -> f32 {
+        let s = vertex.point.position;
+        let sc = self.point.position;
+        let ec = twin.point.position;
+        let e = twin_vertex.point.position;
+
+        // Calculate the area of the triangle formed by the points
+        return (s.x * (-10.0 * s.y - 6.0 * sc.y - 3.0 * ec.y - e.y)
+            + sc.x * (6.0 * s.y - 3.0 * ec.y - 3.0 * e.y))
+            / 20.0;
     }
 }

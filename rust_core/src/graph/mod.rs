@@ -7,6 +7,7 @@ use bubble::{Bubble, BubbleKey};
 use edge::{Edge, EdgeKey};
 use slotmap::SlotMap;
 use vertex::{Vertex, VertexKey};
+use std::collections::HashMap;
 
 use crate::graph::point::Point;
 
@@ -45,9 +46,10 @@ impl RelationManager {
     }
 
     pub fn remove_edge(&mut self, ekey: EdgeKey) {
-        let twin = self.get_edge(ekey).twin;
-
-        let bkey = self.get_edge(ekey).bubble;
+        let (twin, bkey) = {
+            let edge = self.get_edge(ekey);
+            (edge.twin, edge.bubble)
+        };
         let twin_bkey = self.get_edge(twin).bubble;
         if bkey == twin_bkey {
             // Cannot remove edge with same bubble on both sides
@@ -115,9 +117,24 @@ impl RelationManager {
         return prev_on_bubble;
     }
 
+    pub fn update_areas(&mut self) {
+        let mut bubble_to_area: HashMap<BubbleKey, f32> = HashMap::new();
+        for vertex in self.vertecies.values() {
+            for edge in vertex.edges.iter() {
+                let (twin, twin_vertex) = self.get_edge_and_vertex(edge.twin);
+                let half_area = edge.get_half_area(vertex, twin, twin_vertex);
+                *bubble_to_area.entry(edge.bubble).or_insert(0.0) += half_area;
+                *bubble_to_area.entry(twin.bubble).or_insert(0.0) -= half_area;
+            }
+        }
+        for (bubble_key, area) in bubble_to_area {
+            self.bubbles[bubble_key].area = area;
+        }
+    }
+
     fn twin(&mut self, a: EdgeKey, b: EdgeKey) {
-        self.get_edge(a).twin = b;
-        self.get_edge(b).twin = a;
+        self.get_edge_mut(a).twin = b;
+        self.get_edge_mut(b).twin = a;
     }
 
     fn rebubble(&mut self, bkey: BubbleKey, ekey: EdgeKey) {
@@ -125,7 +142,7 @@ impl RelationManager {
 
         let mut next_edge = ekey;
         loop {
-            self.get_edge(next_edge).bubble = bkey;
+            self.get_edge_mut(next_edge).bubble = bkey;
             self.bubbles[bkey].edges.push(next_edge);
             next_edge = self.next_on_bubble(next_edge);
             if next_edge == ekey {
@@ -135,16 +152,25 @@ impl RelationManager {
     }
 
     // Returns the next edge in the bubble in the clockwise direction
-    fn next_on_bubble(&mut self, key: EdgeKey) -> EdgeKey {
+    fn next_on_bubble(&self, key: EdgeKey) -> EdgeKey {
         self.get_edge(key.next_on_vertex()).twin
     }
 
     // Returns the previous edge in the bubble in the clockwise direction
-    fn prev_on_bubble(&mut self, key: EdgeKey) -> EdgeKey {
+    fn prev_on_bubble(&self, key: EdgeKey) -> EdgeKey {
         self.get_edge(key).twin.next_on_vertex()
     }
 
-    fn get_edge(&mut self, key: EdgeKey) -> &mut Edge {
+    fn get_edge(&self, key: EdgeKey) -> &Edge {
+        &self.vertecies[key.vertex].edges[key.offset as usize]
+    }
+
+    fn get_edge_and_vertex(&self, key: EdgeKey) -> (&Edge, &Vertex) {
+        let vertex = &self.vertecies[key.vertex];
+        (&vertex.edges[key.offset as usize], vertex)
+    }
+
+    fn get_edge_mut(&mut self, key: EdgeKey) -> &mut Edge {
         &mut self.vertecies[key.vertex].edges[key.offset as usize]
     }
 }
