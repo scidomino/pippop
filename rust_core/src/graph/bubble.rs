@@ -29,11 +29,11 @@ impl Bubble {
         }
     }
 
-    pub fn get_pressure_ratio(&self) -> f32 {
+    pub fn get_pressure(&self, area: f32) -> f32 {
         if self.open_air {
             0.0
         } else {
-            3000.0 * self.size.sqrt() / self.area.max(0.0)
+            3000.0 * self.size.sqrt() / area
         }
     }
 }

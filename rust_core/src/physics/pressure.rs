@@ -1,0 +1,106 @@
+use crate::graph::bubble::BubbleKey;
+use crate::graph::edge::Edge;
+use crate::graph::edge::EdgeMap;
+use crate::graph::point::Coordinate;
+use crate::graph::vertex::Vertex;
+use crate::graph::vertex::VertexKey;
+use crate::graph::RelationManager;
+use slotmap::SecondaryMap;
+
+const PRESSURE_TENSION: f32 = 0.04;
+
+pub fn forces(
+    relation_manager: &RelationManager,
+) -> (SecondaryMap<VertexKey, Coordinate>, EdgeMap<Coordinate>) {
+    let bubble_to_pressure = get_bubble_to_pressure(relation_manager);
+    let mut vertex_to_force: SecondaryMap<VertexKey, Coordinate> = SecondaryMap::new();
+    let mut edge_to_force: EdgeMap<Coordinate> = EdgeMap::new();
+    for (key, vertex) in relation_manager.vertecies.iter() {
+        let mut vertex_force = Coordinate { x: 0.0, y: 0.0 };
+
+        for edge in vertex.edges.iter() {
+            let (twin, twin_vertex) = relation_manager.get_edge_and_vertex(edge.twin);
+
+            let pressure_diff = bubble_to_pressure[twin.bubble] - bubble_to_pressure[edge.bubble];
+            let pressure = pressure_diff * PRESSURE_TENSION;
+
+            vertex_force.x += pressure * vertex_x_force(vertex, edge, twin, twin_vertex);
+            vertex_force.y += pressure * vertex_y_force(vertex, edge, twin, twin_vertex);
+
+            edge_to_force.insert(
+                twin.twin,
+                Coordinate {
+                    x: pressure * edge_x_force(vertex, twin, twin_vertex),
+                    y: pressure * edge_y_force(vertex, twin, twin_vertex),
+                },
+            );
+        }
+
+        vertex_to_force.insert(key, vertex_force);
+    }
+    return (vertex_to_force, edge_to_force);
+}
+
+pub fn vertex_x_force(vertex: &Vertex, edge: &Edge, twin: &Edge, twin_vertex: &Vertex) -> f32 {
+    let s = vertex.point.position.y;
+    let sc = edge.point.position.y;
+    let ec = twin.point.position.y;
+    let e = twin_vertex.point.position.y;
+
+    return (-10.0 * s - 6.0 * sc - 3.0 * ec - e) / 20.0;
+}
+
+pub fn edge_x_force(vertex: &Vertex, twin: &Edge, twin_vertex: &Vertex) -> f32 {
+    let s = vertex.point.position.y;
+    let ec = twin.point.position.y;
+    let e = twin_vertex.point.position.y;
+
+    return (6.0 * s - 3.0 * ec - 3.0 * e) / 20.0;
+}
+
+pub fn vertex_y_force(vertex: &Vertex, edge: &Edge, twin: &Edge, twin_vertex: &Vertex) -> f32 {
+    let s = vertex.point.position.x;
+    let sc = edge.point.position.x;
+    let ec = twin.point.position.x;
+    let e = twin_vertex.point.position.x;
+
+    return (-10.0 * s + 6.0 * sc + 3.0 * ec + e) / 20.0;
+}
+
+pub fn edge_y_force(vertex: &Vertex, twin: &Edge, twin_vertex: &Vertex) -> f32 {
+    let s = vertex.point.position.x;
+    let ec = twin.point.position.x;
+    let e = twin_vertex.point.position.x;
+
+    return (-6.0 * s + 3.0 * ec + 3.0 * e) / 20.0;
+}
+
+fn get_bubble_to_pressure(relation_manager: &RelationManager) -> SecondaryMap<BubbleKey, f32> {
+    let mut bubble_to_area: SecondaryMap<BubbleKey, f32> = SecondaryMap::new();
+    for vertex in relation_manager.vertecies.values() {
+        for edge in vertex.edges.iter() {
+            let (twin, twin_vertex) = relation_manager.get_edge_and_vertex(edge.twin);
+            let half_area = get_half_area(vertex, edge, twin_vertex, twin);
+            bubble_to_area[edge.bubble] += half_area;
+            bubble_to_area[twin.bubble] -= half_area;
+        }
+    }
+
+    let mut bubble_to_pressure: SecondaryMap<BubbleKey, f32> = SecondaryMap::new();
+    for (key, bubble) in relation_manager.bubbles.iter() {
+        bubble_to_pressure[key] = bubble.get_pressure(bubble_to_area[key]);
+    }
+    bubble_to_pressure
+}
+
+fn get_half_area(vertex: &Vertex, edge: &Edge, twin_vertex: &Vertex, twin: &Edge) -> f32 {
+    let s = vertex.point.position;
+    let sc = edge.point.position;
+    let ec = twin.point.position;
+    let e = twin_vertex.point.position;
+
+    // Calculate the area of the triangle formed by the points
+    return (s.x * (-10.0 * s.y - 6.0 * sc.y - 3.0 * ec.y - e.y)
+        + sc.x * (6.0 * s.y - 3.0 * ec.y - 3.0 * e.y))
+        / 20.0;
+}

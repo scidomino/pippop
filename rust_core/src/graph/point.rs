@@ -1,11 +1,11 @@
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Coordinate {
     pub x: f32,
     pub y: f32,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Point {
     pub position: Coordinate,
     pub velocity: Coordinate,

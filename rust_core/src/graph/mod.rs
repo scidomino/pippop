@@ -7,7 +7,7 @@ use bubble::{Bubble, BubbleKey};
 use edge::{Edge, EdgeKey};
 use slotmap::SlotMap;
 use vertex::{Vertex, VertexKey};
-use std::collections::HashMap;
+
 
 use crate::graph::point::Point;
 
@@ -117,20 +117,7 @@ impl RelationManager {
         return prev_on_bubble;
     }
 
-    pub fn update_areas(&mut self) {
-        let mut bubble_to_area: HashMap<BubbleKey, f32> = HashMap::new();
-        for vertex in self.vertecies.values() {
-            for edge in vertex.edges.iter() {
-                let (twin, twin_vertex) = self.get_edge_and_vertex(edge.twin);
-                let half_area = edge.get_half_area(vertex, twin, twin_vertex);
-                *bubble_to_area.entry(edge.bubble).or_insert(0.0) += half_area;
-                *bubble_to_area.entry(twin.bubble).or_insert(0.0) -= half_area;
-            }
-        }
-        for (bubble_key, area) in bubble_to_area {
-            self.bubbles[bubble_key].area = area;
-        }
-    }
+    
 
     fn twin(&mut self, a: EdgeKey, b: EdgeKey) {
         self.get_edge_mut(a).twin = b;
@@ -165,7 +152,7 @@ impl RelationManager {
         &self.vertecies[key.vertex].edges[key.offset as usize]
     }
 
-    fn get_edge_and_vertex(&self, key: EdgeKey) -> (&Edge, &Vertex) {
+    pub fn get_edge_and_vertex(&self, key: EdgeKey) -> (&Edge, &Vertex) {
         let vertex = &self.vertecies[key.vertex];
         (&vertex.edges[key.offset as usize], vertex)
     }
