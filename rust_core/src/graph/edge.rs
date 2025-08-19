@@ -56,6 +56,7 @@ impl Edge {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct EdgeMap<V> {
     map: slotmap::SecondaryMap<VertexKey, [V; 3]>,
 }
@@ -65,6 +66,10 @@ impl<V> EdgeMap<V> {
         EdgeMap {
             map: slotmap::SecondaryMap::new(),
         }
+    }
+
+    pub fn clear(&mut self) {
+        self.map.clear();
     }
 
     pub fn get(&self, key: EdgeKey) -> Option<&V> {
