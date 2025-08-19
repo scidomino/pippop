@@ -1,4 +1,4 @@
-use super::force::Force;
+use super::vector::GraphVector;
 use crate::graph::edge::Edge;
 use crate::graph::point::Coordinate;
 use crate::graph::vertex::Vertex;
@@ -13,7 +13,7 @@ const LEGENDRE_GAUSS_POINTS: [(f32, f32); 3] = [
     (0.27777777777, 0.11270166537),
 ];
 
-pub fn update_force(relation_manager: &RelationManager, force: &mut Force) {
+pub fn update_force(relation_manager: &RelationManager, force: &mut GraphVector) {
     for (key, vertex) in relation_manager.vertecies.iter() {
         let mut vertex_force = Coordinate::default();
 
@@ -23,7 +23,7 @@ pub fn update_force(relation_manager: &RelationManager, force: &mut Force) {
             vertex_force.x += SURFACE_TENSION * vertex_x_force(vertex, edge, twin, twin_vertex);
             vertex_force.y += SURFACE_TENSION * vertex_y_force(vertex, edge, twin, twin_vertex);
 
-            force.add_edge_force(
+            force.add_edge(
                 edge.twin,
                 Coordinate {
                     x: SURFACE_TENSION * edge_x_force(vertex, edge, twin, twin_vertex),
@@ -32,7 +32,7 @@ pub fn update_force(relation_manager: &RelationManager, force: &mut Force) {
             );
         }
 
-        force.add_vertex_force(key, vertex_force);
+        force.add_vertex(key, vertex_force);
     }
 }
 
@@ -109,7 +109,7 @@ fn vertex_force(sx: f32, sy: f32, scx: f32, scy: f32, ecx: f32, ecy: f32, ex: f3
         let b_y_dp_s_x = 3.0 * p * p; // the only difference from edge force
         force += w * b_y_dp_s_x * b_x_dp / hypot;
     }
-    return force;
+    force
 }
 
 fn edge_force(sx: f32, sy: f32, scx: f32, scy: f32, ecx: f32, ecy: f32, ex: f32, ey: f32) -> f32 {
@@ -133,5 +133,5 @@ fn edge_force(sx: f32, sy: f32, scx: f32, scy: f32, ecx: f32, ecy: f32, ex: f32,
         let b_y_dp_sc_x = p * (6.0 - 9.0 * p); // the only difference from vertex force
         force += w * b_y_dp_sc_x * b_x_dp / hypot;
     }
-    return force;
+    force
 }

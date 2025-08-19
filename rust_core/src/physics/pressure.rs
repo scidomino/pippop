@@ -1,4 +1,4 @@
-use super::force::Force;
+use super::vector::GraphVector;
 use crate::graph::bubble::BubbleKey;
 use crate::graph::edge::Edge;
 use crate::graph::point::Coordinate;
@@ -8,7 +8,7 @@ use slotmap::SecondaryMap;
 
 const PRESSURE_TENSION: f32 = 0.04;
 
-pub fn update_force(relation_manager: &RelationManager, force: &mut Force) {
+pub fn update_force(relation_manager: &RelationManager, force: &mut GraphVector) {
     let bubble_to_pressure = get_bubble_to_pressure(relation_manager);
     for (key, vertex) in relation_manager.vertecies.iter() {
         let mut vertex_force = Coordinate::default();
@@ -23,7 +23,7 @@ pub fn update_force(relation_manager: &RelationManager, force: &mut Force) {
             vertex_force.x += pressure * vertex_x_force(vertex, edge, twin, twin_vertex);
             vertex_force.y += pressure * vertex_y_force(vertex, edge, twin, twin_vertex);
 
-            force.add_edge_force(
+            force.add_edge(
                 edge.twin,
                 Coordinate {
                     x: pressure * edge_x_force(vertex, twin, twin_vertex),
@@ -32,26 +32,26 @@ pub fn update_force(relation_manager: &RelationManager, force: &mut Force) {
             );
         }
 
-        force.add_vertex_force(key, vertex_force);
+        force.add_vertex(key, vertex_force);
     }
 }
 
 fn vertex_x_force(vertex: &Vertex, edge: &Edge, twin: &Edge, twin_vertex: &Vertex) -> f32 {
-    return vertex_force(
+    vertex_force(
         vertex.point.position.y,
         edge.point.position.y,
         twin.point.position.y,
         twin_vertex.point.position.y,
-    );
+    )
 }
 
 fn vertex_y_force(vertex: &Vertex, edge: &Edge, twin: &Edge, twin_vertex: &Vertex) -> f32 {
-    return vertex_force(
+    vertex_force(
         vertex.point.position.x,
         edge.point.position.x,
         twin.point.position.x,
         twin_vertex.point.position.x,
-    );
+    )
 }
 
 fn edge_x_force(vertex: &Vertex, twin: &Edge, twin_vertex: &Vertex) -> f32 {
