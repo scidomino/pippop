@@ -2,7 +2,7 @@ use super::vector::GraphVector;
 use crate::graph::edge::Edge;
 use crate::graph::point::Coordinate;
 use crate::graph::vertex::Vertex;
-use crate::graph::RelationManager;
+use crate::graph::Graph;
 
 const SURFACE_TENSION: f32 = 0.3;
 
@@ -13,12 +13,12 @@ const LEGENDRE_GAUSS_POINTS: [(f32, f32); 3] = [
     (0.27777777777, 0.11270166537),
 ];
 
-pub fn update_force(relation_manager: &RelationManager, force: &mut GraphVector) {
-    for (key, vertex) in relation_manager.vertecies.iter() {
+pub fn update_force(graph: &Graph, force: &mut GraphVector) {
+    for (key, vertex) in graph.vertecies.iter() {
         let mut vertex_force = Coordinate::default();
 
         for edge in vertex.edges.iter() {
-            let (twin, twin_vertex) = relation_manager.get_edge_and_vertex(edge.twin);
+            let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
 
             vertex_force.x += SURFACE_TENSION * vertex_x_force(vertex, edge, twin, twin_vertex);
             vertex_force.y += SURFACE_TENSION * vertex_y_force(vertex, edge, twin, twin_vertex);

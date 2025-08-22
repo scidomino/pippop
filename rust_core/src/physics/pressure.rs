@@ -3,18 +3,18 @@ use crate::graph::bubble::BubbleKey;
 use crate::graph::edge::Edge;
 use crate::graph::point::Coordinate;
 use crate::graph::vertex::Vertex;
-use crate::graph::RelationManager;
+use crate::graph::Graph;
 use slotmap::SecondaryMap;
 
 const PRESSURE_TENSION: f32 = 0.04;
 
-pub fn update_force(relation_manager: &RelationManager, force: &mut GraphVector) {
-    let bubble_to_pressure = get_bubble_to_pressure(relation_manager);
-    for (key, vertex) in relation_manager.vertecies.iter() {
+pub fn update_force(graph: &Graph, force: &mut GraphVector) {
+    let bubble_to_pressure = get_bubble_to_pressure(graph);
+    for (key, vertex) in graph.vertecies.iter() {
         let mut vertex_force = Coordinate::default();
 
         for edge in vertex.edges.iter() {
-            let (twin, twin_vertex) = relation_manager.get_edge_and_vertex(edge.twin);
+            let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
 
             let pressure_diff = bubble_to_pressure[twin.bubble] - bubble_to_pressure[edge.bubble];
             let pressure_diff = pressure_diff.clamp(-2.0, 2.0);
@@ -78,7 +78,7 @@ fn edge_force(s: f32, ec: f32, e: f32) -> f32 {
     (6.0 * s - 3.0 * ec - 3.0 * e) / 20.0
 }
 
-fn get_bubble_to_pressure(relation_manager: &RelationManager) -> SecondaryMap<BubbleKey, f32> {
+fn get_bubble_to_pressure(relation_manager: &Graph) -> SecondaryMap<BubbleKey, f32> {
     let mut bubble_to_area: SecondaryMap<BubbleKey, f32> = SecondaryMap::new();
     for vertex in relation_manager.vertecies.values() {
         for edge in vertex.edges.iter() {

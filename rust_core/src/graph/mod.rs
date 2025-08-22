@@ -11,14 +11,14 @@ use vertex::{Vertex, VertexKey};
 
 use crate::graph::point::Point;
 
-pub struct RelationManager {
+pub struct Graph {
     pub vertecies: SlotMap<VertexKey, Vertex>,
     pub bubbles: SlotMap<BubbleKey, Bubble>,
 }
 
-impl RelationManager {
+impl Graph {
     pub fn new() -> Self {
-        RelationManager {
+        Graph {
             vertecies: SlotMap::with_key(),
             bubbles: SlotMap::with_key(),
         }
@@ -148,7 +148,7 @@ impl RelationManager {
         self.get_edge(key).twin.next_on_vertex()
     }
 
-    fn get_edge(&self, key: EdgeKey) -> &Edge {
+    pub fn get_edge(&self, key: EdgeKey) -> &Edge {
         &self.vertecies[key.vertex].edges[key.offset as usize]
     }
 

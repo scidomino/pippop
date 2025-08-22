@@ -30,4 +30,8 @@ impl Vertex {
             edges: [Edge::new(point), Edge::new(point), Edge::new(point)],
         }
     }
+
+    pub fn edge(&self, key: EdgeKey) -> Edge {
+        self.edges[key.offset as usize]
+    }
 }
