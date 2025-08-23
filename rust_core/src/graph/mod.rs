@@ -138,12 +138,10 @@ impl Graph {
         }
     }
 
-    // Returns the next edge in the bubble in the clockwise direction
     fn next_on_bubble(&self, key: EdgeKey) -> EdgeKey {
         self.get_edge(key.next_on_vertex()).twin
     }
 
-    // Returns the previous edge in the bubble in the clockwise direction
     fn prev_on_bubble(&self, key: EdgeKey) -> EdgeKey {
         self.get_edge(key).twin.next_on_vertex()
     }
