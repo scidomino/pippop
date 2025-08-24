@@ -1,129 +1,109 @@
-// unity_project/Assets/Scripts/RustBridge.cs
-
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+// A class to manage the lifecycle of the Rust library and data
 public class RustBridge : MonoBehaviour
 {
+    // --- FFI Definitions ---
+
     private const string RustLib = "pippop_rust";
 
-    // --- FFI Structs ---
-    // These must match the #[repr(C)] structs in ffi.rs exactly.
+    // Structs must match Rust's #[repr(C)] structs
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct CColor
+    public struct Vec2
     {
-        public float r, g, b, a;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CPoint
-    {
-        public double x, y;
+        public float x;
+        public float y;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct CGameBubbleData
+    public struct CubicBezier
     {
-        public CColor color;
-        public uint size;
-    }
-
-    [StructLayout(LayoutKind.Explicit)]
-    public struct CBubbleKindData
-    {
-        [FieldOffset(0)]
-        public CGameBubbleData game;
-    }
-
-    public enum CBubbleKindTag
-    {
-        Game,
-        Player,
-        Empty,
+        public Vec2 p0;
+        public Vec2 p1;
+        public Vec2 p2;
+        public Vec2 p3;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct CBubble
+    public struct RenderableBubble
     {
-        public ulong key_id;
-        public CBubbleKindTag kind_tag;
-        public CBubbleKindData kind_data;
+        public ulong bubble_key;
+        public bool is_open_air;
+        public IntPtr curves; // *mut CubicBezier
+        public int curves_count;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct CRenderableEdge
+    public struct RenderableBubbleCollection
     {
-        public CPoint p0, p1, p2, p3;
-        public ulong bubble_a_key_id;
-        public ulong bubble_b_key_id;
+        public IntPtr bubbles; // *mut RenderableBubble
+        public int bubbles_count;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CRenderState
-    {
-        public IntPtr edges;
-        public int edge_count;
-        private int edges_capacity;
-
-        public IntPtr bubbles;
-        public int bubble_count;
-        private int bubbles_capacity;
-    }
-
-    // --- FFI Function Signatures ---
+    // --- FFI Function Imports ---
 
     [DllImport(RustLib)]
-    private static extern IntPtr simulation_new();
+    private static extern IntPtr create_graph();
 
     [DllImport(RustLib)]
-    private static extern void simulation_free(IntPtr simPtr);
+    private static extern void destroy_graph(IntPtr graphPtr);
 
     [DllImport(RustLib)]
-    private static extern void simulation_update(IntPtr simPtr, double deltaTime);
+    private static extern void advance_frame_ffi(IntPtr graphPtr);
 
     [DllImport(RustLib)]
-    private static extern CRenderState simulation_get_render_state(IntPtr simPtr);
+    private static extern IntPtr get_renderable_bubbles(IntPtr graphPtr); // Returns a pointer to RenderableBubbleCollection
 
     [DllImport(RustLib)]
-    private static extern void simulation_free_render_state(CRenderState state);
+    private static extern void free_renderable_bubbles(IntPtr collectionPtr);
 
 
     // --- Unity MonoBehaviour ---
 
-    private IntPtr simPtr;
+    private IntPtr graphPtr;
 
-    void Start()
+    void Awake()
     {
-        Debug.Log("Initializing Rust simulation...");
-        simPtr = simulation_new();
-        Debug.Log($"Simulation pointer: {simPtr}");
+        Debug.Log("Initializing Rust graph...");
+        graphPtr = create_graph();
+        Debug.Log($"Graph pointer: {graphPtr}");
     }
 
     void Update()
     {
-        if (simPtr == IntPtr.Zero) return;
+        if (graphPtr == IntPtr.Zero) return;
 
-        simulation_update(simPtr, Time.deltaTime);
+        // 1. Advance the physics simulation
+        advance_frame_ffi(graphPtr);
         
-        CRenderState state = simulation_get_render_state(simPtr);
+        // 2. Get the renderable data
+        IntPtr collectionPtr = get_renderable_bubbles(graphPtr);
         
-        Debug.Log($"Frame Data: {state.bubble_count} bubbles, {state.edge_count} edges.");
+        if (collectionPtr != IntPtr.Zero)
+        {
+            // 3. Marshal the data from a pointer to a C# struct
+            RenderableBubbleCollection collection = Marshal.PtrToStructure<RenderableBubbleCollection>(collectionPtr);
+            
+            Debug.Log($"Frame Data: Received {collection.bubbles_count} bubbles from Rust.");
 
-        // In a real game, we would now process the arrays at state.bubbles and state.edges
-        // to draw the scene. For now, we just log the counts.
+            // In a real game, you would now loop through the bubbles and their curves to draw them.
+            // I've added comments to the README with an example of how to do this.
 
-        simulation_free_render_state(state);
+            // 4. Free the memory allocated by Rust for this frame's data
+            free_renderable_bubbles(collectionPtr);
+        }
     }
 
     void OnDestroy()
     {
-        if (simPtr != IntPtr.Zero)
+        if (graphPtr != IntPtr.Zero)
         {
-            Debug.Log("Freeing Rust simulation memory...");
-            simulation_free(simPtr);
-            simPtr = IntPtr.Zero;
+            Debug.Log("Freeing Rust graph memory...");
+            destroy_graph(graphPtr);
+            graphPtr = IntPtr.Zero;
         }
     }
 }

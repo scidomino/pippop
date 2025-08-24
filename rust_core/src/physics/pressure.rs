@@ -78,11 +78,14 @@ fn edge_force(s: f32, ec: f32, e: f32) -> f32 {
     (6.0 * s - 3.0 * ec - 3.0 * e) / 20.0
 }
 
-fn get_bubble_to_pressure(relation_manager: &Graph) -> SecondaryMap<BubbleKey, f32> {
+fn get_bubble_to_pressure(graph: &Graph) -> SecondaryMap<BubbleKey, f32> {
     let mut bubble_to_area: SecondaryMap<BubbleKey, f32> = SecondaryMap::new();
-    for vertex in relation_manager.vertecies.values() {
+    for (key, _) in graph.bubbles.iter() {
+        bubble_to_area.insert(key, 0.0);
+    }
+    for vertex in graph.vertecies.values() {
         for edge in vertex.edges.iter() {
-            let (twin, twin_vertex) = relation_manager.get_edge_and_vertex(edge.twin);
+            let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
             let half_area = get_half_area(vertex, edge, twin_vertex, twin);
             bubble_to_area[edge.bubble] += half_area;
             bubble_to_area[twin.bubble] -= half_area;
@@ -90,8 +93,8 @@ fn get_bubble_to_pressure(relation_manager: &Graph) -> SecondaryMap<BubbleKey, f
     }
 
     let mut bubble_to_pressure: SecondaryMap<BubbleKey, f32> = SecondaryMap::new();
-    for (key, bubble) in relation_manager.bubbles.iter() {
-        bubble_to_pressure[key] = bubble.get_pressure(bubble_to_area[key]);
+    for (key, bubble) in graph.bubbles.iter() {
+        bubble_to_pressure.insert(key, bubble.get_pressure(bubble_to_area[key]));
     }
     bubble_to_pressure
 }

@@ -1,5 +1,6 @@
 use crate::graph::{Graph};
 use crate::graph::point::Coordinate;
+use crate::physics;
 use slotmap::Key;
 
 // --- Public FFI-safe data structures ---
@@ -43,7 +44,34 @@ pub struct RenderableBubbleCollection {
 // --- FFI functions ---
 
 #[no_mangle]
-pub extern "C" fn get_renderable_bubbles(graph: &Graph) -> *mut RenderableBubbleCollection {
+pub extern "C" fn create_graph() -> *mut Graph {
+    let mut graph = Graph::new();
+    graph.init();
+    Box::into_raw(Box::new(graph))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn destroy_graph(graph_ptr: *mut Graph) {
+    if !graph_ptr.is_null() {
+        let _ = Box::from_raw(graph_ptr);
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn advance_frame_ffi(graph_ptr: *mut Graph) {
+    if !graph_ptr.is_null() {
+        let graph = &mut *graph_ptr;
+        physics::advance_frame(graph);
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn get_renderable_bubbles(graph_ptr: *const Graph) -> *mut RenderableBubbleCollection {
+    if graph_ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let graph = &*graph_ptr;
+
     let mut renderable_bubbles = Vec::new();
 
     for (bkey, bubble) in graph.bubbles.iter() {

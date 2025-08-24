@@ -158,4 +158,14 @@ impl Graph {
     fn get_edge_mut(&mut self, key: EdgeKey) -> &mut Edge {
         &mut self.vertecies[key.vertex].edges[key.offset as usize]
     }
+
+    pub fn print_graph(&self) {
+        for (vertex_key, vertex) in &self.vertecies {
+            println!("Vertex {:?}: ({:?})", vertex_key, vertex.point);
+            for edge in &vertex.edges {
+                let twin_vertex = &self.vertecies[edge.twin.vertex];
+                println!("  Edge to Vertex {:?}: ({:?})", edge.twin.vertex, twin_vertex.point);
+            }
+        }
+    }
 }

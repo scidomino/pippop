@@ -105,3 +105,18 @@ fn accelerate_point(point: &mut Point, accel: Coordinate) {
     point.position.x += point.velocity.x;
     point.position.y += point.velocity.y;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_advance_frame() {
+        let mut graph = Graph::new();
+        graph.init();
+        for _ in 0..5 {
+            advance_frame(&mut graph);
+            graph.print_graph();
+        }
+    }
+}
