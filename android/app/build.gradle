@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 34
+    compileSdkVersion 36
 
     defaultConfig {
         applicationId "com.pippop"
         minSdkVersion 22
-        targetSdkVersion 33
+        targetSdk 35
     }
 
     buildTypes {
