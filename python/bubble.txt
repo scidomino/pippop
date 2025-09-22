@@ -1,0 +1,39 @@
+#Family of Ellipses
+
+Consider the family of ellipses with the following form:
+
+((x-h)/a)^2 + (y/b)^2 = 1
+
+where a > 0 and b > 0 and that contain the point (x,y) = (0,1)
+
+that is, where:
+
+(h/a)^2 + 1/b^2 = 1
+
+so:
+
+(x/a-h/a)^2 + (1 - (h/a)^2)y^2 = 1
+
+This implies −a < h < a
+
+# Area
+
+The formula for the area of the part of the ellipse where x > 0:
+
+Area(a,h) = a * (arccos(-h/a)/sqrt(1 - (h/a)^2) + h/a)
+
+Note that Area(a,0) = a * pi/2
+
+# Reparametrization
+
+m = area
+n = another weird variable
+
+w=n /sqrt(n^2+1)
+k=m / (sqrt(n^2+1) ((n^2+1)arccot(n)-n))
+
+x = (k2t(1-t))/((1-t)^2+w2t(1-t)+t^2)
+y = (1-2t)/((1-t)^2+w2t(1-t)+t^2)
+
+is a parametric curve on 0<t<1
+

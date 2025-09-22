@@ -1,3 +1,7 @@
 {
-    "includeDirectories": ["/Users/sciortino/.cargo/registry"]
+  "context": {
+    "includeDirectories": [
+      "/Users/sciortino/.cargo/registry"
+    ]
+  }
 }
