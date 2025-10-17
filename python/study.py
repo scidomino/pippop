@@ -1,35 +1,38 @@
+import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider
 from sympy import *
-from sympy.integrals.rationaltools import ratint
+import numpy as np
+from scipy.integrate import quad
 
 # Define symbols for the quadratic rational Bezier curve
 P = Matrix([[symbols("P_" + str(p) + "_" + n) for n in ["x", "y"]] for p in [0, 1, 2]])
 w = Matrix(symarray("w", (3)))  # the 3 weights
-t, n, k, d = symbols("t, n, k, d")
+t = symbols("t")
 
 # The quadratic Bernstein basis polynomials
 B = Matrix([(1 - t) ** 2, 2 * t * (1 - t), t**2])
 
 # The parametric curve
-C = P.T * diag(*w) * B / B.dot(w)
+C_symbolic = P.T * diag(*w) * B / B.dot(w)
 
-continuous_acot = Piecewise((acot(n), n > 0), (acot(n) + pi, n < 0), (pi / 2, True))
-C = C.subs(
+# reparameterize 
+u, v = symbols("u, v")
+
+l = u + v
+k = u - v
+
+# Weird factor required to make area = k * ||P_2-P_0||^2
+weirdy_factor = 2 * k / ((l**3 + l) * atan2(1, l) - l**2)
+
+C_symbolic = C_symbolic.subs(
     {
-        "w_0": 1,
-        "w_1": n / sqrt(1 + n**2),
-        "w_2": 1,
-        "P_0_x": -d,
-        "P_0_y": 0,
-        "P_1_x": 0,
-        "P_1_y": k / (n**2 - (n**3 + n) * continuous_acot),
-        "P_2_x": d,
-        "P_2_y": 0,
+        w[0]: 1,
+        w[1]: l / sqrt(1 + l**2),
+        w[2]: 1,
+        # Constrain P_1 to be on the line equidistant from P_0 and P_2, parameterized by k.
+        P[1, 0]: (P[0, 0] + P[2, 0]) / 2 + weirdy_factor * (P[0, 1] - P[2, 1]),
+        P[1, 1]: (P[0, 1] + P[2, 1]) / 2 + weirdy_factor * (P[2, 0] - P[0, 0]),
     }
 )
-pprint(C)
 
-
-x = C[0]
-y = C[1]
-area = simplify(ratint((x * diff(y, t) - y * diff(x, t)), t) / 2)
-pprint(area)
+area = k * ((P[0, 0] - P[2, 0]) ** 2 + (P[0, 1] - P[2, 1]) ** 2)
