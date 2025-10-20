@@ -15,7 +15,7 @@ The bubble mass is represented by a graph: each edge represents a bubble wall;
 each vertex the point where multiple bubble walls meet; each bubble a face. As
 this is a 2D model the graph is planar. Since more than one wall may connect the same
 two vertices the graph is a multigraph. Furthermore since only vertices where
-three walls meet are physically stable we will contrain the graph to be
+three walls meet are physically stable we will constrain the graph to be
 3-regular or ``cubic''. Similarly, loops are physically
 unstable and thus disallowed.
 \begin{figure}[h]
@@ -109,9 +109,9 @@ time.
 \begin{displaymath}
 \vec{B}'(p,t)=(1-p)^3\vec{B_0}'(t)+3p(1-p)^2\vec{B_1}'(t)+3p^2(1-p)\vec{B_2}'(t)+p^3\vec{B_3}'(t)
 \end{displaymath}
-To have Kinetic enegery the wall must have mass so we introduce a coefficient
+To have Kinetic energy the wall must have mass so we introduce a coefficient
 $m$ to represent mass per unit length of p. This gives us the kinetic energy at the
-infintesimal point p
+infinitesimal point p
 \begin{displaymath}
 K(p,t) = \frac{m}{2} \left|\vec{B}'(p,t)\right|^2
 \end{displaymath}
@@ -170,7 +170,7 @@ K(t)=
 Note that $K$ is just for one bubble wall. To get the total
 kinetic energy of the system $K_T$ we must sum the kinetic energy of all the
 walls. Note too that each bezier curve end point is shared by three walls. This
-means the some cooridnates $x_n, y_n$ will appear in more than one wall's kinetic energy equation.
+means the some coordinates $x_n, y_n$ will appear in more than one wall's kinetic energy equation.
 \subsection{Potential Energy}
 Potential energy in our system comes from two sources, air pressure and surface
 tension. Surface tension potential rises as a wall lengthens.
@@ -184,7 +184,7 @@ that all processes are isothermal and that $N$ is constant.
 \begin{align*}
 P(t)=\frac{NkT}{A(t)}=\frac{constant}{A(t)}
 \end{align*}
-The energy neccessary to change a bubble's area from $A_1$ to $A_2$ is
+The energy necessary to change a bubble's area from $A_1$ to $A_2$ is
 \begin{align*}
 \Delta E = \int_{A_1}^{A_2} P dA = \int_{A_1}^{A_2} \frac{NkT}{A} dA = NkT
 \ln\left(\frac{A_2}{A_1}\right)
@@ -197,13 +197,13 @@ V_p(t) = -\rho A_\rho \ln\left(\frac{A(t)}{A_\rho}\right) = \rho A_\rho
 \ln\left(\frac{A_\rho}{A(t)}\right)
 \end{align*}
 
-Though the above formula works for normal bubbles, we must deal seperately with
+Though the above formula works for normal bubbles, we must deal separately with
 the open air outside the bubble mass (represented by the unbounded face). Since
 the area of this bubble is infinite the formula will not apply directly.
 However, if we imagine the bubble mass is floating in a large (but finite!) room
-and then take the limit as the room because infinitly large we can get a formula
+and then take the limit as the room becomes infinitely large we can get a formula
 for the energy. Let $A_r$ be the area of the room and $A_m$ be the area of the
-bubble mass. Then the area of the extrnal bubble is $A_r-A_m$ and the energy
+bubble mass. Then the area of the external bubble is $A_r-A_m$ and the energy
 required to go from $A_r$ to $A_r-A_m$ is
 \begin{align*}
 V_p(t) = \lim_{A_r\to\infty} \rho A_r \ln\left(\frac{A_r}{A_r-A_m(t)}\right)=
@@ -261,7 +261,7 @@ where
 Since the value in the square root is a 4th degree polynomial in p this
 integral cannot generally be solved in closed form.
 \subsection{Calculating the equations of motion}
-Having calulated the kinetic and potential energy of the system we can finally
+Having calculated the kinetic and potential energy of the system we can finally
 apply use them to calculate the Lagrangian $\mathcal{L}_T=K_T-V_T$.
 
 Observe that the formula for kinetic energy is defined only in terms of
@@ -327,7 +327,7 @@ one wall the quantity $\frac{\partial K_T}{\partial x'_1}=\frac{\partial K}{\par
 \end{align*}
 
 The right side has two parts. One for pressure and one for surface tension. We
-calculate the presure part first. 
+calculate the pressure part first. 
 
 Observe that $x_1$ only appears in the formula for the areas of the bubbles
 $A_1$ and $A_2$ on either side of the bubble wall. Let $A_{1\rho}$ and
@@ -363,7 +363,7 @@ Lastly, observe that if one of the bubbles is the ``outside air'' it's factor
 $\frac{A_{\rho}}{A}$ is 1.
 
 Finally we get to the surface tension. Unfortunately there's not much that can
-be done to simplify this expression as it's integral is unreducable.
+be done to simplify this expression as its integral is irreducible.
 \begin{align*}
 \frac{\partial V_s(t)}{\partial x_1}&=
 \frac{\partial}{\partial x_1}
@@ -446,7 +446,7 @@ B_{\gamma y}}{dp}\right)^2}} dp
 \right)
 \end{align*}
 
-Putting this monstrosity together is left as an excersize to the reader.
+Putting this monstrosity together is left as an exercise to the reader.
 \subsection{Solving the equations of motion}
 We are now able to produce the equations of motion all that is left is to solve
 them. Since the equations can't even be written in closed form it's
@@ -459,7 +459,7 @@ form:
 \begin{align*}
 \sum_i^n c_{ij}q_i''(t) = F_j(q_1,q_2,\ldots)
 \end{align*}
-Here $c_{ij}$ is a coeficieint determined above and $F_j$ is
+Here $c_{ij}$ is a coefficient determined above and $F_j$ is
 $-\frac{\partial V(t)}{\partial q_j}$.
 
 If we may generalize $F_j$ to the matrix function $F$ these can be expressed in
@@ -471,11 +471,11 @@ Note that neither $C$ nor $F$ change unless the graph configuration changes.
 
 Now all that is left is to numerically solve. We start with a initial positions
 and velocities $\vec{q}$ and $\vec{q'}$. We use the above formula to determine
-an aproximation for $\vec{q''}$, use that and the velocity to approximate the
+an approximation for $\vec{q''}$, use that and the velocity to approximate the
 location after elapsed time span $t$ and get a new set of $\vec{q}$ and
 $\vec{q'}$. Repeat ad infinitum.
 \section{Sources of Error}
-For the sake of tractability I've choosen to represent a bubble wall with a
+For the sake of tractability I've chosen to represent a bubble wall with a
 cubic bezier. Having only 8 degrees of freedom Cubic bezier curves cannot
 represent all possible configurations for a deformed bubble wall. Even
 worse, it cannot represent an arc of a circle which is the rest shape of a real
