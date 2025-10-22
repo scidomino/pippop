@@ -4,7 +4,7 @@
 \usepackage{tkz-berge}
 \usepackage{amsmath}
 
-\title{Numeric simulation of a bubble cluster}
+\title{Numerical simulation of a bubble cluster}
 \author{Tommaso Sciortino}
 \date{October 2011}
 
@@ -45,11 +45,11 @@ multiple bubble walls meet at a point.
 \end{figure}
 
 Since more than one wall may connect the same two vertices the graph is a
-multigraph. Furthermore since only vertices where three walls meet 
+multigraph. Furthermore, since only vertices where three walls meet 
 are physically stable we will constrain the graph to be 3-regular or ``cubic''.
 Similarly, loops are physically unstable and thus disallowed.
 
-\subsection{Bubble as faces}
+\subsection{Bubbles as faces}
 Each bubble face can be defined by the ring of serially connected edges which
 form its border. Consequently each edge belongs to two faces. In addition to
 the normal internal faces there is one external face which represents the air
@@ -86,9 +86,9 @@ If we view each edge as a pair of directed edges - one in each direction - then
 each face can be defined as a list of directed edges where the head of each
 is the tail of the next. Consequently, each directed edge belongs to exactly
 one face and (except for the external face) the directed edges of each face all
-run clockwise. This conceit is useful for properly calculating various quantities
+run clockwise. This convention is useful for properly calculating various quantities
 when we need to integrate around a face in the right order and direction.
-\subsection{Bubble walls as cubic Bezier curve}
+\subsection{Bubble walls as cubic Bezier curves}
 The position of a bubble wall is represented by a cubic Bezier curve defined as
 a parametric equation with four control points $\vec{B_n}(t)$
 \begin{align}
@@ -116,7 +116,7 @@ numerically solve for these functions.
 
 To derive equations of motion we use Lagrangian mechanics. We define the
 Lagrangian $\mathcal{L}_T=K_T-V_T$ as the total kinetic minus total potential
-energy of the system. The equations of motion is the path for which the
+energy of the system. The equations of motion are the path for which the
 integral of the Lagrangian over time is stationary. To find these we generate
 the following equations:
 \begin{align}
@@ -134,8 +134,8 @@ time.
 \begin{displaymath}
 \vec{B}'(p,t)=(1-p)^3\vec{B_0}'(t)+3p(1-p)^2\vec{B_1}'(t)+3p^2(1-p)\vec{B_2}'(t)+p^3\vec{B_3}'(t)
 \end{displaymath}
-To have Kinetic energy the wall must have mass so we introduce a coefficient
-$m$ to represent mass per unit length of p. This gives us the kinetic energy at the
+To have kinetic energy the wall must have mass so we introduce a coefficient
+$m$ to represent mass per unit interval of the parameter p. This gives us the kinetic energy at the
 infinitesimal point p
 \begin{displaymath}
 K(p,t) = \frac{m}{2} \left|\vec{B}'(p,t)\right|^2
@@ -195,7 +195,7 @@ K(t)=
 Note that $K$ is just for one bubble wall. To get the total
 kinetic energy of the system $K_T$ we must sum the kinetic energy of all the
 walls. Note too that each Bezier curve end point is shared by the other walls
-meeting at that vertex. This means the some coordinates $q_i$ will appear in
+meeting at that vertex. This means that some coordinates $q_i$ will appear in
 more than one wall's kinetic energy equation.
 \subsection{Potential Energy}
 Potential energy in our system comes from two sources, air pressure and surface
@@ -215,7 +215,7 @@ The energy necessary to change a bubble's area from $A_1$ to $A_2$ is
 \Delta E = \int_{A_1}^{A_2} P dA = \int_{A_1}^{A_2} \frac{NkT}{A} dA = NkT
 \ln\left(\frac{A_2}{A_1}\right)
 \end{align*}
-We define the ambient pressure of the outside air and $\rho$ and $A_\rho$ as
+We define the ambient pressure of the outside air as $\rho$, and $A_\rho$ as
 the area of the bubble at this pressure. Then the energy stored as
 potential in a bubble of area $A(t)$ is
 \begin{align}
@@ -225,9 +225,9 @@ V_p(t) = -\rho A_\rho \ln\left(\frac{A(t)}{A_\rho}\right) = \rho A_\rho
 
 Though the above formula works for normal bubbles, we must deal separately with
 the air outside the bubble cluster represented by the external face. Since
-the area of this bubble is infinite the formula will not apply directly.
+the area of this bubble is infinite, the formula will not apply directly.
 However, if we first set the bubble cluster in a large (but finite) room and
-then take the limit as the room becomes infinitely large we can get a
+then take the limit as the room becomes infinitely large, we can get a
 well-defined formula for the energy. 
 
 Let $A_r$ be the area of the room and $A_m$ be the area of the bubble mass. Then
@@ -250,7 +250,7 @@ A_b &= \int_0^1 B_y(p)\frac{\partial B_x(p)}{dp} dp\\
 &+ x_1\left(\frac{3y_0}{10}+ \frac{-3y_2}{20} +\frac{-3y_3}{20}\right)\\
 &+ x_2\left(\frac{3y_0}{20}+ \frac{3y_1}{20} +\frac{-3y_3}{10}\right)\\
 &+ x_3\left(\frac{y_0}{20} + \frac{3y_1}{20} +\frac{3y_2}{10}
-+\frac{y3}{2}\right)
++\frac{y_3}{2}\right)
 \end{align*}
 Rephrased more succinctly with matrices:
 \begin{align}
@@ -291,22 +291,22 @@ known as an ``elliptic integral'' and cannot generally be solved in closed
 form.
 \subsection{Calculating the equations of motion}
 Having calculated the kinetic and potential energy of the system we can finally
-apply use them to calculate the Lagrangian $\mathcal{L}_T=K_T-V_T$.
+use them to calculate the Lagrangian $\mathcal{L}_T=K_T-V_T$.
 
 Observe that the formula for kinetic energy is defined only in terms of
 the velocities of the control points $q'_1,\dots,q'_n$ and the potential is
 defined only in terms of positions of the control points $q_1,\dots,q_n$.
-This simplifies the equations of motion greatly
+This simplifies the equations of motion greatly:
 \begin{align*}
 \frac{d}{d t}\frac{\partial \mathcal{L}_T}{\partial q'_n} 
-&=\frac{\partial \mathcal{L}_T}{\partial q} \\
+&=\frac{\partial \mathcal{L}_T}{\partial q_n} \\
 \frac{d}{d t}\frac{\partial (K_T-V_T)}{\partial q'_n}
-&= \frac{\partial (K_T-V_T)}{\partial q} \\
+&= \frac{\partial (K_T-V_T)}{\partial q_n} \\
 \frac{d}{d t}\left( \frac{\partial K_T}{\partial q'_n} - \frac{\partial
 V_T}{\partial q'_n}\right)
-&=\frac{\partial K_T}{\partial q}-\frac{\partial V_T}{\partial q} \\
+&=\frac{\partial K_T}{\partial q_n}-\frac{\partial V_T}{\partial q_n} \\
 \frac{d}{d t} \frac{\partial K_T}{\partial q'_n}
-&=-\frac{\partial V_T}{\partial q}\\
+&=-\frac{\partial V_T}{\partial q_n}\\
 \frac{d}{d t} \frac{\partial K_T}{\partial q'_n}
 &= -\left(\frac{\partial V_{Tp}}{\partial q_n}+\frac{\partial V_{Ts}}{\partial
 q_n}\right)
@@ -316,7 +316,7 @@ control point coordinate in the system. This means generating 8 equations for
 every bubble wall in the system. We will only work out 2 such equations here as
 the rest can be inferred from them by symmetry.
 \subsubsection{Equation of motion for $x_1$}
-We will generate the the Lagrangian for the x coordinate of the second control
+We will generate the Lagrangian for the x coordinate of the second control
 point $x_1$ of the bubble wall as this case is simpler than the first
 coordinate which is shared by three walls.  Our equation is
 \begin{align*}
@@ -326,7 +326,7 @@ coordinate which is shared by three walls.  Our equation is
 
 First observe that since $x_1$ only appears in the kinetic energy formula for
 one wall the quantity $\frac{\partial K_T}{\partial x'_1}=\frac{\partial K}{\partial x'_1}$
- so the left hand side of the equation is 
+ so the left-hand side of the equation is 
 \begin{align*}
 \frac{d}{d t} \frac{\partial K_T}{\partial x'_1} &=
 \frac{d}{d t} \frac{\partial K}{\partial x'_1}\\
@@ -355,7 +355,7 @@ one wall the quantity $\frac{\partial K_T}{\partial x'_1}=\frac{\partial K}{\par
 &= \frac{m}{140} \left(10x''_0+12x''_1+9x''_2+4x''_3 \right)
 \end{align*}
 
-The right side has two parts. One for pressure and one for surface tension. We
+The right-hand side has two parts. One for pressure and one for surface tension. We
 calculate the pressure first. 
 
 Observe that $x_1$ only appears in the formula for the areas of the bubbles
@@ -389,7 +389,7 @@ bubble.
  \frac{3\rho}{20} (2y_0-y_2-y_3)
 \left( \frac{A_{1\rho}}{A_1} -\frac{A_{2\rho}}{A_2}\right)
 \end{align*}
-Lastly, observe that for external face the factor $\frac{A_{\rho}}{A}$ is
+Lastly, observe that for the external face the factor $\frac{A_{\rho}}{A}$ is
 instead 1.
 
 Finally we get to the surface tension. Unfortunately this expression is
@@ -409,14 +409,14 @@ B_y(p,t)}{dp}\right)^2}} dp\\
   \sqrt{\left(\frac{d B_x(p,t)}{dp}\right)^2+\left(\frac{d
 B_y(p,t)}{dp}\right)^2}} dp
 \end{align*}
-This value must be estimated by numeric integration.
+This value must be estimated by numerical integration.
 
-All together that gives us
+Altogether, that gives us
 \begin{align}
 \frac{m}{140} \left(10x''_0+12x''_1+9x''_2+4x''_3 \right) &= 
  \frac{3\rho}{20} (2y_0-y_2-y_3)
 \left( \frac{A_{1\rho}}{A_1} -\frac{A_{2\rho}}{A_2}\right)\\
-&+\tau\int_0^1\frac{3(3p-1)(p-1))  \frac{d B_x(p,t)}{dp}}{
+&+\tau\int_0^1\frac{3(3p-1)(p-1)  \frac{d B_x(p,t)}{dp}}{
   \sqrt{\left(\frac{d B_x(p,t)}{dp}\right)^2+\left(\frac{d
 B_y(p,t)}{dp}\right)^2}} dp \nonumber
 \end{align}
@@ -425,7 +425,7 @@ We generate the equation of motion for the x coordinate of a vertex $x_0$ where
 three walls meet. We will use $\alpha$, $\beta$, and $\gamma$ to distinguish the
 three walls.
 
-The left hand side of the Lagrangian equation is 
+The left-hand side of the Lagrangian equation is 
 \begin{align}
 \frac{d}{d t} \frac{\partial K_T}{\partial x'_0}&=
 \frac{m}{140}  \left( 20x''_0+10x''_{1\alpha}+4x''_{2\alpha}+x''_{3\alpha} \right)\\
@@ -440,7 +440,7 @@ The left hand side of the Lagrangian equation is
 +(x''_{3\alpha}+x''_{3\beta}+x''_{3\gamma}) \right)\nonumber
 \end{align}
 
-For the pressure part of the right hand side we denote the area of the bubble
+For the pressure part of the right-hand side we denote the area of the bubble
 shared by $\alpha$ and $\beta$ by $A_{\alpha\beta}$.
 
 \begin{align*}
@@ -461,7 +461,7 @@ Where
 -3(y_{2\alpha}+y_{2\beta})-(y_{3\alpha}+y_{3\beta})\right)
 \end{align*}
 
-For the tension part of the right hand side we have
+For the tension part of the right-hand side we have
 \begin{align*}
 \frac{\partial V_s(t)}{\partial x_0}&=
 \tau\left(\int_0^1\frac{3(1-p)^2  \frac{d B_{\alpha x}}{dp}}{
@@ -479,8 +479,8 @@ B_{\gamma y}}{dp}\right)^2}} dp
 Putting these together to form the equation of motion is left as an exercise to
 the reader.
 \subsection{Solving the equations of motion}
-We are now able to produce the equations of motion all that is left is to solve
-them. The equations can't be written in closed form so it's unsurprising that
+We are now able to produce the equations of motion; all that is left is to solve
+them. The equations can't be written in closed form, so it's unsurprising that
 they can't be solved in closed form either. Instead we'll use a slightly
 modified form of the forward Euler method for approximating the solution to ODEs.
 
@@ -500,7 +500,7 @@ Since equations generated for x coordinates only include the second derivative
 of x coordinates (and vice versa) this equation can be cut into two, one for x
 and one for y.
 
-Now all that is left is to numerically solve. We start with a initial positions
+Now all that is left is to numerically solve. We start with initial positions
 and velocities $\vec{q}(t_0)$ and $\vec{q'}(t_0)$. At each step we calculate the
 state after time $\Delta t$,  $\vec{q'}(t_{n+1})$ and $\vec{q}(t_{n+1})$ from
 $\vec{q}(t_n)$ and $\vec{q'}(t_n)$.
@@ -513,7 +513,7 @@ $\vec{q}(t_n)$ and $\vec{q'}(t_n)$.
 (Note the matrix division in the first step.)
 
 One final step is to introduce friction. This not only adds realism, but also
-helps keep the numeric solution stable. Friction will be modeled by
+helps keep the numerical solution stable. Friction will be modeled by
 a drag friction $c_f$ which is proportional to velocity. It modifies the
 equations like so:
 \begin{align*}
@@ -578,7 +578,7 @@ B^{\top} & D
 \end{array}\right]
 \end{align*}
 
-Our submatricies have very simple forms:
+Our submatrices have very simple forms:
 \begin{align*}
 A_{ij} &= \left\{ 
   \begin{array}{l l}
@@ -596,7 +596,7 @@ D_{ij} &= \left\{
   \begin{array}{l l}
     \frac{3}{7} & \quad \text{if $i=j$}\\
     \frac{n}{140} & \quad \text{if $i\neq j$}\\
-    & \quad \text{where n is the number of edges shared by vertex $i$ and $j$}
+    & \quad \text{where $n$ is the number of edges shared by vertex $i$ and $j$}
   \end{array} \right.
 \end{align*}
 
@@ -752,7 +752,7 @@ Which leaves us with
 \vec{Q_c} &= A^{-1}\vec{F_c} - A^{-1}B \vec{Q_{v}}  
 \end{align*}
 
-To efficiently calculate this requires simple definitions for the matricies used.
+To efficiently calculate this requires simple definitions for the matrices used.
 Matrix $A^{-1}$ can be directly computed:
 \begin{align*}
 A^{-1}_{ij} = \left\{ 
@@ -802,7 +802,7 @@ Continuing on, the first vector can be defined like so:
 \begin{align*}
 \left( \vec{F_v} - B^{\top}A^{-1}\vec{F_c} \right)_i= (F_v)_i - \left( \frac{4}{3} \sum_{n} (F_c)_n + \frac{2}{3} \sum_{f} (F_c)_f \right)
 \end{align*}
-Where the first sum is over the thre control points directly connected to vertex i and the 
+Where the first sum is over the three control points directly connected to vertex i and the 
 second sum is over those indirectly connected to vertex i. 
 
 The second vector $\vec{Q_c}$ is defined like so:
@@ -811,7 +811,7 @@ The second vector $\vec{Q_c}$ is defined like so:
 \end{align*}
 
 At this point it's straightforward to calculate each frame by using Cholesky decomposition 
-to quickly slove for $Q_v$ and use that to calculate $Q_c$.
+to quickly solve for $Q_v$ and use that to calculate $Q_c$.
 
 An even quicker (but less exact) way to proceed is to observe that the inverse of 
 $D - B^{\top}A^{-1}B$ is approximately equal to:
@@ -820,12 +820,12 @@ $D - B^{\top}A^{-1}B$ is approximately equal to:
 (D-B^{\top}A^{-1}B)^{-1}_{ij} &\approx \left\{ 
   \begin{array}{l l}
     5.1 & \text{if $i=j$}\\
-    -.4 n & \text{if vertex $i$ is adjecent to vertex $j$}\\
+    -.4 n & \text{if vertex $i$ is adjacent to vertex $j$}\\
     0 & \text{otherwise}\\
   \end{array} \right.  \\
 \end{align*}
 
-(This has been established expirementally only. No attempt has been made to prove this approximation generally true.)
+(This has been established experimentally only. No attempt has been made to prove this approximation generally true.)
 
 With this simplification each frame can be computed in time linear with respect to the number of vertices.
 \subsubsection{Configuration parameter consolidation}
@@ -845,35 +845,35 @@ Furthermore, observe that $m$ only appears opposite $\tau$ and
 $\rho$ so we can restate all equations in terms of $\frac{\tau}{m}=\tau_m$,
 $\frac{\rho}{m}=\rho_m$, and $c_f$.
 
-Trial an error yields the following values:
+Trial and error yields the following values:
 \begin{align*}
 \rho_m \approx 1 \qquad \tau_m \approx 20 \qquad c_f \approx .05 
 \end{align*}
 \clearpage
 \section{Sources of Error}
-For the sake of tractability we represent the bubble wall with a
+For the sake of tractability, we represent the bubble wall with a
 cubic Bezier. Having only 8 degrees of freedom cubic Bezier curves cannot
 represent all possible configurations for a deformed bubble wall. Even
 worse, it cannot represent an arc of a circle which is the rest shape of a real
-bubble wall. This is only noticeable for walls with high curvature however.
+bubble wall. This is only noticeable for walls with high curvature, however.
 
 Another source of error occurs in the kinetic energy equation. There we
 implicitly assume that the mass of the bubble wall is described by the
-parametric parameter $p$. But this parameter \emph{does not necessarily
+parameter $p$. But this parameter \emph{does not necessarily
 traverse the wall at constant speed!} This means that our equations have some
-parts of the bubble wall heavier than the other. This also affects
+parts of the bubble wall heavier than others. This also affects
 the direction and magnitude of the velocity of each part of the bubble wall.
 
 Another source of error is in approximating the matrix solve when solving for
 $\vec{q''}(t_{n+1})$. This can be solved exactly but only at prohibitively slow
 speed.
 
-Further error is introduced by the the numeric integration of the surface
+Further error is introduced by the the numerical integration of the surface
 tension component.
 
 The most obvious source of error is the \emph{very} basic forward Euler
 technique used to solve the equations of motion. This technique is known to be
-very unstable and it only acceptable here because of friction.
+very unstable and it is only acceptable here because of friction.
 
 No attempt has been made to estimate the magnitude of these errors. Actual
 implementations yield satisfactory enough results.
