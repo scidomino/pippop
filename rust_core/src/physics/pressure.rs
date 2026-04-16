@@ -17,7 +17,7 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
             let edge_key = key.edge_key(offset as u8);
             let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
 
-            let pressure_diff = bubble_to_pressure[twin.bubble] - bubble_to_pressure[edge.bubble];
+            let pressure_diff = bubble_to_pressure[edge.bubble] - bubble_to_pressure[twin.bubble];
             let pressure_diff = pressure_diff.clamp(-2.0, 2.0);
             let pressure = pressure_diff * PRESSURE_TENSION;
 

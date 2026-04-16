@@ -12,7 +12,7 @@ async fn main() {
 
     loop {
         // Physics update
-        if get_time() - last_physics_time > 0.01 {
+        if get_time() - last_physics_time > 0.016 {
             physics::advance_frame(&mut graph);
             last_physics_time = get_time();
         }
@@ -23,7 +23,7 @@ async fn main() {
         let aspect = screen_width() / screen_height();
         let camera = Camera2D {
             target: vec2(0.0, 0.0),
-            zoom: vec2(1.0 / 10000.0, -aspect / 10000.0),
+            zoom: vec2(1.0 / 600.0, -aspect / 600.0),
             ..Default::default()
         };
         set_camera(&camera);
@@ -43,13 +43,9 @@ async fn main() {
                     edge.point.position,
                     twin_edge.point.position,
                     twin_vertex.point.position,
-                    100.0,
+                    2.0,
                     SKYBLUE,
                 );
-
-                // Debug: Draw control points
-                draw_circle(edge.point.position.x, edge.point.position.y, 3.0, ORANGE);
-                draw_circle(twin_edge.point.position.x, twin_edge.point.position.y, 3.0, YELLOW);
             }
         }
 

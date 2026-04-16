@@ -33,7 +33,8 @@ impl Bubble {
         if self.open_air {
             0.0
         } else {
-            let target_area = 40000.0 * self.size;
+            // The sqrt is just to make the pressure increase more slowly as the bubble gets bigger.
+            let target_area = 3000.0 * self.size.sqrt();
             target_area / area.abs().max(100.0)
         }
     }
