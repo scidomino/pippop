@@ -3,8 +3,8 @@ pub mod colors;
 pub mod effects;
 
 use self::effects::EffectsManager;
-use crate::graph::Graph;
 use crate::graph::bubble::BubbleStyle;
+use crate::graph::Graph;
 use macroquad::prelude::*;
 
 pub struct Renderer {
@@ -14,8 +14,7 @@ pub struct Renderer {
 
 impl Renderer {
     pub fn new() -> Self {
-        let font_bytes =
-            include_bytes!("../../../android/app/src/main/res/font/sniglet_extrabold.ttf");
+        let font_bytes = include_bytes!("../../assets/sniglet_extrabold.ttf");
         let font = load_ttf_font_from_bytes(font_bytes).unwrap();
         Self {
             font,
