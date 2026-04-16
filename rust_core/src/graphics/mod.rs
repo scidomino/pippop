@@ -30,7 +30,7 @@ impl Renderer {
                 continue;
             }
 
-            let points = bubble::get_bubble_points(graph, bkey, 10);
+            let points = bubble::get_bubble_points(graph, bkey);
             if points.is_empty() {
                 continue;
             }
@@ -61,7 +61,9 @@ impl Renderer {
                 continue;
             }
 
-            let points = bubble::get_bubble_points(graph, bkey, 10);
+            // Note: In a high-performance scenario, we'd cache these centroids 
+            // during Pass 1 to avoid re-calculating points.
+            let points = bubble::get_bubble_points(graph, bkey);
             if points.is_empty() {
                 continue;
             }
