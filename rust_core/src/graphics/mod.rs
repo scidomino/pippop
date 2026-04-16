@@ -10,6 +10,12 @@ pub struct Renderer {
     pub effects: EffectsManager,
 }
 
+impl Default for Renderer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Renderer {
     pub fn new() -> Self {
         Self {

@@ -17,6 +17,12 @@ pub struct Graph {
     pub bubbles: SlotMap<BubbleKey, Bubble>,
 }
 
+impl Default for Graph {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Graph {
     pub fn new() -> Self {
         Graph {
@@ -133,7 +139,7 @@ impl Graph {
         let b = self.get_edge(ekey).bubble;
         self.rebubble(b, ekey);
 
-        return prev_on_bubble;
+        prev_on_bubble
     }
 
     

@@ -14,6 +14,12 @@ pub struct EffectsManager {
     effects: Vec<Effect>,
 }
 
+impl Default for EffectsManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EffectsManager {
     pub fn new() -> Self {
         Self { effects: Vec::new() }

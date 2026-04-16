@@ -10,13 +10,6 @@ pub struct EdgeKey {
 }
 
 impl EdgeKey {
-    pub fn default() -> Self {
-        EdgeKey {
-            vertex: VertexKey::default(),
-            offset: 0,
-        }
-    }
-
     pub fn new(vertex: VertexKey, offset: u8) -> Self {
         assert!(offset < 3, "Offset must be 0, 1, or 2");
         EdgeKey { vertex, offset }
@@ -39,6 +32,15 @@ impl EdgeKey {
     }
 }
 
+impl Default for EdgeKey {
+    fn default() -> Self {
+        EdgeKey {
+            vertex: VertexKey::default(),
+            offset: 0,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Edge {
     pub point: Point,
@@ -49,7 +51,7 @@ pub struct Edge {
 impl Edge {
     pub fn new(point: Point) -> Self {
         Edge {
-            point: point,
+            point,
             twin: EdgeKey::default(),
             bubble: BubbleKey::default(),
         }
@@ -59,6 +61,12 @@ impl Edge {
 #[derive(Debug, Clone)]
 pub struct EdgeMap<V> {
     map: slotmap::SecondaryMap<VertexKey, [V; 3]>,
+}
+
+impl<V> Default for EdgeMap<V> {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<V> EdgeMap<V> {
@@ -91,7 +99,7 @@ impl<V> EdgeMap<V> {
         self.map
             .entry(key.vertex)
             .unwrap()
-            .or_insert(Default::default())[key.offset as usize] = value;
+            .or_default()[key.offset as usize] = value;
     }
 }
 

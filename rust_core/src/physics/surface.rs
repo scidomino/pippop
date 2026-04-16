@@ -8,9 +8,9 @@ const SURFACE_TENSION: f32 = 0.3;
 
 // 3 point Legendre Gauss Integrator
 const LEGENDRE_GAUSS_POINTS: [(f32, f32); 3] = [
-    (0.27777777777, 0.88729833462),
-    (0.44444444444, 0.5),
-    (0.27777777777, 0.11270166537),
+    (0.277_777_8, 0.887_298_35),
+    (0.444_444_45, 0.5),
+    (0.277_777_8, 0.112_701_66),
 ];
 
 pub fn update_force(graph: &Graph, force: &mut GraphVector) {

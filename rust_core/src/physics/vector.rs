@@ -24,20 +24,20 @@ impl GraphVector {
     pub fn get_vertex(&self, key: VertexKey) -> Coordinate {
         self.vertex_to_value
             .get(key)
-            .map_or_else(|| Coordinate::default(), |p| p.vertex)
+            .map_or_else(Coordinate::default, |p| p.vertex)
     }
 
     pub fn get_edge(&self, key: EdgeKey) -> Coordinate {
         self.vertex_to_value
             .get(key.vertex)
-            .map_or_else(|| Coordinate::default(), |p| p.edges[key.offset as usize])
+            .map_or_else(Coordinate::default, |p| p.edges[key.offset as usize])
     }
 
     fn get_mut(&mut self, key: VertexKey) -> &mut Value {
         self.vertex_to_value
             .entry(key)
             .unwrap()
-            .or_insert(Value::default())
+            .or_default()
     }
 
     pub fn add_vertex(&mut self, key: VertexKey, value: Coordinate) {

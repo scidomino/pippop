@@ -25,7 +25,7 @@ pub fn advance_frame(graph: &mut Graph) {
 fn solve_vertex(graph: &Graph, force: &GraphVector) -> SecondaryMap<VertexKey, Coordinate> {
     let mut fbafs = SecondaryMap::new();
     for (key, vertex) in graph.vertecies.iter() {
-        let mut a = force.get_vertex(key).clone();
+        let mut a = force.get_vertex(key);
         for edge_key in key.edge_keys() {
             let edge = vertex.edge(edge_key);
 
@@ -40,7 +40,7 @@ fn solve_vertex(graph: &Graph, force: &GraphVector) -> SecondaryMap<VertexKey, C
 
     let mut vertex_accels = SecondaryMap::new();
     for (key, vertex) in graph.vertecies.iter() {
-        let mut a = fbafs[key].clone();
+        let mut a = fbafs[key];
         a.x *= 5.1;
         a.y *= 5.1;
         for edge in vertex.edges.iter() {

@@ -83,7 +83,7 @@ impl BubbleStyle {
 
     pub fn render_ui(&self, screen_pos: Vec2) {
         let label = match self {
-            BubbleStyle::Standard { size, .. } => format!("{}", size),
+            BubbleStyle::Standard { size, .. } => format!("{size}"),
             BubbleStyle::Player => "P".to_string(),
             BubbleStyle::OpenAir => return,
         };

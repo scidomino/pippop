@@ -95,7 +95,7 @@ fn get_half_area(vertex: &Vertex, edge: &Edge, twin_vertex: &Vertex, twin: &Edge
     let e = twin_vertex.point.position;
 
     // calculate half the area of the bezier curve defined by the points
-    return (s.x * (-10.0 * s.y - 6.0 * sc.y - 3.0 * ec.y - e.y)
+    (s.x * (-10.0 * s.y - 6.0 * sc.y - 3.0 * ec.y - e.y)
         + sc.x * (6.0 * s.y - 3.0 * ec.y - 3.0 * e.y))
-        / 20.0;
+        / 20.0
 }
