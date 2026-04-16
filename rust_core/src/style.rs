@@ -43,7 +43,7 @@ impl BubbleStyle {
         }
     }
 
-    pub fn render(&self, points: &[Vec2], centroid: Vec2) {
+    pub fn render(&self, points: &[Vec2], centroid: Vec2, camera: &Camera2D) {
         if self.is_open_air() || points.is_empty() {
             return;
         }
@@ -79,15 +79,18 @@ impl BubbleStyle {
             }
             BubbleStyle::OpenAir => {}
         }
-    }
 
-    pub fn render_ui(&self, screen_pos: Vec2) {
+        // --- Screen Space (UI) Rendering ---
         let label = match self {
             BubbleStyle::Standard { size, .. } => format!("{size}"),
             BubbleStyle::Player => "P".to_string(),
             BubbleStyle::OpenAir => return,
         };
 
+        // Temporarily switch to default camera for screen-space text
+        set_default_camera();
+
+        let screen_pos = camera.world_to_screen(centroid);
         let font_size = 20.0;
         let text_dims = measure_text(&label, None, font_size as u16, 1.0);
         
@@ -98,5 +101,8 @@ impl BubbleStyle {
             font_size,
             colors::WHITE,
         );
+
+        // Switch back to world camera
+        set_camera(camera);
     }
 }

@@ -61,7 +61,7 @@ impl Graph {
         }));
         self.rebubble(b1, ekeys1[0]);
         let b2 = self.bubbles.insert(Bubble::new(BubbleStyle::Standard {
-            size: 2,
+            size: 1,
             max_size: 5,
             color: colors::ROSE,
         }));

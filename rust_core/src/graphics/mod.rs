@@ -10,12 +10,6 @@ pub struct Renderer {
     pub effects: EffectsManager,
 }
 
-impl Default for Renderer {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl Renderer {
     pub fn new() -> Self {
         Self {
@@ -28,7 +22,7 @@ impl Renderer {
     }
 
     pub fn draw(&self, graph: &Graph, camera: &Camera2D) {
-        // --- Pass 1: World Space (Bubbles) ---
+        // --- Pass 1: World Space (Bubbles & UI) ---
         set_camera(camera);
         
         for (bkey, bubble) in graph.bubbles.iter() {
@@ -43,30 +37,12 @@ impl Renderer {
 
             let centroid = bubble::calculate_centroid(&points);
 
-            // Delegate to the style implementation
-            bubble.style.render(&points, centroid);
+            // Delegate all rendering (World + UI) to the style implementation
+            bubble.style.render(&points, centroid, camera);
         }
 
-        // --- Pass 2: Screen Space (UI & Effects) ---
+        // --- Pass 2: Screen Space (Effects) ---
         set_default_camera();
-
-        for (bkey, bubble) in graph.bubbles.iter() {
-            if bubble.style.is_open_air() {
-                continue;
-            }
-
-            let points = bubble::get_bubble_points(graph, bkey);
-            if points.is_empty() {
-                continue;
-            }
-            
-            let centroid = bubble::calculate_centroid(&points);
-            let screen_pos = camera.world_to_screen(centroid);
-
-            // Delegate UI rendering to the style implementation
-            bubble.style.render_ui(screen_pos);
-        }
-
         self.effects.draw(camera);
     }
 }

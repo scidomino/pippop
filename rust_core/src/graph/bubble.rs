@@ -27,11 +27,7 @@ impl Bubble {
     }
 
     pub fn get_pressure(&self, area: f32) -> f32 {
-        if self.style.is_open_air() {
-            0.0
-        } else {
-            let target_area = self.style.get_target_area();
-            target_area / area.abs().max(100.0)
-        }
+        let target_area = self.style.get_target_area();
+        target_area / area.abs().max(100.0)
     }
 }
