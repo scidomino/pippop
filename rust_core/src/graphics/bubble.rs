@@ -1,135 +1,46 @@
-use crate::graph::{Graph};
+use crate::graph::Graph;
 use crate::graph::point::Coordinate;
-use crate::physics;
-use slotmap::Key;
+use macroquad::prelude::*;
 
-// --- Public FFI-safe data structures ---
+pub fn get_bubble_points(graph: &Graph, bkey: crate::graph::bubble::BubbleKey, steps: usize) -> Vec<Vec2> {
+    let bubble = &graph.bubbles[bkey];
+    let mut points = Vec::new();
 
-#[repr(C)]
-#[derive(Clone, Copy, Debug)]
-pub struct Vec2 {
-    pub x: f32,
-    pub y: f32,
-}
+    for &ekey in &bubble.edges {
+        let (edge, vertex) = graph.get_edge_and_vertex(ekey);
+        let (twin_edge, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
 
-impl From<Coordinate> for Vec2 {
-    fn from(c: Coordinate) -> Self {
-        Vec2 { x: c.x, y: c.y }
-    }
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug)]
-pub struct CubicBezier {
-    pub p0: Vec2,
-    pub p1: Vec2,
-    pub p2: Vec2,
-    pub p3: Vec2,
-}
-
-#[repr(C)]
-pub struct RenderableBubble {
-    pub bubble_key: u64,
-    pub is_open_air: bool,
-    pub curves: *mut CubicBezier,
-    pub curves_count: usize,
-}
-
-#[repr(C)]
-pub struct RenderableBubbleCollection {
-    pub bubbles: *mut RenderableBubble,
-    pub bubbles_count: usize,
-}
-
-// --- FFI functions ---
-
-#[no_mangle]
-pub extern "C" fn create_graph() -> *mut Graph {
-    let mut graph = Graph::new();
-    graph.init();
-    Box::into_raw(Box::new(graph))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn destroy_graph(graph_ptr: *mut Graph) {
-    if !graph_ptr.is_null() {
-        let _ = Box::from_raw(graph_ptr);
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn advance_frame_ffi(graph_ptr: *mut Graph) {
-    if !graph_ptr.is_null() {
-        let graph = &mut *graph_ptr;
-        physics::advance_frame(graph);
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn get_renderable_bubbles(graph_ptr: *const Graph) -> *mut RenderableBubbleCollection {
-    if graph_ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let graph = &*graph_ptr;
-
-    let mut renderable_bubbles = Vec::new();
-
-    for (bkey, bubble) in graph.bubbles.iter() {
-        let (curves_ptr, curves_len) = if bubble.open_air || bubble.edges.is_empty() {
-            (std::ptr::null_mut(), 0)
-        } else {
-            let mut curves = Vec::with_capacity(bubble.edges.len());
-            for &ekey in &bubble.edges {
-                let (edge, vertex) = graph.get_edge_and_vertex(ekey);
-                let (twin_edge, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
-
-                let bezier = CubicBezier {
-                    p0: vertex.point.position.into(),
-                    p1: edge.point.position.into(),
-                    p2: twin_edge.point.position.into(),
-                    p3: twin_vertex.point.position.into(),
-                };
-                curves.push(bezier);
-            }
-            let mut curves_vec = curves.into_boxed_slice();
-            let ptr = curves_vec.as_mut_ptr();
-            let len = curves_vec.len();
-            std::mem::forget(curves_vec);
-            (ptr, len)
-        };
-
-        let renderable = RenderableBubble {
-            bubble_key: bkey.data().as_ffi(),
-            is_open_air: bubble.open_air,
-            curves: curves_ptr,
-            curves_count: curves_len,
-        };
-        renderable_bubbles.push(renderable);
-    }
-
-    let mut bubbles_vec = renderable_bubbles.into_boxed_slice();
-    let collection = Box::new(RenderableBubbleCollection {
-        bubbles: bubbles_vec.as_mut_ptr(),
-        bubbles_count: bubbles_vec.len(),
-    });
-    std::mem::forget(bubbles_vec);
-
-    Box::into_raw(collection)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn free_renderable_bubbles(collection_ptr: *mut RenderableBubbleCollection) {
-    if collection_ptr.is_null() {
-        return;
-    }
-    let collection = Box::from_raw(collection_ptr);
-    let bubbles = std::slice::from_raw_parts_mut(collection.bubbles, collection.bubbles_count);
-
-    for bubble in bubbles {
-        if !bubble.curves.is_null() {
-            let _ = Vec::from_raw_parts(bubble.curves, bubble.curves_count, bubble.curves_count);
+        for i in 0..steps {
+            let t = i as f32 / steps as f32;
+            points.push(sample_cubic_bezier(
+                vertex.point.position,
+                edge.point.position,
+                twin_edge.point.position,
+                twin_vertex.point.position,
+                t,
+            ));
         }
     }
+    points
+}
 
-    let _ = Vec::from_raw_parts(collection.bubbles, collection.bubbles_count, collection.bubbles_count);
+pub fn sample_cubic_bezier(p0: Coordinate, p1: Coordinate, p2: Coordinate, p3: Coordinate, t: f32) -> Vec2 {
+    let inv_t = 1.0 - t;
+    let b0 = inv_t * inv_t * inv_t;
+    let b1 = 3.0 * t * inv_t * inv_t;
+    let b2 = 3.0 * t * t * inv_t;
+    let b3 = t * t * t;
+
+    Vec2::new(
+        b0 * p0.x + b1 * p1.x + b2 * p2.x + b3 * p3.x,
+        b0 * p0.y + b1 * p1.y + b2 * p2.y + b3 * p3.y,
+    )
+}
+
+pub fn calculate_centroid(points: &[Vec2]) -> Vec2 {
+    if points.is_empty() {
+        return Vec2::ZERO;
+    }
+    let sum = points.iter().fold(Vec2::ZERO, |acc, p| acc + *p);
+    sum / points.len() as f32
 }
