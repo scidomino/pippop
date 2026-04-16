@@ -1,6 +1,6 @@
 pub mod bubble;
+pub mod colors;
 pub mod effects;
-pub mod styles;
 
 use macroquad::prelude::*;
 use crate::graph::Graph;
@@ -26,7 +26,7 @@ impl Renderer {
         set_camera(camera);
         
         for (bkey, bubble) in graph.bubbles.iter() {
-            if bubble.open_air {
+            if bubble.style.is_open_air() {
                 continue;
             }
 
@@ -35,34 +35,20 @@ impl Renderer {
                 continue;
             }
 
-            let style = styles::get_bubble_style(bubble.size, bubble.open_air);
             let centroid = bubble::calculate_centroid(&points);
 
-            // 1. Draw Fill (Triangle Fan)
-            for i in 0..points.len() {
-                let p1 = points[i];
-                let p2 = points[(i + 1) % points.len()];
-                draw_triangle(centroid, p1, p2, style.fill_color);
-            }
-
-            // 2. Draw Outline
-            for i in 0..points.len() {
-                let p1 = points[i];
-                let p2 = points[(i + 1) % points.len()];
-                draw_line(p1.x, p1.y, p2.x, p2.y, 2.0, style.outline_color);
-            }
+            // Delegate to the style implementation
+            bubble.style.render(&points, centroid);
         }
 
         // --- Pass 2: Screen Space (UI & Effects) ---
         set_default_camera();
 
         for (bkey, bubble) in graph.bubbles.iter() {
-            if bubble.open_air {
+            if bubble.style.is_open_air() {
                 continue;
             }
 
-            // Note: In a high-performance scenario, we'd cache these centroids 
-            // during Pass 1 to avoid re-calculating points.
             let points = bubble::get_bubble_points(graph, bkey);
             if points.is_empty() {
                 continue;
@@ -70,19 +56,9 @@ impl Renderer {
             
             let centroid = bubble::calculate_centroid(&points);
             let screen_pos = camera.world_to_screen(centroid);
-            let style = styles::get_bubble_style(bubble.size, bubble.open_air);
 
-            let label = format!("{}", bubble.size as i32);
-            let font_size = 20.0;
-            let text_dims = measure_text(&label, None, font_size as u16, 1.0);
-            
-            draw_text(
-                &label,
-                screen_pos.x - text_dims.width / 2.0,
-                screen_pos.y + text_dims.height / 2.0,
-                font_size,
-                style.label_color,
-            );
+            // Delegate UI rendering to the style implementation
+            bubble.style.render_ui(screen_pos);
         }
 
         self.effects.draw(camera);

@@ -1,4 +1,5 @@
 use super::edge::EdgeKey;
+use crate::style::BubbleStyle;
 use slotmap::new_key_type;
 
 new_key_type! {
@@ -7,34 +8,29 @@ new_key_type! {
 
 #[derive(Debug, Clone)]
 pub struct Bubble {
-    pub open_air: bool,
+    pub style: BubbleStyle,
     pub edges: Vec<EdgeKey>,
     pub area: f32,
-    pub size: f32,
 }
 
 impl Bubble {
-    pub fn new(open_air: bool) -> Self {
+    pub fn new(style: BubbleStyle) -> Self {
         Bubble {
-            open_air,
+            style,
             edges: Vec::new(),
             area: 0.0,
-            size: 1.0,
         }
     }
 
     pub fn merge(&mut self, other: &Bubble) {
-        if other.open_air {
-            self.open_air = true;
-        }
+        self.style = self.style.merge(&other.style);
     }
 
     pub fn get_pressure(&self, area: f32) -> f32 {
-        if self.open_air {
+        if self.style.is_open_air() {
             0.0
         } else {
-            // The sqrt is just to make the pressure increase more slowly as the bubble gets bigger.
-            let target_area = 3000.0 * self.size.sqrt();
+            let target_area = self.style.get_target_area();
             target_area / area.abs().max(100.0)
         }
     }

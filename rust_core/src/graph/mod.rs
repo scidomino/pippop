@@ -4,10 +4,11 @@ pub mod point;
 pub mod vertex;
 
 use bubble::{Bubble, BubbleKey};
+use crate::style::BubbleStyle;
 use edge::{Edge, EdgeKey};
 use slotmap::SlotMap;
 use vertex::{Vertex, VertexKey};
-
+use crate::graphics::colors;
 
 use crate::graph::point::Point;
 
@@ -47,11 +48,19 @@ impl Graph {
         self.twin(ekeys1[1], ekeys2[2]);
         self.twin(ekeys1[2], ekeys2[1]);
 
-        let b1 = self.bubbles.insert(Bubble::new(false));
+        let b1 = self.bubbles.insert(Bubble::new(BubbleStyle::Standard {
+            size: 1,
+            max_size: 5,
+            color: colors::TURQUOISE,
+        }));
         self.rebubble(b1, ekeys1[0]);
-        let b2 = self.bubbles.insert(Bubble::new(false));
+        let b2 = self.bubbles.insert(Bubble::new(BubbleStyle::Standard {
+            size: 2,
+            max_size: 5,
+            color: colors::ROSE,
+        }));
         self.rebubble(b2, ekeys1[1]);
-        let open_air = self.bubbles.insert(Bubble::new(true));
+        let open_air = self.bubbles.insert(Bubble::new(BubbleStyle::OpenAir));
         self.rebubble(open_air, ekeys1[2]);
     }
 
