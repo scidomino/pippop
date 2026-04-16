@@ -10,7 +10,6 @@ new_key_type! {
 pub struct Bubble {
     pub style: BubbleStyle,
     pub edges: Vec<EdgeKey>,
-    pub area: f32,
 }
 
 impl Bubble {
@@ -18,7 +17,6 @@ impl Bubble {
         Bubble {
             style,
             edges: Vec::new(),
-            area: 0.0,
         }
     }
 

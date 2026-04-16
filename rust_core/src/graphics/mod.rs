@@ -26,15 +26,10 @@ impl Renderer {
         set_camera(camera);
         
         for (bkey, bubble) in graph.bubbles.iter() {
-            if bubble.style.is_open_air() {
-                continue;
-            }
-
             let points = bubble::get_bubble_points(graph, bkey);
             if points.is_empty() {
                 continue;
             }
-
             let centroid = bubble::calculate_centroid(&points);
 
             // Delegate all rendering (World + UI) to the style implementation
