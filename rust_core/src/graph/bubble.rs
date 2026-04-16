@@ -25,7 +25,11 @@ impl Bubble {
     }
 
     pub fn get_pressure(&self, area: f32) -> f32 {
-        let target_area = self.style.get_target_area();
+        let target_area = match self.style {
+            BubbleStyle::Standard { size, .. } => 3000.0 * (size as f32).sqrt(),
+            BubbleStyle::Player => 3000.0, // Fixed size for player
+            BubbleStyle::OpenAir => 0.0,   // Open air has no target area
+        };
         target_area / area.abs().max(100.0)
     }
 }
