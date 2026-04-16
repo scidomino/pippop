@@ -3,8 +3,7 @@ pub mod edge;
 pub mod point;
 pub mod vertex;
 
-use bubble::{Bubble, BubbleKey};
-use crate::style::BubbleStyle;
+use bubble::{Bubble, BubbleKey, BubbleStyle};
 use edge::{Edge, EdgeKey};
 use slotmap::SlotMap;
 use vertex::{Vertex, VertexKey};

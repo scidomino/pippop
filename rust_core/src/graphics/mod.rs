@@ -4,7 +4,7 @@ pub mod effects;
 
 use self::effects::EffectsManager;
 use crate::graph::Graph;
-use crate::style::BubbleStyle;
+use crate::graph::bubble::BubbleStyle;
 use macroquad::prelude::*;
 
 pub struct Renderer {
