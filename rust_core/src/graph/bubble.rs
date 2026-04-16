@@ -33,7 +33,8 @@ impl Bubble {
         if self.open_air {
             0.0
         } else {
-            3000.0 * self.size.sqrt() / area.max(1.0)
+            let target_area = 40000.0 * self.size;
+            target_area / area.abs().max(100.0)
         }
     }
 }

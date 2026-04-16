@@ -32,18 +32,17 @@ fn solve_vertex(graph: &Graph, force: &GraphVector) -> SecondaryMap<VertexKey, C
             let edge_force = force.get_edge(edge_key);
             let twin_edge_force = force.get_edge(edge.twin);
 
-            a.x += (-4.0 / 3.0) * edge_force.x + (2.0 / 3.0) * twin_edge_force.x;
-            a.y += (-4.0 / 3.0) * edge_force.y + (2.0 / 3.0) * twin_edge_force.y;
-
-            fbafs.insert(key, a);
+            a.x -= (4.0 / 3.0) * edge_force.x - (2.0 / 3.0) * twin_edge_force.x;
+            a.y -= (4.0 / 3.0) * edge_force.y - (2.0 / 3.0) * twin_edge_force.y;
         }
+        fbafs.insert(key, a);
     }
 
     let mut vertex_accels = SecondaryMap::new();
     for (key, vertex) in graph.vertecies.iter() {
         let mut a = fbafs[key].clone();
-        a.x *= 5.4;
-        a.y *= 5.4;
+        a.x *= 5.1;
+        a.y *= 5.1;
         for edge in vertex.edges.iter() {
             let twin_vertex_force = fbafs[edge.twin.vertex];
             a.x -= 0.4 * twin_vertex_force.x;
@@ -91,8 +90,8 @@ fn solve_edge(
 fn accelerate(graph: &mut Graph, accels: &GraphVector) {
     for (key, vertex) in graph.vertecies.iter_mut() {
         accelerate_point(&mut vertex.point, accels.get_vertex(key));
-        for edge_key in key.edge_keys() {
-            let edge = &mut vertex.edge(edge_key);
+        for (offset, edge) in vertex.edges.iter_mut().enumerate() {
+            let edge_key = key.edge_key(offset as u8);
             accelerate_point(&mut edge.point, accels.get_edge(edge_key));
         }
     }

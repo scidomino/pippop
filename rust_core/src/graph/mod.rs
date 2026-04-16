@@ -28,21 +28,31 @@ impl Graph {
         self.vertecies.clear();
         self.bubbles.clear();
 
-        let vkey1 = self.vertecies.insert(Vertex::new(Point::new(50.0, 0.0)));
-        let vkey2 = self.vertecies.insert(Vertex::new(Point::new(50.0, 100.0)));
+        let vkey1 = self.vertecies.insert(Vertex::new(Point::new(0.0, -50.0)));
+        let vkey2 = self.vertecies.insert(Vertex::new(Point::new(0.0, 50.0)));
         let ekeys1 = vkey1.edge_keys();
         let ekeys2 = vkey2.edge_keys();
+
+        // Give the control points an initial offset so they aren't flat lines
+        self.get_edge_mut(ekeys1[0]).point.position.x = -50.0;
+        self.get_edge_mut(ekeys2[0]).point.position.x = -50.0;
+        
+        self.get_edge_mut(ekeys1[1]).point.position.x = 0.0;
+        self.get_edge_mut(ekeys2[2]).point.position.x = 0.0;
+        
+        self.get_edge_mut(ekeys1[2]).point.position.x = 50.0;
+        self.get_edge_mut(ekeys2[1]).point.position.x = 50.0;
 
         self.twin(ekeys1[0], ekeys2[0]);
         self.twin(ekeys1[1], ekeys2[2]);
         self.twin(ekeys1[2], ekeys2[1]);
 
-        let open_air = self.bubbles.insert(Bubble::new(true));
-        self.rebubble(open_air, ekeys1[0]);
         let b1 = self.bubbles.insert(Bubble::new(false));
-        self.rebubble(b1, ekeys1[1]);
+        self.rebubble(b1, ekeys1[0]);
         let b2 = self.bubbles.insert(Bubble::new(false));
-        self.rebubble(b2, ekeys1[2]);
+        self.rebubble(b2, ekeys1[1]);
+        let open_air = self.bubbles.insert(Bubble::new(true));
+        self.rebubble(open_air, ekeys1[2]);
     }
 
     pub fn remove_edge(&mut self, ekey: EdgeKey) {

@@ -13,7 +13,8 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
     for (key, vertex) in graph.vertecies.iter() {
         let mut vertex_force = Coordinate::default();
 
-        for edge in vertex.edges.iter() {
+        for (offset, edge) in vertex.edges.iter().enumerate() {
+            let edge_key = key.edge_key(offset as u8);
             let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
 
             let pressure_diff = bubble_to_pressure[twin.bubble] - bubble_to_pressure[edge.bubble];
@@ -24,7 +25,7 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
             vertex_force.y += pressure * vertex_y_force(vertex, edge, twin, twin_vertex);
 
             force.add_edge(
-                edge.twin,
+                edge_key,
                 Coordinate {
                     x: pressure * edge_x_force(vertex, twin, twin_vertex),
                     y: pressure * edge_y_force(vertex, twin, twin_vertex),
@@ -37,45 +38,33 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
 }
 
 fn vertex_x_force(vertex: &Vertex, edge: &Edge, twin: &Edge, twin_vertex: &Vertex) -> f32 {
-    vertex_force(
-        vertex.point.position.y,
-        edge.point.position.y,
-        twin.point.position.y,
-        twin_vertex.point.position.y,
-    )
-}
-
-fn vertex_y_force(vertex: &Vertex, edge: &Edge, twin: &Edge, twin_vertex: &Vertex) -> f32 {
-    vertex_force(
-        vertex.point.position.x,
-        edge.point.position.x,
-        twin.point.position.x,
-        twin_vertex.point.position.x,
-    )
-}
-
-fn edge_x_force(vertex: &Vertex, twin: &Edge, twin_vertex: &Vertex) -> f32 {
-    edge_force(
-        vertex.point.position.y,
-        twin.point.position.y,
-        twin_vertex.point.position.y,
-    )
-}
-
-fn edge_y_force(vertex: &Vertex, twin: &Edge, twin_vertex: &Vertex) -> f32 {
-    edge_force(
-        vertex.point.position.x,
-        twin.point.position.x,
-        twin_vertex.point.position.x,
-    )
-}
-
-fn vertex_force(s: f32, sc: f32, ec: f32, e: f32) -> f32 {
+    let s = vertex.point.position.y;
+    let sc = edge.point.position.y;
+    let ec = twin.point.position.y;
+    let e = twin_vertex.point.position.y;
     (-10.0 * s - 6.0 * sc - 3.0 * ec - e) / 20.0
 }
 
-fn edge_force(s: f32, ec: f32, e: f32) -> f32 {
+fn vertex_y_force(vertex: &Vertex, edge: &Edge, twin: &Edge, twin_vertex: &Vertex) -> f32 {
+    let s = vertex.point.position.x;
+    let sc = edge.point.position.x;
+    let ec = twin.point.position.x;
+    let e = twin_vertex.point.position.x;
+    (-10.0 * s + 6.0 * sc + 3.0 * ec + e) / 20.0
+}
+
+fn edge_x_force(vertex: &Vertex, twin: &Edge, twin_vertex: &Vertex) -> f32 {
+    let s = vertex.point.position.y;
+    let ec = twin.point.position.y;
+    let e = twin_vertex.point.position.y;
     (6.0 * s - 3.0 * ec - 3.0 * e) / 20.0
+}
+
+fn edge_y_force(vertex: &Vertex, twin: &Edge, twin_vertex: &Vertex) -> f32 {
+    let s = vertex.point.position.x;
+    let ec = twin.point.position.x;
+    let e = twin_vertex.point.position.x;
+    (-6.0 * s + 3.0 * ec + 3.0 * e) / 20.0
 }
 
 fn get_bubble_to_pressure(graph: &Graph) -> SecondaryMap<BubbleKey, f32> {

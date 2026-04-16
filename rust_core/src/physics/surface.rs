@@ -17,17 +17,18 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
     for (key, vertex) in graph.vertecies.iter() {
         let mut vertex_force = Coordinate::default();
 
-        for edge in vertex.edges.iter() {
+        for (offset, edge) in vertex.edges.iter().enumerate() {
+            let edge_key = key.edge_key(offset as u8);
             let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
 
-            vertex_force.x += SURFACE_TENSION * vertex_x_force(vertex, edge, twin, twin_vertex);
-            vertex_force.y += SURFACE_TENSION * vertex_y_force(vertex, edge, twin, twin_vertex);
+            vertex_force.x -= SURFACE_TENSION * vertex_x_force(vertex, edge, twin, twin_vertex);
+            vertex_force.y -= SURFACE_TENSION * vertex_y_force(vertex, edge, twin, twin_vertex);
 
             force.add_edge(
-                edge.twin,
+                edge_key,
                 Coordinate {
-                    x: SURFACE_TENSION * edge_x_force(vertex, edge, twin, twin_vertex),
-                    y: SURFACE_TENSION * edge_y_force(vertex, edge, twin, twin_vertex),
+                    x: -SURFACE_TENSION * edge_x_force(vertex, edge, twin, twin_vertex),
+                    y: -SURFACE_TENSION * edge_y_force(vertex, edge, twin, twin_vertex),
                 },
             );
         }
@@ -89,12 +90,12 @@ fn edge_y_force(vertex: &Vertex, edge: &Edge, twin: &Edge, twin_vertex: &Vertex)
 }
 
 fn vertex_force(sx: f32, sy: f32, scx: f32, scy: f32, ecx: f32, ecy: f32, ex: f32, ey: f32) -> f32 {
-    let ax = 3.0 * (ecx - scx) + sx - ex;
-    let ay = 3.0 * (ecy - scy) + sy - ey;
-    let bx = 2.0 * (ex - 2.0 * ecx + scx);
-    let by = 2.0 * (ey - 2.0 * ecy + scy);
-    let cx = ecx - ex;
-    let cy = ecy - ey;
+    let ax = 3.0 * (ex - 3.0 * ecx + 3.0 * scx - sx);
+    let ay = 3.0 * (ey - 3.0 * ecy + 3.0 * scy - sy);
+    let bx = 6.0 * (ecx - 2.0 * scx + sx);
+    let by = 6.0 * (ecy - 2.0 * scy + sy);
+    let cx = 3.0 * (scx - sx);
+    let cy = 3.0 * (scy - sy);
 
     let mut force = 0.0;
 
@@ -106,19 +107,20 @@ fn vertex_force(sx: f32, sy: f32, scx: f32, scy: f32, ecx: f32, ecy: f32, ex: f3
         if hypot == 0.0 {
             continue;
         }
-        let b_y_dp_s_x = 3.0 * p * p; // the only difference from edge force
-        force += w * b_y_dp_s_x * b_x_dp / hypot;
+        let inv_t = 1.0 - p;
+        let der_v = -3.0 * inv_t * inv_t;
+        force += w * der_v * b_x_dp / hypot;
     }
     force
 }
 
 fn edge_force(sx: f32, sy: f32, scx: f32, scy: f32, ecx: f32, ecy: f32, ex: f32, ey: f32) -> f32 {
-    let ax = 3.0 * (ecx - scx) + sx - ex;
-    let ay = 3.0 * (ecy - scy) + sy - ey;
-    let bx = 2.0 * (ex - 2.0 * ecx + scx);
-    let by = 2.0 * (ey - 2.0 * ecy + scy);
-    let cx = ecx - ex;
-    let cy = ecy - ey;
+    let ax = 3.0 * (ex - 3.0 * ecx + 3.0 * scx - sx);
+    let ay = 3.0 * (ey - 3.0 * ecy + 3.0 * scy - sy);
+    let bx = 6.0 * (ecx - 2.0 * scx + sx);
+    let by = 6.0 * (ecy - 2.0 * scy + sy);
+    let cx = 3.0 * (scx - sx);
+    let cy = 3.0 * (scy - sy);
 
     let mut force = 0.0;
 
@@ -130,8 +132,9 @@ fn edge_force(sx: f32, sy: f32, scx: f32, scy: f32, ecx: f32, ecy: f32, ex: f32,
         if hypot == 0.0 {
             continue;
         }
-        let b_y_dp_sc_x = p * (6.0 - 9.0 * p); // the only difference from vertex force
-        force += w * b_y_dp_sc_x * b_x_dp / hypot;
+        let inv_t = 1.0 - p;
+        let der_sc = 3.0 * inv_t * (1.0 - 3.0 * p);
+        force += w * der_sc * b_x_dp / hypot;
     }
     force
 }
