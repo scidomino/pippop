@@ -44,6 +44,7 @@ impl Default for EdgeKey {
 pub struct Edge {
     pub point: Point,
     pub twin: EdgeKey,
+    // the bubble shared by this edge and it's clockwise vertex edge.
     pub bubble: BubbleKey,
 }
 

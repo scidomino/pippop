@@ -20,6 +20,7 @@ impl VertexKey {
 #[derive(Debug, Clone, Copy)]
 pub struct Vertex {
     pub point: Point,
+    // indexed clockwise
     pub edges: [Edge; 3],
 }
 
