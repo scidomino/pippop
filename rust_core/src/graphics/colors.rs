@@ -17,3 +17,7 @@ pub const ALL_COLORS: [Color; 6] = [TURQUOISE, ROSE, GREEN, YELLOW, RED, ORANGE]
 pub fn get_group(size: usize) -> Vec<Color> {
     ALL_COLORS[..size.min(ALL_COLORS.len())].to_vec()
 }
+
+pub fn random_game_color() -> Color {
+    ALL_COLORS[macroquad::rand::gen_range(0, ALL_COLORS.len())]
+}

@@ -192,4 +192,20 @@ impl Graph {
             }
         }
     }
+
+    pub fn get_open_air_vertices(&self) -> Vec<VertexKey> {
+        let open_air_key = self.bubbles.iter()
+            .find(|(_, b)| b.style == BubbleStyle::OpenAir)
+            .map(|(k, _)| k);
+        
+        if let Some(key) = open_air_key {
+            self.bubbles[key].edges.iter().map(|e| e.vertex).collect()
+        } else {
+            Vec::new()
+        }
+    }
+
+    pub fn spawn(&mut self, _vkey: VertexKey, _style: BubbleStyle) {
+        // To be implemented
+    }
 }
