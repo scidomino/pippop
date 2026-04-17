@@ -44,7 +44,7 @@ new_key_type! {
 #[derive(Debug, Clone)]
 pub struct Bubble {
     pub style: BubbleStyle,
-    // counter clockwise list of the trailing edges that (along with their leading edge twins) form the boundary of this bubble
+    // clockwise list of the edges that form the boundary of this bubble
     // These are the edges where edge.bubble == this bubble.
     pub edges: Vec<EdgeKey>,
 }

@@ -39,16 +39,6 @@ impl Graph {
         let ekeys1 = vkey1.edge_keys();
         let ekeys2 = vkey2.edge_keys();
 
-        // Give the control points an initial offset so they aren't flat lines
-        self.get_edge_mut(ekeys1[0]).point.position.x = -50.0;
-        self.get_edge_mut(ekeys2[0]).point.position.x = -50.0;
-        
-        self.get_edge_mut(ekeys1[1]).point.position.x = 0.0;
-        self.get_edge_mut(ekeys2[2]).point.position.x = 0.0;
-        
-        self.get_edge_mut(ekeys1[2]).point.position.x = 50.0;
-        self.get_edge_mut(ekeys2[1]).point.position.x = 50.0;
-
         self.twin(ekeys1[0], ekeys2[0]);
         self.twin(ekeys1[1], ekeys2[2]);
         self.twin(ekeys1[2], ekeys2[1]);
@@ -162,12 +152,14 @@ impl Graph {
         }
     }
 
+    // next edge on the same bubble in clockwise order
     fn next_on_bubble(&self, key: EdgeKey) -> EdgeKey {
-        self.get_edge(key.next_on_vertex()).twin
+        self.get_edge(key).twin.next_on_vertex()
     }
 
+    // previous edge on the same bubble in clockwise order
     fn prev_on_bubble(&self, key: EdgeKey) -> EdgeKey {
-        self.get_edge(key).twin.next_on_vertex()
+        self.get_edge(key.next_on_vertex()).twin
     }
 
     pub fn get_edge(&self, key: EdgeKey) -> &Edge {

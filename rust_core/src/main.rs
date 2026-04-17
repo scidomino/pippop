@@ -16,7 +16,7 @@ async fn main() {
         let dt = get_frame_time();
 
         // Physics update (fixed timestep approx 60fps)
-        if get_time() - last_physics_time > 0.016 {
+        if get_time() - last_physics_time > 0.16 {
             physics::advance_frame(&mut graph);
             last_physics_time = get_time();
         }

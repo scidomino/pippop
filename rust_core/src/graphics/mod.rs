@@ -40,6 +40,15 @@ impl Renderer {
             self.draw_bubble(&bubble.style, &points, centroid, camera);
         }
 
+        // Draw Edge Points
+        set_camera(camera);
+        for (_, vertex) in graph.vertecies.iter() {
+            for edge in &vertex.edges {
+                let p = edge.point.position;
+                draw_circle(p.x, p.y, 10.0, colors::YELLOW);
+            }
+        }
+
         // --- Pass 2: Screen Space (Effects) ---
         set_default_camera();
         self.effects.draw(camera, &self.font);
