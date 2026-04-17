@@ -3,11 +3,11 @@ pub mod edge;
 pub mod point;
 pub mod vertex;
 
+use crate::graphics::colors;
 use bubble::{Bubble, BubbleKey, BubbleStyle};
 use edge::{Edge, EdgeKey};
 use slotmap::SlotMap;
 use vertex::{Vertex, VertexKey};
-use crate::graphics::colors;
 
 use crate::graph::point::Point;
 
@@ -131,8 +131,6 @@ impl Graph {
         prev_on_bubble
     }
 
-    
-
     fn twin(&mut self, a: EdgeKey, b: EdgeKey) {
         self.get_edge_mut(a).twin = b;
         self.get_edge_mut(b).twin = a;
@@ -180,16 +178,21 @@ impl Graph {
             println!("Vertex {:?}: ({:?})", vertex_key, vertex.point);
             for edge in &vertex.edges {
                 let twin_vertex = &self.vertecies[edge.twin.vertex];
-                println!("  Edge to Vertex {:?}: ({:?})", edge.twin.vertex, twin_vertex.point);
+                println!(
+                    "  Edge to Vertex {:?}: ({:?})",
+                    edge.twin.vertex, twin_vertex.point
+                );
             }
         }
     }
 
     pub fn get_open_air_vertices(&self) -> Vec<VertexKey> {
-        let open_air_key = self.bubbles.iter()
+        let open_air_key = self
+            .bubbles
+            .iter()
             .find(|(_, b)| b.style == BubbleStyle::OpenAir)
             .map(|(k, _)| k);
-        
+
         if let Some(key) = open_air_key {
             self.bubbles[key].edges.iter().map(|e| e.vertex).collect()
         } else {
@@ -197,7 +200,46 @@ impl Graph {
         }
     }
 
-    pub fn spawn(&mut self, _vkey: VertexKey, _style: BubbleStyle) {
-        // To be implemented
+    pub fn spawn(&mut self, vkey: VertexKey, style: BubbleStyle) {
+        let vertex: Vertex = self.vertecies[vkey];
+        let edge_keys: [EdgeKey; 3] = vkey.edge_keys();
+        let twin_keys = [
+            vertex.edges[0].twin,
+            vertex.edges[1].twin,
+            vertex.edges[2].twin,
+        ];
+        let bubble_keys = [
+            vertex.edges[0].bubble,
+            vertex.edges[1].bubble,
+            vertex.edges[2].bubble,
+        ];
+
+        let vpoint = vertex.point.position;
+        let epoint1 = vertex.edges[0].point.position;
+        let epoint2 = vertex.edges[1].point.position;
+
+        let mid_point1 = Point::new((vpoint.x + epoint1.x) / 2.0, (vpoint.y + epoint1.y) / 2.0);
+        let mid_point2 = Point::new((vpoint.x + epoint2.x) / 2.0, (vpoint.y + epoint2.y) / 2.0);
+
+        let new_vertex1_key = self.vertecies.insert(Vertex::new(mid_point1));
+        let new_vertex2_key = self.vertecies.insert(Vertex::new(mid_point2));
+
+        let new_vertex1_edge_keys = new_vertex1_key.edge_keys();
+        let new_vertex2_edge_keys = new_vertex2_key.edge_keys();
+
+        // Connect the new vertices to each other.
+        self.twin(new_vertex1_edge_keys[0], new_vertex2_edge_keys[0]);
+
+        self.twin(new_vertex1_edge_keys[1], edge_keys[0]);
+        self.twin(new_vertex1_edge_keys[2], twin_keys[0]);
+
+        self.twin(new_vertex2_edge_keys[1], twin_keys[1]);
+        self.twin(new_vertex2_edge_keys[2], edge_keys[1]);
+
+        let newbkey = self.bubbles.insert(Bubble::new(style));
+        self.rebubble(newbkey, edge_keys[0]);
+        self.rebubble(bubble_keys[1], edge_keys[1]);
+        self.rebubble(bubble_keys[2], edge_keys[2]);
+        self.rebubble(bubble_keys[0], new_vertex1_edge_keys[0]);
     }
 }
