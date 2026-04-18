@@ -1,9 +1,9 @@
 use super::vector::GraphVector;
 use crate::graph::bubble::BubbleKey;
 use crate::graph::edge::Edge;
-use crate::graph::point::Coordinate;
 use crate::graph::vertex::Vertex;
 use crate::graph::Graph;
+use macroquad::math::Vec2;
 use slotmap::SecondaryMap;
 
 const PRESSURE_TENSION: f32 = 0.04;
@@ -11,7 +11,7 @@ const PRESSURE_TENSION: f32 = 0.04;
 pub fn update_force(graph: &Graph, force: &mut GraphVector) {
     let bubble_to_pressure = get_bubble_to_pressure(graph);
     for (key, vertex) in graph.vertices.iter() {
-        let mut vertex_force = Coordinate::default();
+        let mut vertex_force = Vec2::ZERO;
 
         for (offset, edge) in vertex.edges.iter().enumerate() {
             let ekey = key.edge_key(offset as u8);
@@ -26,10 +26,10 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
 
             force.add_edge(
                 ekey,
-                Coordinate {
-                    x: pressure * edge_x_force(vertex, twin, twin_vertex),
-                    y: pressure * edge_y_force(vertex, twin, twin_vertex),
-                },
+                Vec2::new(
+                    pressure * edge_x_force(vertex, twin, twin_vertex),
+                    pressure * edge_y_force(vertex, twin, twin_vertex),
+                ),
             );
         }
 

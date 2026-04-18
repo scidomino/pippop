@@ -1,8 +1,8 @@
 use super::vector::GraphVector;
 use crate::graph::edge::Edge;
-use crate::graph::point::Coordinate;
 use crate::graph::vertex::Vertex;
 use crate::graph::Graph;
+use macroquad::math::Vec2;
 
 const SURFACE_TENSION: f32 = 0.3;
 
@@ -15,7 +15,7 @@ const LEGENDRE_GAUSS_POINTS: [(f32, f32); 3] = [
 
 pub fn update_force(graph: &Graph, force: &mut GraphVector) {
     for (key, vertex) in graph.vertices.iter() {
-        let mut vertex_force = Coordinate::default();
+        let mut vertex_force = Vec2::ZERO;
 
         for (offset, edge) in vertex.edges.iter().enumerate() {
             let ekey = key.edge_key(offset as u8);
@@ -26,10 +26,10 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
 
             force.add_edge(
                 ekey,
-                Coordinate {
-                    x: -SURFACE_TENSION * edge_x_force(vertex, edge, twin, twin_vertex),
-                    y: -SURFACE_TENSION * edge_y_force(vertex, edge, twin, twin_vertex),
-                },
+                Vec2::new(
+                    -SURFACE_TENSION * edge_x_force(vertex, edge, twin, twin_vertex),
+                    -SURFACE_TENSION * edge_y_force(vertex, edge, twin, twin_vertex),
+                ),
             );
         }
 

@@ -1,47 +1,16 @@
-
-use std::ops::{Add, AddAssign};
-
-#[derive(Debug, Default, Clone, Copy, PartialEq)]
-pub struct Coordinate {
-    pub x: f32,
-    pub y: f32,
-}
-
-impl Coordinate {
-    pub fn new(x: f32, y: f32) -> Self {
-        Coordinate { x, y }
-    }
-}
-
-impl Add for Coordinate {
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self {
-        Self {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-}
-
-impl AddAssign for Coordinate {
-    fn add_assign(&mut self, other: Self) {
-        self.x += other.x;
-        self.y += other.y;
-    }
-}
+use macroquad::math::Vec2;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Point {
-    pub position: Coordinate,
-    pub velocity: Coordinate,
+    pub position: Vec2,
+    pub velocity: Vec2,
 }
 
 impl Point {
     pub fn new(x: f32, y: f32) -> Self {
         Point {
-            position: Coordinate::new(x, y),
-            velocity: Coordinate::default(),
+            position: Vec2::new(x, y),
+            velocity: Vec2::ZERO,
         }
     }
 }

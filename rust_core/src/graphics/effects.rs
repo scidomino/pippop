@@ -1,10 +1,10 @@
 use macroquad::prelude::*;
-use crate::graph::point::Coordinate;
+use macroquad::math::Vec2;
 
 pub enum Effect {
     RisingPoints {
         text: String,
-        pos: Coordinate,
+        pos: Vec2,
         timer: f32, // Remaining time in seconds
         max_time: f32,
     },
@@ -25,7 +25,7 @@ impl EffectsManager {
         Self { effects: Vec::new() }
     }
 
-    pub fn add_rising_points(&mut self, text: String, pos: Coordinate) {
+    pub fn add_rising_points(&mut self, text: String, pos: Vec2) {
         self.effects.push(Effect::RisingPoints {
             text,
             pos,
@@ -54,7 +54,7 @@ impl EffectsManager {
                     let progress = 1.0 - (timer / max_time);
                     
                     // Project world position to screen pixels
-                    let screen_pos = camera.world_to_screen(vec2(pos.x, pos.y));
+                    let screen_pos = camera.world_to_screen(*pos);
                     let scale = screen_width() / 1200.0;
                     let y_offset = progress * 100.0 * scale; // Rise by 100 world units
                     let alpha = *timer / max_time;

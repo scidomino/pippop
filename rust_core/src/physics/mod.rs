@@ -2,10 +2,11 @@ pub mod pressure;
 pub mod surface;
 pub mod vector;
 
-use crate::graph::point::{Coordinate, Point};
+use crate::graph::point::Point;
 use crate::graph::vertex::VertexKey;
 use crate::graph::Graph;
 use crate::physics::vector::GraphVector;
+use macroquad::math::Vec2;
 use slotmap::SecondaryMap;
 
 const FRICTION: f32 = 0.9;
@@ -22,7 +23,7 @@ pub fn advance_frame(graph: &mut Graph) {
     accelerate(graph, &accels);
 }
 
-fn solve_vertex(graph: &Graph, force: &GraphVector) -> SecondaryMap<VertexKey, Coordinate> {
+fn solve_vertex(graph: &Graph, force: &GraphVector) -> SecondaryMap<VertexKey, Vec2> {
     let mut fbafs = SecondaryMap::new();
     for (key, vertex) in graph.vertices.iter() {
         let mut a = force.get_vertex(key);
@@ -56,7 +57,7 @@ fn solve_vertex(graph: &Graph, force: &GraphVector) -> SecondaryMap<VertexKey, C
 fn solve_edge(
     graph: &Graph,
     force: &GraphVector,
-    vertex_accels: &SecondaryMap<VertexKey, Coordinate>,
+    vertex_accels: &SecondaryMap<VertexKey, Vec2>,
 ) -> GraphVector {
     let mut accels = GraphVector::new();
     for (key, vertex) in graph.vertices.iter() {
@@ -71,16 +72,16 @@ fn solve_edge(
 
             accels.add_edge(
                 ekey,
-                Coordinate {
-                    x: (80.0 / 3.0) * edge_force.x
+                Vec2::new(
+                    (80.0 / 3.0) * edge_force.x
                         - 20.0 * twin_edge_force.x
                         - (4.0 / 3.0) * vertex_accel.x
                         + (2.0 / 3.0) * twin_vertex_accel.x,
-                    y: (80.0 / 3.0) * edge_force.y
+                    (80.0 / 3.0) * edge_force.y
                         - 20.0 * twin_edge_force.y
                         - (4.0 / 3.0) * vertex_accel.y
                         + (2.0 / 3.0) * twin_vertex_accel.y,
-                },
+                ),
             );
         }
     }
@@ -97,7 +98,7 @@ fn accelerate(graph: &mut Graph, accels: &GraphVector) {
     }
 }
 
-fn accelerate_point(point: &mut Point, accel: Coordinate) {
+fn accelerate_point(point: &mut Point, accel: Vec2) {
     point.velocity.x = FRICTION * point.velocity.x + accel.x;
     point.velocity.y = FRICTION * point.velocity.y + accel.y;
 
