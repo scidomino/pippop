@@ -96,8 +96,9 @@ impl Graph {
     }
 
     /*
-    When a wall gets too short, We change its orientation: moving it's
+    When a wall gets too short, We change its orientation: moving its
     edges from the bubble they are on to the ones opposite.
+    This is a topological T1 flip.
 
     Before:           After:
     \        /          \   /
@@ -107,28 +108,46 @@ impl Graph {
     /        \          /   \
     */
     pub fn slide(&mut self, ekey: EdgeKey) {
-        let twin_ekey = self.get_edge(ekey).twin;
+        let e = ekey;
+        let t = self.get_edge(e).twin;
 
-        let a = self.half_slide(ekey);
-        let b = self.half_slide(twin_ekey);
+        let e1 = e.next_on_vertex();
+        let e2 = e.prev_on_vertex();
+        let t1 = t.next_on_vertex();
+        let t2 = t.prev_on_vertex();
 
-        self.link_twins(a, b);
+        let b_left = self.get_edge(e).bubble;
+        let b_right = self.get_edge(t).bubble;
+        let b_top = self.get_edge(e1).bubble;
+        let b_bottom = self.get_edge(t1).bubble;
 
-        let next_a = self.next_on_bubble(a);
-        let bubble_a = self.get_edge(next_a).bubble;
-        self.rebubble(bubble_a, next_a);
+        let old_e1_twin = self.get_edge(e1).twin;
+        let old_e2_twin = self.get_edge(e2).twin;
+        let old_t1_twin = self.get_edge(t1).twin;
+        let old_t2_twin = self.get_edge(t2).twin;
 
-        let next_b = self.next_on_bubble(b);
-        let bubble_b = self.get_edge(next_b).bubble;
-        self.rebubble(bubble_b, next_b);
+        // Perform topological flip by rotating the external connections
+        self.link_twins(e1, old_t2_twin);
+        self.link_twins(t2, old_t1_twin);
+        self.link_twins(t1, old_e2_twin);
+        self.link_twins(e2, old_e1_twin);
+
+        // Rebuild the boundaries of the 4 affected bubbles
+        self.rebubble(b_left, e1);
+        self.rebubble(b_right, t1);
+        self.rebubble(b_top, t);
+        self.rebubble(b_bottom, e);
     }
 
-    // Removes the previous edge from the bubble and returns it
+    // Re-links neighbors of an edge to bypass a vertex, effectively "straightening"
+    // a 2-way junction. Used during bubble removal.
     fn half_slide(&mut self, ekey: EdgeKey) -> EdgeKey {
+        // In CW traversal, the edge pointing to ekey's start is ekey.next_on_vertex().twin
         let prev_on_bubble = self.prev_on_bubble(ekey);
-        let new_twin = self.get_edge(prev_on_bubble).twin;
+        let next_on_vertex = ekey.next_on_vertex();
+        let other_neighbor_twin = self.get_edge(next_on_vertex).twin;
 
-        self.link_twins(ekey, new_twin);
+        self.link_twins(ekey, other_neighbor_twin);
 
         let b = self.get_edge(ekey).bubble;
         self.rebubble(b, ekey);
@@ -157,7 +176,7 @@ impl Graph {
 
     // next edge on the same bubble in clockwise order
     fn next_on_bubble(&self, key: EdgeKey) -> EdgeKey {
-        self.get_edge(key).twin.next_on_vertex()
+        self.get_edge(key).twin.prev_on_vertex()
     }
 
     // previous edge on the same bubble in clockwise order
@@ -245,6 +264,6 @@ impl Graph {
         self.rebubble(new_bkey, ekeys[0]);
         self.rebubble(bkeys[1], ekeys[1]);
         self.rebubble(bkeys[2], ekeys[2]);
-        self.rebubble(bkeys[0], new_ekeys1[0]);
+        self.rebubble(bkeys[0], new_ekeys2[0]);
     }
 }
