@@ -49,7 +49,7 @@ async fn main() {
         let aspect = screen_width() / screen_height();
         let camera = Camera2D {
             target: vec2(0.0, 0.0),
-            zoom: vec2(1.0 / 600.0, -aspect / 600.0),
+            zoom: vec2(1.0 / 300.0, -aspect / 300.0),
             ..Default::default()
         };
 

@@ -49,7 +49,7 @@ impl Renderer {
             for (_, vertex) in graph.vertices.iter() {
                 for edge in &vertex.edges {
                     let p = edge.point.position;
-                    draw_circle(p.x, p.y, 10.0, colors::YELLOW);
+                    draw_circle(p.x, p.y, 1.0, colors::YELLOW);
                 }
             }
         }
