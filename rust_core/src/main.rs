@@ -56,6 +56,8 @@ async fn main() {
         // Rendering
         renderer.draw(&graph, &camera);
 
+        draw_text(&format!("FPS: {:03}", get_fps()), 10.0, 30.0, 30.0, WHITE);
+
         next_frame().await
     }
 }
