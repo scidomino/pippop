@@ -111,15 +111,27 @@ impl Graph {
         let e = ekey;
         let t = self.get_edge(e).twin;
 
+        let b_left = self.get_edge(e).bubble;
+        let b_right = self.get_edge(t).bubble;
+
+        // Safety: cannot slide an edge that has the same bubble on both sides (a bridge).
+        if b_left == b_right {
+            return;
+        }
+
         let e1 = e.next_on_vertex();
         let e2 = e.prev_on_vertex();
         let t1 = t.next_on_vertex();
         let t2 = t.prev_on_vertex();
 
-        let b_left = self.get_edge(e).bubble;
-        let b_right = self.get_edge(t).bubble;
         let b_top = self.get_edge(e1).bubble;
         let b_bottom = self.get_edge(t1).bubble;
+
+        // Safety: cannot slide if it would merge two different boundaries of the same bubble
+        // or create other topological monstrosities.
+        if b_top == b_bottom {
+            return;
+        }
 
         let old_e1_twin = self.get_edge(e1).twin;
         let old_e2_twin = self.get_edge(e2).twin;
@@ -164,12 +176,17 @@ impl Graph {
         self.bubbles[bkey].edges.clear();
 
         let mut next_edge = ekey;
+        let mut i = 0;
         loop {
             self.get_edge_mut(next_edge).bubble = bkey;
             self.bubbles[bkey].edges.push(next_edge);
             next_edge = self.next_on_bubble(next_edge);
             if next_edge == ekey {
                 break;
+            }
+            i += 1;
+            if i > 1000 {
+                panic!("Infinite loop detected in rebubble for bubble {:?}. Started at edge {:?}", bkey, ekey);
             }
         }
     }

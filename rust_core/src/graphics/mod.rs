@@ -45,14 +45,14 @@ impl Renderer {
             bubble::draw_bubble_body(style, points, *centroid);
         }
 
-        if cfg!(debug_assertions) {
-            for (_, vertex) in graph.vertices.iter() {
-                for edge in &vertex.edges {
-                    let p = edge.point.position;
-                    draw_circle(p.x, p.y, 1.0, colors::YELLOW);
-                }
-            }
-        }
+        // if cfg!(debug_assertions) {
+        //     for (_, vertex) in graph.vertices.iter() {
+        //         for edge in &vertex.edges {
+        //             let p = edge.point.position;
+        //             draw_circle(p.x, p.y, 1.0, colors::YELLOW);
+        //         }
+        //     }
+        // }
 
         // --- Pass 2: Screen Space (UI & Effects) ---
         set_default_camera();
