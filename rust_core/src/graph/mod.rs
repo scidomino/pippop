@@ -138,11 +138,21 @@ impl Graph {
         let old_t1_twin = self.get_edge(t1).twin;
         let old_t2_twin = self.get_edge(t2).twin;
 
+        let p_e1 = self.get_edge(e1).point;
+        let p_e2 = self.get_edge(e2).point;
+        let p_t1 = self.get_edge(t1).point;
+        let p_t2 = self.get_edge(t2).point;
+
         // Perform topological flip by rotating the external connections
         self.link_twins(e1, old_t2_twin);
         self.link_twins(t2, old_t1_twin);
         self.link_twins(t1, old_e2_twin);
         self.link_twins(e2, old_e1_twin);
+
+        self.get_edge_mut(e1).point = p_t2;
+        self.get_edge_mut(t2).point = p_t1;
+        self.get_edge_mut(t1).point = p_e2;
+        self.get_edge_mut(e2).point = p_e1;
 
         // Rebuild the boundaries of the 4 affected bubbles
         self.rebubble(b_left, e1);

@@ -1,15 +1,20 @@
 use macroquad::math::Vec2;
 
 const FLATNESS: f32 = 0.5;
+const MAX_DEPTH: u32 = 10;
 
 /// Flatten a cubic Bezier curve into a sequence of points.
 pub fn flatten_bezier(points: &mut Vec<Vec2>, p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2) {
+    flatten_bezier_recursive(points, p1, p2, p3, p4, 0);
+}
+
+fn flatten_bezier_recursive(points: &mut Vec<Vec2>, p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, depth: u32) {
     let dx = p4.x - p1.x;
     let dy = p4.y - p1.y;
     let d2 = ((p2.x - p4.x) * dy - (p2.y - p4.y) * dx).abs();
     let d3 = ((p3.x - p4.x) * dy - (p3.y - p4.y) * dx).abs();
 
-    if (d2 + d3) * (d2 + d3) < FLATNESS * (dx * dx + dy * dy) {
+    if depth >= MAX_DEPTH || (d2 + d3) * (d2 + d3) <= FLATNESS * (dx * dx + dy * dy) {
         points.push(p1);
         return;
     }
@@ -22,8 +27,8 @@ pub fn flatten_bezier(points: &mut Vec<Vec2>, p1: Vec2, p2: Vec2, p3: Vec2, p4: 
     let p234 = (p23 + p34) / 2.0;
     let p1234 = (p123 + p234) / 2.0;
 
-    flatten_bezier(points, p1, p12, p123, p1234);
-    flatten_bezier(points, p1234, p234, p34, p4);
+    flatten_bezier_recursive(points, p1, p12, p123, p1234, depth + 1);
+    flatten_bezier_recursive(points, p1234, p234, p34, p4, depth + 1);
 }
 
 use crate::graph::Graph;
