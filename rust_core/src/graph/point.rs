@@ -1,4 +1,6 @@
 
+use std::ops::{Add, AddAssign};
+
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Coordinate {
     pub x: f32,
@@ -9,8 +11,21 @@ impl Coordinate {
     pub fn new(x: f32, y: f32) -> Self {
         Coordinate { x, y }
     }
+}
 
-    pub fn add(&mut self, other: Coordinate) {
+impl Add for Coordinate {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
+impl AddAssign for Coordinate {
+    fn add_assign(&mut self, other: Self) {
         self.x += other.x;
         self.y += other.y;
     }

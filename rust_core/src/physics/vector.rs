@@ -41,11 +41,11 @@ impl GraphVector {
     }
 
     pub fn add_vertex(&mut self, key: VertexKey, value: Coordinate) {
-        self.get_mut(key).vertex.add(value);
+        self.get_mut(key).vertex += value;
     }
 
     pub fn add_edge(&mut self, key: EdgeKey, value: Coordinate) {
-        self.get_mut(key.vertex).edges[key.offset as usize].add(value);
+        self.get_mut(key.vertex).edges[key.offset as usize] += value;
     }
 
     pub fn clear(&mut self) {
