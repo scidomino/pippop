@@ -39,9 +39,9 @@ impl Graph {
         let ekeys1 = vkey1.edge_keys();
         let ekeys2 = vkey2.edge_keys();
 
-        self.twin(ekeys1[0], ekeys2[0]);
-        self.twin(ekeys1[1], ekeys2[2]);
-        self.twin(ekeys1[2], ekeys2[1]);
+        self.link_twins(ekeys1[0], ekeys2[0]);
+        self.link_twins(ekeys1[1], ekeys2[2]);
+        self.link_twins(ekeys1[2], ekeys2[1]);
 
         let b1 = self.bubbles.insert(Bubble::new(BubbleStyle::Standard {
             size: 1,
@@ -107,7 +107,7 @@ impl Graph {
         let a = self.half_slide(ekey);
         let b = self.half_slide(twin_ekey);
 
-        self.twin(a, b);
+        self.link_twins(a, b);
 
         let next_a = self.next_on_bubble(a);
         let bubble_a = self.get_edge(next_a).bubble;
@@ -123,7 +123,7 @@ impl Graph {
         let prev_on_bubble = self.prev_on_bubble(ekey);
         let new_twin = self.get_edge(prev_on_bubble).twin;
 
-        self.twin(ekey, new_twin);
+        self.link_twins(ekey, new_twin);
 
         let b = self.get_edge(ekey).bubble;
         self.rebubble(b, ekey);
@@ -131,7 +131,7 @@ impl Graph {
         prev_on_bubble
     }
 
-    fn twin(&mut self, a: EdgeKey, b: EdgeKey) {
+    fn link_twins(&mut self, a: EdgeKey, b: EdgeKey) {
         self.get_edge_mut(a).twin = b;
         self.get_edge_mut(b).twin = a;
     }
@@ -228,13 +228,13 @@ impl Graph {
         let new_vertex2_edge_keys = new_vertex2_key.edge_keys();
 
         // Connect the new vertices to each other.
-        self.twin(new_vertex1_edge_keys[0], new_vertex2_edge_keys[0]);
+        self.link_twins(new_vertex1_edge_keys[0], new_vertex2_edge_keys[0]);
 
-        self.twin(new_vertex1_edge_keys[1], edge_keys[0]);
-        self.twin(new_vertex1_edge_keys[2], twin_keys[0]);
+        self.link_twins(new_vertex1_edge_keys[1], edge_keys[0]);
+        self.link_twins(new_vertex1_edge_keys[2], twin_keys[0]);
 
-        self.twin(new_vertex2_edge_keys[1], twin_keys[1]);
-        self.twin(new_vertex2_edge_keys[2], edge_keys[1]);
+        self.link_twins(new_vertex2_edge_keys[1], twin_keys[1]);
+        self.link_twins(new_vertex2_edge_keys[2], edge_keys[1]);
 
         let newbkey = self.bubbles.insert(Bubble::new(style));
         self.rebubble(newbkey, edge_keys[0]);
