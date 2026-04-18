@@ -41,11 +41,13 @@ impl Renderer {
         }
 
         // Draw Edge Points
-        set_camera(camera);
-        for (_, vertex) in graph.vertices.iter() {
-            for edge in &vertex.edges {
-                let p = edge.point.position;
-                draw_circle(p.x, p.y, 10.0, colors::YELLOW);
+        if cfg!(debug_assertions) {
+            set_camera(camera);
+            for (_, vertex) in graph.vertices.iter() {
+                for edge in &vertex.edges {
+                    let p = edge.point.position;
+                    draw_circle(p.x, p.y, 10.0, colors::YELLOW);
+                }
             }
         }
 
