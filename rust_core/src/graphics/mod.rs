@@ -33,7 +33,7 @@ impl Renderer {
         for (bkey, bubble) in graph.bubbles.iter() {
             let points = bubble::get_bubble_points(graph, bkey);
             if !points.is_empty() {
-                let centroid = geometry::calculate_centroid(&points);
+                let centroid = geometry::calculate_centroid(graph, bkey);
                 bubble_render_data.push((&bubble.style, points, centroid));
             }
         }
