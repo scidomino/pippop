@@ -18,14 +18,14 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
         let mut vertex_force = Coordinate::default();
 
         for (offset, edge) in vertex.edges.iter().enumerate() {
-            let edge_key = key.edge_key(offset as u8);
+            let ekey = key.edge_key(offset as u8);
             let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
 
             vertex_force.x -= SURFACE_TENSION * vertex_x_force(vertex, edge, twin, twin_vertex);
             vertex_force.y -= SURFACE_TENSION * vertex_y_force(vertex, edge, twin, twin_vertex);
 
             force.add_edge(
-                edge_key,
+                ekey,
                 Coordinate {
                     x: -SURFACE_TENSION * edge_x_force(vertex, edge, twin, twin_vertex),
                     y: -SURFACE_TENSION * edge_y_force(vertex, edge, twin, twin_vertex),

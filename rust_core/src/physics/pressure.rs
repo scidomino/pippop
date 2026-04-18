@@ -14,7 +14,7 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
         let mut vertex_force = Coordinate::default();
 
         for (offset, edge) in vertex.edges.iter().enumerate() {
-            let edge_key = key.edge_key(offset as u8);
+            let ekey = key.edge_key(offset as u8);
             let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
 
             let pressure_diff = bubble_to_pressure[edge.bubble] - bubble_to_pressure[twin.bubble];
@@ -25,7 +25,7 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
             vertex_force.y += pressure * vertex_y_force(vertex, edge, twin, twin_vertex);
 
             force.add_edge(
-                edge_key,
+                ekey,
                 Coordinate {
                     x: pressure * edge_x_force(vertex, twin, twin_vertex),
                     y: pressure * edge_y_force(vertex, twin, twin_vertex),

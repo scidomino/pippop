@@ -62,15 +62,15 @@ fn solve_edge(
     for (key, vertex) in graph.vertices.iter() {
         let vertex_accel = vertex_accels[key];
         accels.add_vertex(key, vertex_accel);
-        for edge_key in key.edge_keys() {
-            let edge = vertex.edge(edge_key);
+        for ekey in key.edge_keys() {
+            let edge = vertex.edge(ekey);
 
-            let edge_force = force.get_edge(edge_key);
+            let edge_force = force.get_edge(ekey);
             let twin_edge_force = force.get_edge(edge.twin);
             let twin_vertex_accel = vertex_accels[edge.twin.vertex];
 
             accels.add_edge(
-                edge_key,
+                ekey,
                 Coordinate {
                     x: (80.0 / 3.0) * edge_force.x
                         - 20.0 * twin_edge_force.x
@@ -91,8 +91,8 @@ fn accelerate(graph: &mut Graph, accels: &GraphVector) {
     for (key, vertex) in graph.vertices.iter_mut() {
         accelerate_point(&mut vertex.point, accels.get_vertex(key));
         for (offset, edge) in vertex.edges.iter_mut().enumerate() {
-            let edge_key = key.edge_key(offset as u8);
-            accelerate_point(&mut edge.point, accels.get_edge(edge_key));
+            let ekey = key.edge_key(offset as u8);
+            accelerate_point(&mut edge.point, accels.get_edge(ekey));
         }
     }
 }
