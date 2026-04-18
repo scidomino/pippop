@@ -24,7 +24,7 @@ pub fn advance_frame(graph: &mut Graph) {
 
 fn solve_vertex(graph: &Graph, force: &GraphVector) -> SecondaryMap<VertexKey, Coordinate> {
     let mut fbafs = SecondaryMap::new();
-    for (key, vertex) in graph.vertecies.iter() {
+    for (key, vertex) in graph.vertices.iter() {
         let mut a = force.get_vertex(key);
         for edge_key in key.edge_keys() {
             let edge = vertex.edge(edge_key);
@@ -39,7 +39,7 @@ fn solve_vertex(graph: &Graph, force: &GraphVector) -> SecondaryMap<VertexKey, C
     }
 
     let mut vertex_accels = SecondaryMap::new();
-    for (key, vertex) in graph.vertecies.iter() {
+    for (key, vertex) in graph.vertices.iter() {
         let mut a = fbafs[key];
         a.x *= 5.1;
         a.y *= 5.1;
@@ -59,7 +59,7 @@ fn solve_edge(
     vertex_accels: &SecondaryMap<VertexKey, Coordinate>,
 ) -> GraphVector {
     let mut accels = GraphVector::new();
-    for (key, vertex) in graph.vertecies.iter() {
+    for (key, vertex) in graph.vertices.iter() {
         let vertex_accel = vertex_accels[key];
         accels.add_vertex(key, vertex_accel);
         for edge_key in key.edge_keys() {
@@ -88,7 +88,7 @@ fn solve_edge(
 }
 
 fn accelerate(graph: &mut Graph, accels: &GraphVector) {
-    for (key, vertex) in graph.vertecies.iter_mut() {
+    for (key, vertex) in graph.vertices.iter_mut() {
         accelerate_point(&mut vertex.point, accels.get_vertex(key));
         for (offset, edge) in vertex.edges.iter_mut().enumerate() {
             let edge_key = key.edge_key(offset as u8);

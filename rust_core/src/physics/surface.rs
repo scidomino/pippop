@@ -14,7 +14,7 @@ const LEGENDRE_GAUSS_POINTS: [(f32, f32); 3] = [
 ];
 
 pub fn update_force(graph: &Graph, force: &mut GraphVector) {
-    for (key, vertex) in graph.vertecies.iter() {
+    for (key, vertex) in graph.vertices.iter() {
         let mut vertex_force = Coordinate::default();
 
         for (offset, edge) in vertex.edges.iter().enumerate() {

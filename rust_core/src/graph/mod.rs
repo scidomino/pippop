@@ -12,7 +12,7 @@ use vertex::{Vertex, VertexKey};
 use crate::graph::point::Point;
 
 pub struct Graph {
-    pub vertecies: SlotMap<VertexKey, Vertex>,
+    pub vertices: SlotMap<VertexKey, Vertex>,
     pub bubbles: SlotMap<BubbleKey, Bubble>,
 }
 
@@ -25,17 +25,17 @@ impl Default for Graph {
 impl Graph {
     pub fn new() -> Self {
         Graph {
-            vertecies: SlotMap::with_key(),
+            vertices: SlotMap::with_key(),
             bubbles: SlotMap::with_key(),
         }
     }
 
     pub fn init(&mut self) {
-        self.vertecies.clear();
+        self.vertices.clear();
         self.bubbles.clear();
 
-        let vkey1 = self.vertecies.insert(Vertex::new(Point::new(0.0, -50.0)));
-        let vkey2 = self.vertecies.insert(Vertex::new(Point::new(0.0, 50.0)));
+        let vkey1 = self.vertices.insert(Vertex::new(Point::new(0.0, -50.0)));
+        let vkey2 = self.vertices.insert(Vertex::new(Point::new(0.0, 50.0)));
         let ekeys1 = vkey1.edge_keys();
         let ekeys2 = vkey2.edge_keys();
 
@@ -86,8 +86,8 @@ impl Graph {
         self.bubbles.remove(twin_retaned_bkey);
         self.rebubble(retained_bkey, retained);
 
-        self.vertecies.remove(ekey.vertex);
-        self.vertecies.remove(twin.vertex);
+        self.vertices.remove(ekey.vertex);
+        self.vertices.remove(twin.vertex);
     }
 
     /*
@@ -161,23 +161,23 @@ impl Graph {
     }
 
     pub fn get_edge(&self, key: EdgeKey) -> &Edge {
-        &self.vertecies[key.vertex].edges[key.offset as usize]
+        &self.vertices[key.vertex].edges[key.offset as usize]
     }
 
     pub fn get_edge_and_vertex(&self, key: EdgeKey) -> (&Edge, &Vertex) {
-        let vertex = &self.vertecies[key.vertex];
+        let vertex = &self.vertices[key.vertex];
         (&vertex.edges[key.offset as usize], vertex)
     }
 
     fn get_edge_mut(&mut self, key: EdgeKey) -> &mut Edge {
-        &mut self.vertecies[key.vertex].edges[key.offset as usize]
+        &mut self.vertices[key.vertex].edges[key.offset as usize]
     }
 
     pub fn print_graph(&self) {
-        for (vertex_key, vertex) in &self.vertecies {
+        for (vertex_key, vertex) in &self.vertices {
             println!("Vertex {:?}: ({:?})", vertex_key, vertex.point);
             for edge in &vertex.edges {
-                let twin_vertex = &self.vertecies[edge.twin.vertex];
+                let twin_vertex = &self.vertices[edge.twin.vertex];
                 println!(
                     "  Edge to Vertex {:?}: ({:?})",
                     edge.twin.vertex, twin_vertex.point
@@ -201,7 +201,7 @@ impl Graph {
     }
 
     pub fn spawn(&mut self, vkey: VertexKey, style: BubbleStyle) {
-        let vertex: Vertex = self.vertecies[vkey];
+        let vertex: Vertex = self.vertices[vkey];
         let edge_keys: [EdgeKey; 3] = vkey.edge_keys();
         let twin_keys = [
             vertex.edges[0].twin,
@@ -221,8 +221,8 @@ impl Graph {
         let mid_point1 = Point::new((vpoint.x + epoint1.x) / 2.0, (vpoint.y + epoint1.y) / 2.0);
         let mid_point2 = Point::new((vpoint.x + epoint2.x) / 2.0, (vpoint.y + epoint2.y) / 2.0);
 
-        let new_vertex1_key = self.vertecies.insert(Vertex::new(mid_point1));
-        let new_vertex2_key = self.vertecies.insert(Vertex::new(mid_point2));
+        let new_vertex1_key = self.vertices.insert(Vertex::new(mid_point1));
+        let new_vertex2_key = self.vertices.insert(Vertex::new(mid_point2));
 
         let new_vertex1_edge_keys = new_vertex1_key.edge_keys();
         let new_vertex2_edge_keys = new_vertex2_key.edge_keys();

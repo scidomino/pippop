@@ -10,7 +10,7 @@ const PRESSURE_TENSION: f32 = 0.04;
 
 pub fn update_force(graph: &Graph, force: &mut GraphVector) {
     let bubble_to_pressure = get_bubble_to_pressure(graph);
-    for (key, vertex) in graph.vertecies.iter() {
+    for (key, vertex) in graph.vertices.iter() {
         let mut vertex_force = Coordinate::default();
 
         for (offset, edge) in vertex.edges.iter().enumerate() {
@@ -72,7 +72,7 @@ fn get_bubble_to_pressure(graph: &Graph) -> SecondaryMap<BubbleKey, f32> {
     for (key, _) in graph.bubbles.iter() {
         bubble_to_area.insert(key, 0.0);
     }
-    for vertex in graph.vertecies.values() {
+    for vertex in graph.vertices.values() {
         for edge in vertex.edges.iter() {
             let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
             let half_area = get_half_area(vertex, edge, twin_vertex, twin);
