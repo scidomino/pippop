@@ -11,6 +11,11 @@ use vertex::{Vertex, VertexKey};
 
 use crate::graph::point::Point;
 
+/// A Half-Edge data structure representing the planar graph of bubbles.
+/// 
+/// This graph enforces a trivalent (honeycomb) topology, meaning every
+/// vertex is connected to exactly three edges. This naturally simulates
+/// Plateau's Laws for foams, where bubble walls always meet at 120-degree angles.
 pub struct Graph {
     pub vertices: SlotMap<VertexKey, Vertex>,
     pub bubbles: SlotMap<BubbleKey, Bubble>,

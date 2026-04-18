@@ -17,10 +17,15 @@ impl VertexKey {
     }
 }
 
+/// A junction where exactly three bubble walls (edges) meet.
+///
+/// Following Plateau's Laws, the physics simulation drives the points
+/// to maintain 120-degree angles between the three outgoing half-edges.
 #[derive(Debug, Clone, Copy)]
 pub struct Vertex {
+    /// The physical location and velocity of this junction.
     pub point: Point,
-    // indexed clockwise
+    /// The three outgoing half-edges originating from this vertex, indexed clockwise.
     pub edges: [Edge; 3],
 }
 

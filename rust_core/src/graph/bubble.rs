@@ -41,11 +41,14 @@ new_key_type! {
     pub struct BubbleKey;
 }
 
+/// Represents a face in the planar graph (a single bubble or the open air).
+///
+/// A bubble is defined topologically by a boundary of half-edges.
 #[derive(Debug, Clone)]
 pub struct Bubble {
     pub style: BubbleStyle,
-    // clockwise list of the edges that form the boundary of this bubble
-    // These are the edges where edge.bubble == this bubble.
+    /// A clockwise sequence of half-edges that form the continuous boundary 
+    /// of this bubble. For every edge in this list, `edge.bubble == this bubble`.
     pub edges: Vec<EdgeKey>,
 }
 

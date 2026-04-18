@@ -2,6 +2,11 @@ use super::bubble::BubbleKey;
 use super::point::Point;
 use super::vertex::VertexKey;
 
+/// A unique identifier for a directed half-edge in the graph.
+///
+/// Instead of a global edge pool, edges are owned by their originating vertex.
+/// The key is a combination of the origin `VertexKey` and an `offset` (0, 1, or 2),
+/// representing which of the three outgoing slots this edge occupies.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct EdgeKey {
     pub vertex: VertexKey,
@@ -40,11 +45,19 @@ impl Default for EdgeKey {
     }
 }
 
+/// A directed half-edge representing one side of a bubble wall.
+///
+/// In this half-edge data structure, every physical boundary between two
+/// vertices is represented by two directed `Edge`s (twins) pointing in opposite
+/// directions.
 #[derive(Debug, Clone, Copy)]
 pub struct Edge {
+    /// The physical control point used to curve the edge via Bezier interpolation.
     pub point: Point,
+    /// The opposite half-edge pointing back toward this edge's origin vertex.
     pub twin: EdgeKey,
-    // the bubble shared by this edge and it's clockwise vertex edge.
+    /// The bubble bounded by this edge. By convention, traversing the edges
+    /// of a bubble in a clockwise direction will have the bubble on the interior.
     pub bubble: BubbleKey,
 }
 
