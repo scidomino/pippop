@@ -2,23 +2,40 @@ use macroquad::prelude::*;
 use rust_core::graph::Graph;
 use rust_core::graphics::Renderer;
 use rust_core::physics;
+use rust_core::managers::spawn::{SpawnManager, RatchetSpawnTimer};
+use rust_core::graphics::colors;
 
 #[macroquad::main("PipPop")]
 async fn main() {
+    // Seed the random number generator using the current system time
+    rand::srand(miniquad::date::now() as u64);
+
     let mut graph = Graph::new();
     graph.init();
 
     let mut renderer = Renderer::new();
     let mut last_physics_time = get_time();
 
+    let mut spawn_manager = SpawnManager::new(
+        colors::get_group(6),
+        Box::new(RatchetSpawnTimer {
+            starting_wait: 2.0,
+            doubling_time: 120.0,
+        }),
+    );
+
     loop {
         let dt = get_frame_time();
-
+        
         // Physics update (fixed timestep approx 60fps)
         if get_time() - last_physics_time > 0.016 {
             physics::advance_frame(&mut graph);
             last_physics_time = get_time();
         }
+
+        // Managers update
+        spawn_manager.update(dt);
+        spawn_manager.possibly_spawn(&mut graph);
 
         // Animation update
         renderer.update(dt);
@@ -35,24 +52,6 @@ async fn main() {
 
         // Rendering
         renderer.draw(&graph, &camera);
-
-        // Example: Add a rising point on mouse click
-        if is_mouse_button_pressed(MouseButton::Left) {
-            let open_air_vertices = graph.get_open_air_vertices();
-            if !open_air_vertices.is_empty() {
-                let vkey =
-                    open_air_vertices[macroquad::rand::gen_range(0, open_air_vertices.len())];
-                let color = rust_core::graphics::colors::random_game_color();
-                graph.spawn(
-                    vkey,
-                    rust_core::graph::bubble::BubbleStyle::Standard {
-                        size: 1,
-                        max_size: 5,
-                        color,
-                    },
-                );
-            }
-        }
 
         next_frame().await
     }
