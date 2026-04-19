@@ -1,7 +1,5 @@
 use super::vector::GraphVector;
 use crate::graph::bubble::BubbleKey;
-use crate::graph::edge::Edge;
-use crate::graph::vertex::Vertex;
 use crate::graph::Graph;
 use macroquad::math::Vec2;
 use slotmap::SecondaryMap;
@@ -10,46 +8,37 @@ const PRESSURE_TENSION: f32 = 0.04;
 
 pub fn update_force(graph: &Graph, force: &mut GraphVector) {
     let bubble_to_pressure = get_bubble_to_pressure(graph);
-    for (key, vertex) in graph.vertices.iter() {
+    for key in graph.vertices.keys() {
         let mut vertex_force = Vec2::ZERO;
 
-        for (offset, edge) in vertex.edges.iter().enumerate() {
-            let ekey = key.edge_key(offset as u8);
-            let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
+        for ekey in key.edge_keys() {
+            let edge = graph.get_edge(ekey);
+            let bezier = graph.get_bezier(ekey);
+            let twin_bubble = graph.get_edge(edge.twin).bubble;
 
-            let pressure_diff = (bubble_to_pressure[edge.bubble] - bubble_to_pressure[twin.bubble])
+            let pressure_diff = (bubble_to_pressure[edge.bubble] - bubble_to_pressure[twin_bubble])
                 .clamp(-2.0, 2.0);
             let pressure = pressure_diff * PRESSURE_TENSION;
 
-            vertex_force += pressure * vertex_pressure_force(vertex, edge, twin, twin_vertex);
-            force.add_edge(
-                ekey,
-                pressure * edge_pressure_force(vertex, twin, twin_vertex),
-            );
+            vertex_force += pressure * vertex_pressure_force(&bezier);
+            force.add_edge(ekey, pressure * edge_pressure_force(&bezier));
         }
 
         force.add_vertex(key, vertex_force);
     }
 }
 
-fn vertex_pressure_force(vertex: &Vertex, edge: &Edge, twin: &Edge, twin_vertex: &Vertex) -> Vec2 {
-    let s = vertex.point.position;
-    let sc = edge.point.position;
-    let ec = twin.point.position;
-    let e = twin_vertex.point.position;
+fn vertex_pressure_force(b: &crate::graphics::geometry::Bezier) -> Vec2 {
     Vec2::new(
-        (-10.0 * s.y - 6.0 * sc.y - 3.0 * ec.y - e.y) / 20.0,
-        (-10.0 * s.x + 6.0 * sc.x + 3.0 * ec.x + e.x) / 20.0,
+        (-10.0 * b.s.y - 6.0 * b.sc.y - 3.0 * b.ec.y - b.e.y) / 20.0,
+        (-10.0 * b.s.x + 6.0 * b.sc.x + 3.0 * b.ec.x + b.e.x) / 20.0,
     )
 }
 
-fn edge_pressure_force(vertex: &Vertex, twin: &Edge, twin_vertex: &Vertex) -> Vec2 {
-    let s = vertex.point.position;
-    let ec = twin.point.position;
-    let e = twin_vertex.point.position;
+fn edge_pressure_force(b: &crate::graphics::geometry::Bezier) -> Vec2 {
     Vec2::new(
-        (6.0 * s.y - 3.0 * ec.y - 3.0 * e.y) / 20.0,
-        (-6.0 * s.x + 3.0 * ec.x + 3.0 * e.x) / 20.0,
+        (6.0 * b.s.y - 3.0 * b.ec.y - 3.0 * b.e.y) / 20.0,
+        (-6.0 * b.s.x + 3.0 * b.ec.x + 3.0 * b.e.x) / 20.0,
     )
 }
 
@@ -57,12 +46,15 @@ fn get_bubble_to_pressure(graph: &Graph) -> SecondaryMap<BubbleKey, f32> {
     let mut bubble_to_area: SecondaryMap<BubbleKey, f32> =
         graph.bubbles.keys().map(|k| (k, 0.0)).collect();
 
-    for vertex in graph.vertices.values() {
-        for edge in vertex.edges.iter() {
-            let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
-            let half_area = get_half_area(vertex, edge, twin_vertex, twin);
+    for vkey in graph.vertices.keys() {
+        for ekey in vkey.edge_keys() {
+            let edge = graph.get_edge(ekey);
+            let bezier = graph.get_bezier(ekey);
+            let twin_bubble = graph.get_edge(edge.twin).bubble;
+
+            let half_area = bezier.half_area_contribution();
             bubble_to_area[edge.bubble] += half_area;
-            bubble_to_area[twin.bubble] -= half_area;
+            bubble_to_area[twin_bubble] -= half_area;
         }
     }
 
@@ -71,16 +63,4 @@ fn get_bubble_to_pressure(graph: &Graph) -> SecondaryMap<BubbleKey, f32> {
         .iter()
         .map(|(key, bubble)| (key, bubble.get_pressure(bubble_to_area[key])))
         .collect()
-}
-
-fn get_half_area(vertex: &Vertex, edge: &Edge, twin_vertex: &Vertex, twin: &Edge) -> f32 {
-    let s = vertex.point.position;
-    let sc = edge.point.position;
-    let ec = twin.point.position;
-    let e = twin_vertex.point.position;
-
-    // calculate half the area of the bezier curve defined by the points
-    (s.x * (-10.0 * s.y - 6.0 * sc.y - 3.0 * ec.y - e.y)
-        + sc.x * (6.0 * s.y - 3.0 * ec.y - 3.0 * e.y))
-        / 20.0
 }

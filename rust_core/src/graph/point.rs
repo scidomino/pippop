@@ -8,14 +8,10 @@ pub struct Point {
 
 impl Point {
     pub fn new(x: f32, y: f32) -> Self {
-        Point {
-            position: Vec2::new(x, y),
-            velocity: Vec2::ZERO,
-        }
+        Self::from_vec2(macroquad::math::vec2(x, y))
     }
-
     pub fn from_vec2(position: Vec2) -> Self {
-        Point {
+        Self {
             position,
             velocity: Vec2::ZERO,
         }

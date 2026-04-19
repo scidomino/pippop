@@ -35,25 +35,23 @@ impl Graph {
         }
     }
 
-    pub fn init(&mut self, style1: BubbleStyle, style2: BubbleStyle) {
+    pub fn init(&mut self, s1: BubbleStyle, s2: BubbleStyle) {
         self.vertices.clear();
         self.bubbles.clear();
 
-        let vkey1 = self.vertices.insert(Vertex::new(Point::new(0.0, -50.0)));
-        let vkey2 = self.vertices.insert(Vertex::new(Point::new(0.0, 50.0)));
-        let ekeys1 = vkey1.edge_keys();
-        let ekeys2 = vkey2.edge_keys();
+        let v1 = self.vertices.insert(Vertex::new(Point::new(0.0, -50.0)));
+        let v2 = self.vertices.insert(Vertex::new(Point::new(0.0, 50.0)));
+        let e1 = v1.edge_keys();
+        let e2 = v2.edge_keys();
 
-        self.link_twins(ekeys1[0], ekeys2[0]);
-        self.link_twins(ekeys1[1], ekeys2[2]);
-        self.link_twins(ekeys1[2], ekeys2[1]);
+        self.link_twins(e1[0], e2[0]);
+        self.link_twins(e1[1], e2[2]);
+        self.link_twins(e1[2], e2[1]);
 
-        let b1 = self.bubbles.insert(Bubble::new(style1));
-        self.rebubble(b1, ekeys1[0]);
-        let b2 = self.bubbles.insert(Bubble::new(style2));
-        self.rebubble(b2, ekeys1[1]);
-        let open_air = self.bubbles.insert(Bubble::new(BubbleStyle::OpenAir));
-        self.rebubble(open_air, ekeys1[2]);
+        for (s, e) in [(s1, e1[0]), (s2, e1[1]), (BubbleStyle::OpenAir, e1[2])] {
+            let b = self.bubbles.insert(Bubble::new(s));
+            self.rebubble(b, e);
+        }
     }
 
     pub fn remove_edge(&mut self, ekey: EdgeKey) {
@@ -276,6 +274,17 @@ impl Graph {
 
     pub fn get_edge(&self, key: EdgeKey) -> &Edge {
         &self.vertices[key.vertex].edges[key.offset as usize]
+    }
+
+    pub fn get_bezier(&self, ekey: EdgeKey) -> crate::graphics::geometry::Bezier {
+        let (edge, vertex) = self.get_edge_and_vertex(ekey);
+        let (twin, twin_vertex) = self.get_edge_and_vertex(edge.twin);
+        crate::graphics::geometry::Bezier::from_points(
+            vertex.point.position,
+            edge.point.position,
+            twin.point.position,
+            twin_vertex.point.position,
+        )
     }
 
     pub fn get_edge_and_vertex(&self, key: EdgeKey) -> (&Edge, &Vertex) {

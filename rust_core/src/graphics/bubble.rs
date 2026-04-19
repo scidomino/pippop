@@ -18,16 +18,7 @@ pub fn get_points_for_bubble(graph: &Graph, bubble: &Bubble) -> Vec<Vec2> {
 }
 
 pub fn push_edge_points(graph: &Graph, ekey: crate::graph::edge::EdgeKey, points: &mut Vec<Vec2>) {
-    let (edge, vertex) = graph.get_edge_and_vertex(ekey);
-    let (twin_edge, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
-
-    geometry::flatten_bezier(
-        points,
-        vertex.point.position,
-        edge.point.position,
-        twin_edge.point.position,
-        twin_vertex.point.position,
-    );
+    graph.get_bezier(ekey).flatten(points);
 }
 
 pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2], _centroid: Vec2) {

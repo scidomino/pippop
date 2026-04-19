@@ -3,6 +3,52 @@ use macroquad::prelude::*;
 const FLATNESS: f32 = 0.5;
 const MAX_DEPTH: u32 = 10;
 
+pub struct Bezier {
+    pub s: Vec2,
+    pub sc: Vec2,
+    pub ec: Vec2,
+    pub e: Vec2,
+}
+
+impl Bezier {
+    pub fn from_points(s: Vec2, sc: Vec2, ec: Vec2, e: Vec2) -> Self {
+        Self { s, sc, ec, e }
+    }
+
+    pub fn area(&self) -> f32 {
+        self.half_area(self.s, self.sc, self.ec, self.e)
+            - self.half_area(self.e, self.ec, self.sc, self.s)
+    }
+
+    pub fn half_area_contribution(&self) -> f32 {
+        self.half_area(self.s, self.sc, self.ec, self.e)
+    }
+
+    fn half_area(&self, s: Vec2, sc: Vec2, ec: Vec2, e: Vec2) -> f32 {
+        (s.x * (-10.0 * s.y - 6.0 * sc.y - 3.0 * ec.y - e.y)
+            + sc.x * (6.0 * s.y - 3.0 * ec.y - 3.0 * e.y))
+            / 20.0
+    }
+
+    pub fn centroid_contribution(&self) -> Vec2 {
+        let cx = calculate_half_partial_centroid(
+            self.s.x, self.s.y, self.sc.x, self.sc.y, self.ec.x, self.ec.y, self.e.x, self.e.y,
+        ) - calculate_half_partial_centroid(
+            self.e.x, self.e.y, self.ec.x, self.ec.y, self.sc.x, self.sc.y, self.s.x, self.s.y,
+        );
+        let cy = calculate_half_partial_centroid(
+            self.s.y, self.s.x, self.sc.y, self.sc.x, self.ec.y, self.ec.x, self.e.y, self.e.x,
+        ) - calculate_half_partial_centroid(
+            self.e.y, self.e.x, self.ec.y, self.ec.x, self.sc.y, self.sc.x, self.s.y, self.s.x,
+        );
+        Vec2::new(cx, -cy)
+    }
+
+    pub fn flatten(&self, points: &mut Vec<Vec2>) {
+        flatten_bezier(points, self.s, self.sc, self.ec, self.e);
+    }
+}
+
 /// Flatten a cubic Bezier curve into a sequence of points.
 pub fn flatten_bezier(points: &mut Vec<Vec2>, p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2) {
     flatten_bezier_recursive(points, p1, p2, p3, p4, 0);
@@ -299,55 +345,20 @@ pub fn calculate_centroid(graph: &Graph, bkey: BubbleKey) -> Vec2 {
     }
 
     let mut area = 0.0;
-    let mut centroid_x = 0.0;
-    let mut centroid_y = 0.0;
+    let mut centroid_sum = Vec2::ZERO;
 
     for &ekey in &bubble.edges {
-        let (edge, vertex) = graph.get_edge_and_vertex(ekey);
-        let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
-
-        let s = vertex.point.position;
-        let sc = edge.point.position;
-        let ec = twin.point.position;
-        let e = twin_vertex.point.position;
-
-        let half_area = (s.x * (-10.0 * s.y - 6.0 * sc.y - 3.0 * ec.y - e.y)
-            + sc.x * (6.0 * s.y - 3.0 * ec.y - 3.0 * e.y))
-            / 20.0;
-
-        let twin_half_area = (e.x * (-10.0 * e.y - 6.0 * ec.y - 3.0 * sc.y - s.y)
-            + ec.x * (6.0 * e.y - 3.0 * sc.y - 3.0 * s.y))
-            / 20.0;
-
-        area += half_area - twin_half_area;
-
-        let half_cx = calculate_half_partial_centroid(s.x, s.y, sc.x, sc.y, ec.x, ec.y, e.x, e.y);
-        let twin_half_cx =
-            calculate_half_partial_centroid(e.x, e.y, ec.x, ec.y, sc.x, sc.y, s.x, s.y);
-        centroid_x += half_cx - twin_half_cx;
-
-        let half_cy = calculate_half_partial_centroid(s.y, s.x, sc.y, sc.x, ec.y, ec.x, e.y, e.x);
-        let twin_half_cy =
-            calculate_half_partial_centroid(e.y, e.x, ec.y, ec.x, sc.y, sc.x, s.y, s.x);
-        centroid_y += half_cy - twin_half_cy;
+        let bezier = graph.get_bezier(ekey);
+        area += bezier.area();
+        centroid_sum += bezier.centroid_contribution();
     }
 
     if area.abs() < 1e-6 {
-        let (first_edge, first_vertex) = graph.get_edge_and_vertex(bubble.edges[0]);
-        let (first_twin, first_twin_vertex) = graph.get_edge_and_vertex(first_edge.twin);
-
-        let s = first_vertex.point.position;
-        let e = first_twin_vertex.point.position;
-        let sc = first_edge.point.position;
-        let ec = first_twin.point.position;
-
-        return Vec2::new(
-            ((s.x + e.x) + 3.0 * (sc.x + ec.x)) / 8.0,
-            ((s.y + e.y) + 3.0 * (sc.y + ec.y)) / 8.0,
-        );
+        let bezier = graph.get_bezier(bubble.edges[0]);
+        return (bezier.s + bezier.e + 3.0 * (bezier.sc + bezier.ec)) / 8.0;
     }
 
-    Vec2::new(centroid_x / area as f32, -centroid_y / area as f32)
+    centroid_sum / area
 }
 
 fn calculate_half_partial_centroid(
@@ -395,7 +406,7 @@ pub fn triangulate(points: &[Vec2]) -> Vec<(Vec2, Vec2, Vec2)> {
     for i in 0..clean_points.len() {
         let p1 = clean_points[i];
         let p2 = clean_points[(i + 1) % clean_points.len()];
-        area += p1.x * p2.y - p2.x * p1.y;
+        area += p1.perp_dot(p2);
     }
 
     if area < 0.0 {
@@ -422,17 +433,12 @@ pub fn triangulate(points: &[Vec2]) -> Vec<(Vec2, Vec2, Vec2)> {
         let cross = v1.perp_dot(v2);
 
         if cross > 0.0 {
-            let mut is_ear = true;
-            for j in 0..n {
-                let test_idx = indices[j];
-                if test_idx == prev_idx || test_idx == curr_idx || test_idx == next_idx {
-                    continue;
-                }
-                if point_in_triangle(clean_points[test_idx], p_prev, p_curr, p_next) {
-                    is_ear = false;
-                    break;
-                }
-            }
+            let is_ear = !indices.iter().any(|&test_idx| {
+                test_idx != prev_idx
+                    && test_idx != curr_idx
+                    && test_idx != next_idx
+                    && point_in_triangle(clean_points[test_idx], p_prev, p_curr, p_next)
+            });
 
             if is_ear {
                 triangles.push((p_prev, p_curr, p_next));

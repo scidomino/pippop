@@ -48,7 +48,7 @@ impl BubbleStyle {
                 start_area,
                 end_area,
                 progress,
-            } => (1.0 - progress) * start_area + progress * end_area,
+            } => start_area + (end_area - start_area) * progress,
         }
     }
 }

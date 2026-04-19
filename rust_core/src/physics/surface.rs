@@ -12,30 +12,24 @@ const LEGENDRE_GAUSS_POINTS: [(f32, f32); 3] = [
 ];
 
 pub fn update_force(graph: &Graph, force: &mut GraphVector) {
-    for (key, vertex) in graph.vertices.iter() {
+    for key in graph.vertices.keys() {
         let mut vertex_force = Vec2::ZERO;
 
-        for (offset, edge) in vertex.edges.iter().enumerate() {
-            let ekey = key.edge_key(offset as u8);
-            let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
+        for ekey in key.edge_keys() {
+            let bezier = graph.get_bezier(ekey);
 
-            let s = vertex.point.position;
-            let sc = edge.point.position;
-            let ec = twin.point.position;
-            let e = twin_vertex.point.position;
-
-            vertex_force -= SURFACE_TENSION * vertex_surface_force(s, sc, ec, e);
-            force.add_edge(ekey, -SURFACE_TENSION * edge_surface_force(s, sc, ec, e));
+            vertex_force -= SURFACE_TENSION * vertex_surface_force(&bezier);
+            force.add_edge(ekey, -SURFACE_TENSION * edge_surface_force(&bezier));
         }
 
         force.add_vertex(key, vertex_force);
     }
 }
 
-fn vertex_surface_force(s: Vec2, sc: Vec2, ec: Vec2, e: Vec2) -> Vec2 {
-    let a = 3.0 * (e - 3.0 * ec + 3.0 * sc - s);
-    let b = 6.0 * (ec - 2.0 * sc + s);
-    let c = 3.0 * (sc - s);
+fn vertex_surface_force(bez: &crate::graphics::geometry::Bezier) -> Vec2 {
+    let a = 3.0 * (bez.e - 3.0 * bez.ec + 3.0 * bez.sc - bez.s);
+    let b = 6.0 * (bez.ec - 2.0 * bez.sc + bez.s);
+    let c = 3.0 * (bez.sc - bez.s);
 
     let mut force = Vec2::ZERO;
     for (w, p) in LEGENDRE_GAUSS_POINTS.iter() {
@@ -47,10 +41,10 @@ fn vertex_surface_force(s: Vec2, sc: Vec2, ec: Vec2, e: Vec2) -> Vec2 {
     force
 }
 
-fn edge_surface_force(s: Vec2, sc: Vec2, ec: Vec2, e: Vec2) -> Vec2 {
-    let a = 3.0 * (e - 3.0 * ec + 3.0 * sc - s);
-    let b = 6.0 * (ec - 2.0 * sc + s);
-    let c = 3.0 * (sc - s);
+fn edge_surface_force(bez: &crate::graphics::geometry::Bezier) -> Vec2 {
+    let a = 3.0 * (bez.e - 3.0 * bez.ec + 3.0 * bez.sc - bez.s);
+    let b = 6.0 * (bez.ec - 2.0 * bez.sc + bez.s);
+    let c = 3.0 * (bez.sc - bez.s);
 
     let mut force = Vec2::ZERO;
     for (w, p) in LEGENDRE_GAUSS_POINTS.iter() {
