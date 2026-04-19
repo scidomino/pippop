@@ -12,6 +12,11 @@ pub enum BubbleStyle {
     },
     Player,
     OpenAir,
+    Waiting {
+        start_area: f32,
+        end_area: f32,
+        progress: f32,
+    },
 }
 
 impl BubbleStyle {
@@ -34,6 +39,17 @@ impl BubbleStyle {
                 color: *color,
             },
             _ => unreachable!("merge should only be called with Standard or OpenAir styles"),
+        }
+    }
+
+    pub fn get_target_area(&self) -> f32 {
+        match self {
+            BubbleStyle::Standard { size, .. } => 3000.0 * (*size as f32).sqrt(),
+            BubbleStyle::Player => 3000.0,
+            BubbleStyle::OpenAir => 0.0,
+            BubbleStyle::Waiting { start_area, end_area, progress } => {
+                (1.0 - progress) * start_area + progress * end_area
+            }
         }
     }
 }
@@ -84,11 +100,10 @@ impl Bubble {
     }
 
     pub fn get_pressure(&self, area: f32) -> f32 {
-        match self.style {
-            BubbleStyle::Standard { size, .. } => 3000.0 * (size as f32).sqrt() / area.max(100.0),
-            BubbleStyle::Player => 3000.0 / area.max(100.0),
-            BubbleStyle::OpenAir => 1.0,
+        if self.style == BubbleStyle::OpenAir {
+            return 1.0;
         }
+        self.style.get_target_area() / area.max(100.0)
     }
 }
 

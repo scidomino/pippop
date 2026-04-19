@@ -248,7 +248,7 @@ impl Graph {
     pub fn get_player_bubble(&self) -> Option<BubbleKey> {
         self.bubbles
             .iter()
-            .find(|(_, b)| b.style == BubbleStyle::Player)
+            .find(|(_, b)| matches!(b.style, BubbleStyle::Player))
             .map(|(k, _)| k)
     }
 
@@ -312,7 +312,7 @@ impl Graph {
         let open_air_key = self
             .bubbles
             .iter()
-            .find(|(_, b)| b.style == BubbleStyle::OpenAir)
+            .find(|(_, b)| matches!(b.style, BubbleStyle::OpenAir))
             .map(|(k, _)| k);
 
         if let Some(key) = open_air_key {

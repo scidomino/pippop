@@ -34,7 +34,7 @@ pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2], centroid: Vec2) {
     let color = match style {
         BubbleStyle::Standard { color, .. } => *color,
         BubbleStyle::Player => colors::TRANSPARENT_WHITE,
-        BubbleStyle::OpenAir => return,
+        BubbleStyle::OpenAir | BubbleStyle::Waiting { .. } => return,
     };
 
     // Draw Fill (Triangle Fan)

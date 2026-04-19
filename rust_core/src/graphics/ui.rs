@@ -6,7 +6,7 @@ pub fn draw_bubble_label(style: &BubbleStyle, centroid: Vec2, camera: &Camera2D,
     let label = match style {
         BubbleStyle::Standard { size, .. } => format!("{size}"),
         BubbleStyle::Player => "P".to_string(),
-        BubbleStyle::OpenAir => return,
+        BubbleStyle::OpenAir | BubbleStyle::Waiting { .. } => return,
     };
 
     let screen_pos = camera.world_to_screen(centroid);
