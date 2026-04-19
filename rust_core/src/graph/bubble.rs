@@ -16,9 +16,21 @@ pub enum BubbleStyle {
         end_area: f32,
         progress: f32,
     },
+    Popping {
+        size: i32,
+        color: Color,
+        timer: f32,
+    },
 }
 
 impl BubbleStyle {
+    pub fn is_poppable(&self) -> bool {
+        match self {
+            BubbleStyle::Standard { size, .. } => *size >= 5,
+            _ => false,
+        }
+    }
+
     pub fn merge(&self, other: &BubbleStyle) -> BubbleStyle {
         match (self, other) {
             (BubbleStyle::OpenAir, _) | (_, BubbleStyle::OpenAir) => BubbleStyle::OpenAir,
@@ -28,7 +40,7 @@ impl BubbleStyle {
                     color: *color,
                 }
             }
-            _ => unreachable!("merge should only be called with Standard or OpenAir styles"),
+            _ => self.clone(),
         }
     }
 
@@ -42,6 +54,14 @@ impl BubbleStyle {
                 end_area,
                 progress,
             } => start_area + (end_area - start_area) * progress,
+            BubbleStyle::Popping { size, timer, .. } => {
+                let target = 3000.0 * (*size as f32).sqrt();
+                if *timer <= 0.0 {
+                    0.0
+                } else {
+                    target
+                }
+            }
         }
     }
 }

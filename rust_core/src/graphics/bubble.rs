@@ -29,6 +29,10 @@ pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2], _centroid: Vec2) {
     let color = match style {
         BubbleStyle::Standard { color, .. } => *color,
         BubbleStyle::Player => colors::TRANSPARENT_WHITE,
+        BubbleStyle::Popping { color, timer, .. } => {
+            let alpha = (*timer / 0.5).clamp(0.0, 1.0);
+            Color::new(color.r, color.g, color.b, alpha)
+        }
         BubbleStyle::OpenAir | BubbleStyle::Waiting { .. } => return,
     };
 

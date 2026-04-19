@@ -4,6 +4,7 @@ use rust_core::graphics::colors;
 use rust_core::graphics::Renderer;
 use rust_core::managers::burst::BurstManager;
 use rust_core::managers::highlight::HighlightManager;
+use rust_core::managers::pop::PopManager;
 use rust_core::managers::slide::SlideManager;
 use rust_core::managers::spawn::{RatchetSpawnTimer, SpawnManager};
 use rust_core::managers::swap::SwapManager;
@@ -36,6 +37,7 @@ async fn main() {
     let mut slide_manager = SlideManager::new();
     let mut burst_manager = BurstManager::new(1);
     let mut swap_manager = SwapManager::new();
+    let mut pop_manager = PopManager::new();
     let mut highlight_manager = HighlightManager::new();
 
     loop {
@@ -74,13 +76,23 @@ async fn main() {
 
         let mut did_graph_change = false;
 
-        if slide_manager.slide_slidable_edges(&mut graph, dt) {
-            did_graph_change = true;
-        }
+        pop_manager.remove_deflated(&mut graph, &burst_manager);
 
-        if swap_manager.update(&mut graph, dt) {
-            // Swap finished, check for bursts
-            did_graph_change = true;
+        if pop_manager.pending_pop.is_none() {
+            if slide_manager.slide_slidable_edges(&mut graph, dt) {
+                did_graph_change = true;
+            }
+
+            if swap_manager.update(&mut graph, dt) {
+                // Swap finished, check for bursts
+                did_graph_change = true;
+            }
+
+            if pop_manager.deflate_big_bubble(&mut graph) {
+                did_graph_change = true;
+            }
+        } else {
+            pop_manager.update(&mut graph, dt);
         }
 
         if did_graph_change && burst_manager.active_edge.is_none() {
