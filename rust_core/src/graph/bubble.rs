@@ -116,7 +116,10 @@ mod tests {
     #[test]
     fn test_bubble_contains() {
         let mut graph = Graph::new();
-        graph.init();
+        graph.init(
+            BubbleStyle::Standard { size: 1, max_size: 5, color: crate::graphics::colors::TURQUOISE },
+            BubbleStyle::Standard { size: 1, max_size: 5, color: crate::graphics::colors::ROSE },
+        );
         
         // Run physics a few frames to expand the bubbles from their initial degenerate state
         for _ in 0..10 {

@@ -113,7 +113,10 @@ mod tests {
     #[test]
     fn test_advance_frame() {
         let mut graph = Graph::new();
-        graph.init();
+        graph.init(
+            crate::graph::bubble::BubbleStyle::Standard { size: 1, max_size: 5, color: crate::graphics::colors::TURQUOISE },
+            crate::graph::bubble::BubbleStyle::Standard { size: 1, max_size: 5, color: crate::graphics::colors::ROSE },
+        );
         for _ in 0..5 {
             advance_frame(&mut graph);
             graph.print_graph();

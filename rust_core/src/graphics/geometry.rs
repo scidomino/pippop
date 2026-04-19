@@ -31,6 +31,45 @@ fn flatten_bezier_recursive(points: &mut Vec<Vec2>, p1: Vec2, p2: Vec2, p3: Vec2
     flatten_bezier_recursive(points, p1234, p234, p34, p4, depth + 1);
 }
 
+pub fn rotate_points(points: &[Vec2], pivot: Vec2, angle: f32) -> Vec<Vec2> {
+    let (sin, cos) = angle.sin_cos();
+    points.iter().map(|p| {
+        let dx = p.x - pivot.x;
+        let dy = p.y - pivot.y;
+        Vec2::new(
+            cos * dx - sin * dy + pivot.x,
+            sin * dx + cos * dy + pivot.y,
+        )
+    }).collect()
+}
+
+pub fn tween_points(a: &[Vec2], b: &[Vec2], progress: f32) -> Vec<Vec2> {
+    if a.len() == b.len() {
+        return a.iter().zip(b.iter()).map(|(&p1, &p2)| p1.lerp(p2, progress)).collect();
+    }
+
+    // If lengths differ, we scale the indices as in the Android implementation
+    let (big, small, morph) = if a.len() > b.len() {
+        (a, b, progress)
+    } else {
+        (b, a, 1.0 - progress)
+    };
+
+    let big_count = big.len();
+    let small_count = small.len();
+    let ratio = big_count as f32 / small_count as f32;
+    let mut out = Vec::with_capacity(big_count);
+
+    for i in 0..big_count {
+        let small_idx = (i as f32 / ratio) as usize;
+        let p1 = big[i];
+        let p2 = small[small_idx.min(small_count - 1)];
+        out.push(p1.lerp(p2, morph));
+    }
+    
+    out
+}
+
 use crate::graph::Graph;
 use crate::graph::bubble::BubbleKey;
 

@@ -150,7 +150,10 @@ mod tests {
     #[test]
     fn test_spawn_integration() {
         let mut graph = Graph::new();
-        graph.init();
+        graph.init(
+            BubbleStyle::Standard { size: 1, max_size: 5, color: colors::TURQUOISE },
+            BubbleStyle::Standard { size: 1, max_size: 5, color: colors::ROSE },
+        );
         let initial_bubbles = graph.bubbles.len();
 
         let timer = Box::new(RatchetSpawnTimer {

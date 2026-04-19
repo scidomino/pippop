@@ -3,7 +3,6 @@ pub mod edge;
 pub mod point;
 pub mod vertex;
 
-use crate::graphics::colors;
 use bubble::{Bubble, BubbleKey, BubbleStyle};
 use edge::{Edge, EdgeKey};
 use macroquad::math::Vec2;
@@ -36,7 +35,7 @@ impl Graph {
         }
     }
 
-    pub fn init(&mut self) {
+    pub fn init(&mut self, style1: BubbleStyle, style2: BubbleStyle) {
         self.vertices.clear();
         self.bubbles.clear();
 
@@ -49,17 +48,9 @@ impl Graph {
         self.link_twins(ekeys1[1], ekeys2[2]);
         self.link_twins(ekeys1[2], ekeys2[1]);
 
-        let b1 = self.bubbles.insert(Bubble::new(BubbleStyle::Standard {
-            size: 1,
-            max_size: 5,
-            color: colors::TURQUOISE,
-        }));
+        let b1 = self.bubbles.insert(Bubble::new(style1));
         self.rebubble(b1, ekeys1[0]);
-        let b2 = self.bubbles.insert(Bubble::new(BubbleStyle::Standard {
-            size: 1,
-            max_size: 5,
-            color: colors::ROSE,
-        }));
+        let b2 = self.bubbles.insert(Bubble::new(style2));
         self.rebubble(b2, ekeys1[1]);
         let open_air = self.bubbles.insert(Bubble::new(BubbleStyle::OpenAir));
         self.rebubble(open_air, ekeys1[2]);
@@ -374,7 +365,10 @@ mod tests {
     #[test]
     fn test_get_player_bubble() {
         let mut graph = Graph::new();
-        graph.init();
+        graph.init(
+            BubbleStyle::Standard { size: 1, max_size: 5, color: crate::graphics::colors::TURQUOISE },
+            BubbleStyle::Standard { size: 1, max_size: 5, color: crate::graphics::colors::ROSE },
+        );
         
         // Initially no player bubble in init()
         assert_eq!(graph.get_player_bubble(), None);
@@ -389,14 +383,15 @@ mod tests {
     #[test]
     fn test_get_closest_otter_swappable() {
         let mut graph = Graph::new();
-        graph.init();
+        graph.init(
+            BubbleStyle::Player,
+            BubbleStyle::Standard { size: 1, max_size: 5, color: crate::graphics::colors::TURQUOISE },
+        );
         
         // Assign b1 as player and b2 as a standard bubble.
         let mut keys = graph.bubbles.keys();
         let b1 = keys.next().unwrap();
         let b2 = keys.next().unwrap();
-        
-        graph.bubbles[b1].style = BubbleStyle::Player;
         
         // Find a point near b2
         let centroid2 = crate::graphics::geometry::calculate_centroid(&graph, b2);
