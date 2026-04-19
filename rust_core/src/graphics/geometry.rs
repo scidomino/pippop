@@ -221,6 +221,52 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
             base + 1, base + 2, 1,
             1, base + 2, 2,
         ]);
+    } else if !closed && points.len() > 1 {
+        let cap_segments = 10;
+        
+        // Start Cap
+        let p_start = points[0];
+        let t_start = (points[1] - points[0]).normalize_or_zero();
+        let n_start = Vec2::new(-t_start.y, t_start.x);
+        let start_angle = n_start.y.atan2(n_start.x);
+        
+        let center_idx = 1 as u16;
+        let mut prev_idx = 0 as u16; // outer1 at i=0
+        
+        for s in 1..cap_segments {
+            let a = start_angle + (s as f32 / cap_segments as f32) * std::f32::consts::PI;
+            let pos = p_start + Vec2::new(a.cos(), a.sin()) * (width * 0.5);
+            let new_idx = vertices.len() as u16;
+            vertices.push(Vertex::new2(vec3(pos.x, pos.y, 0.0), vec2(0.0, 0.0), outer_color));
+            
+            indices.extend_from_slice(&[center_idx, prev_idx, new_idx]);
+            prev_idx = new_idx;
+        }
+        let outer2_idx = 2 as u16;
+        indices.extend_from_slice(&[center_idx, prev_idx, outer2_idx]);
+        
+        // End Cap
+        let last_i = points.len() - 1;
+        let p_end = points[last_i];
+        let t_end = (p_end - points[last_i - 1]).normalize_or_zero();
+        let n_end = Vec2::new(-t_end.y, t_end.x);
+        let end_angle = n_end.y.atan2(n_end.x);
+        
+        let base = (last_i * 3) as u16;
+        let center_idx = base + 1;
+        let mut prev_idx = base + 0; // outer1
+        
+        for s in 1..cap_segments {
+            let a = end_angle - (s as f32 / cap_segments as f32) * std::f32::consts::PI;
+            let pos = p_end + Vec2::new(a.cos(), a.sin()) * (width * 0.5);
+            let new_idx = vertices.len() as u16;
+            vertices.push(Vertex::new2(vec3(pos.x, pos.y, 0.0), vec2(0.0, 0.0), outer_color));
+            
+            indices.extend_from_slice(&[center_idx, new_idx, prev_idx]);
+            prev_idx = new_idx;
+        }
+        let outer2_idx = base + 2;
+        indices.extend_from_slice(&[center_idx, outer2_idx, prev_idx]);
     }
 
     Mesh {
