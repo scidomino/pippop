@@ -70,53 +70,64 @@ pub fn tween_points(a: &[Vec2], b: &[Vec2], progress: f32) -> Vec<Vec2> {
     out
 }
 
+struct MiterPoint {
+    center: Vec2,
+    normal: Vec2,
+    length: f32,
+}
+
+fn calculate_miter(points: &[Vec2], i: usize, width: f32, closed: bool) -> MiterPoint {
+    let p = points[i];
+    
+    let prev = if i == 0 {
+        if closed { points[points.len() - 1] } else { p - (points[1] - p) }
+    } else {
+        points[i - 1]
+    };
+    let next = if i == points.len() - 1 {
+        if closed { points[0] } else { p + (p - points[i - 1]) }
+    } else {
+        points[i + 1]
+    };
+
+    let mut t1 = (p - prev).normalize_or_zero();
+    let mut t2 = (next - p).normalize_or_zero();
+    
+    // Fallback for coincident points
+    if t1.length_squared() == 0.0 { t1 = t2; }
+    if t2.length_squared() == 0.0 { t2 = t1; }
+    if t1.length_squared() == 0.0 { 
+        t1 = Vec2::new(1.0, 0.0); 
+        t2 = Vec2::new(1.0, 0.0); 
+    }
+
+    let n1 = Vec2::new(-t1.y, t1.x);
+    let n2 = Vec2::new(-t2.y, t2.x);
+
+    let mut miter_normal = (n1 + n2).normalize_or_zero();
+    let mut dot = miter_normal.dot(n1);
+
+    // Fallback if normals are exactly opposite
+    if dot < 0.1 {
+        miter_normal = n1;
+        dot = 1.0;
+    }
+
+    // Limit the miter length to avoid huge spikes at very sharp angles
+    let length = (width * 0.5 / dot).min(width * 4.0);
+
+    MiterPoint { center: p, normal: miter_normal, length }
+}
+
 /// Generates a ribbon mesh (thick line) from a sequence of points.
 pub fn generate_ribbon_mesh(points: &[Vec2], width: f32, color: Color, closed: bool) -> Mesh {
     let mut vertices = Vec::with_capacity(points.len() * 2);
     let mut indices = Vec::with_capacity(points.len() * 6);
 
     for i in 0..points.len() {
-        let p = points[i];
-        
-        let prev = if i == 0 {
-            if closed { points[points.len() - 1] } else { p - (points[1] - p) }
-        } else {
-            points[i - 1]
-        };
-        let next = if i == points.len() - 1 {
-            if closed { points[0] } else { p + (p - points[i - 1]) }
-        } else {
-            points[i + 1]
-        };
-
-        let mut t1 = (p - prev).normalize_or_zero();
-        let mut t2 = (next - p).normalize_or_zero();
-        
-        // Fallback for coincident points
-        if t1.length_squared() == 0.0 { t1 = t2; }
-        if t2.length_squared() == 0.0 { t2 = t1; }
-        if t1.length_squared() == 0.0 { 
-            t1 = Vec2::new(1.0, 0.0); 
-            t2 = Vec2::new(1.0, 0.0); 
-        }
-
-        let n1 = Vec2::new(-t1.y, t1.x);
-        let n2 = Vec2::new(-t2.y, t2.x);
-
-        let mut miter_normal = (n1 + n2).normalize_or_zero();
-        let mut dot = miter_normal.dot(n1);
-
-        // Fallback if normals are exactly opposite
-        if dot < 0.1 {
-            miter_normal = n1;
-            dot = 1.0;
-        }
-
-        // Limit the miter length to avoid huge spikes at very sharp angles
-        let miter_length = (width * 0.5 / dot).min(width * 4.0);
-
-        let p1 = p + miter_normal * miter_length;
-        let p2 = p - miter_normal * miter_length;
+        let miter = calculate_miter(points, i, width, closed);
+        let p1 = miter.center + miter.normal * miter.length;
+        let p2 = miter.center - miter.normal * miter.length;
 
         vertices.push(Vertex::new2(vec3(p1.x, p1.y, 0.0), vec2(0.0, 0.0), color));
         vertices.push(Vertex::new2(vec3(p2.x, p2.y, 0.0), vec2(0.0, 0.0), color));
@@ -154,45 +165,10 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
     let outer_color = Color::new(color.r, color.g, color.b, 0.0);
 
     for i in 0..points.len() {
-        let p = points[i];
-        
-        let prev = if i == 0 {
-            if closed { points[points.len() - 1] } else { p - (points[1] - p) }
-        } else {
-            points[i - 1]
-        };
-        let next = if i == points.len() - 1 {
-            if closed { points[0] } else { p + (p - points[i - 1]) }
-        } else {
-            points[i + 1]
-        };
-
-        let mut t1 = (p - prev).normalize_or_zero();
-        let mut t2 = (next - p).normalize_or_zero();
-        
-        if t1.length_squared() == 0.0 { t1 = t2; }
-        if t2.length_squared() == 0.0 { t2 = t1; }
-        if t1.length_squared() == 0.0 { 
-            t1 = Vec2::new(1.0, 0.0); 
-            t2 = Vec2::new(1.0, 0.0); 
-        }
-
-        let n1 = Vec2::new(-t1.y, t1.x);
-        let n2 = Vec2::new(-t2.y, t2.x);
-
-        let mut miter_normal = (n1 + n2).normalize_or_zero();
-        let mut dot = miter_normal.dot(n1);
-
-        if dot < 0.1 {
-            miter_normal = n1;
-            dot = 1.0;
-        }
-
-        let miter_length = (width * 0.5 / dot).min(width * 4.0);
-
-        let p_outer1 = p + miter_normal * miter_length;
-        let p_inner = p;
-        let p_outer2 = p - miter_normal * miter_length;
+        let miter = calculate_miter(points, i, width, closed);
+        let p_outer1 = miter.center + miter.normal * miter.length;
+        let p_inner = miter.center;
+        let p_outer2 = miter.center - miter.normal * miter.length;
 
         vertices.push(Vertex::new2(vec3(p_outer1.x, p_outer1.y, 0.0), vec2(0.0, 0.0), outer_color));
         vertices.push(Vertex::new2(vec3(p_inner.x, p_inner.y, 0.0), vec2(0.0, 0.0), inner_color));
