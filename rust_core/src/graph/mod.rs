@@ -245,27 +245,21 @@ impl Graph {
 
     pub fn get_closest_otter_swappable(&self, point: Vec2) -> Option<EdgeKey> {
         let player_bkey = self.get_player_bubble()?;
-        let player_bubble = &self.bubbles[player_bkey];
 
-        let mut min_dist = f32::MAX;
-        let mut closest_edge = None;
-
-        for &ekey in &player_bubble.edges {
-            let edge = self.get_edge(ekey);
-            let twin_ekey = edge.twin;
-            let bkey = self.get_edge(twin_ekey).bubble;
-            let twin_bubble = &self.bubbles[bkey];
-
-            if let BubbleStyle::Standard { .. } = twin_bubble.style {
-                let centroid = crate::graphics::geometry::calculate_centroid(self, bkey);
-                let dist = centroid.distance(point);
-                if dist < min_dist {
-                    min_dist = dist;
-                    closest_edge = Some(twin_ekey);
+        self.bubbles[player_bkey].edges.iter()
+            .filter_map(|&ekey| {
+                let twin_ekey = self.get_edge(ekey).twin;
+                let bkey = self.get_edge(twin_ekey).bubble;
+                
+                if let BubbleStyle::Standard { .. } = self.bubbles[bkey].style {
+                    let centroid = crate::graphics::geometry::calculate_centroid(self, bkey);
+                    Some((twin_ekey, centroid.distance_squared(point)))
+                } else {
+                    None
                 }
-            }
-        }
-        closest_edge
+            })
+            .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal))
+            .map(|(ekey, _)| ekey)
     }
 
     // next edge on the same bubble in clockwise order
