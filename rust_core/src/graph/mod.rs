@@ -239,18 +239,19 @@ impl Graph {
     pub fn get_player_bubble(&self) -> Option<BubbleKey> {
         self.bubbles
             .iter()
-            .find(|(_, b)| matches!(b.style, BubbleStyle::Player))
-            .map(|(k, _)| k)
+            .find_map(|(k, b)| matches!(b.style, BubbleStyle::Player).then_some(k))
     }
 
     pub fn get_closest_otter_swappable(&self, point: Vec2) -> Option<EdgeKey> {
         let player_bkey = self.get_player_bubble()?;
 
-        self.bubbles[player_bkey].edges.iter()
+        self.bubbles[player_bkey]
+            .edges
+            .iter()
             .filter_map(|&ekey| {
                 let twin_ekey = self.get_edge(ekey).twin;
                 let bkey = self.get_edge(twin_ekey).bubble;
-                
+
                 if let BubbleStyle::Standard { .. } = self.bubbles[bkey].style {
                     let centroid = crate::graphics::geometry::calculate_centroid(self, bkey);
                     Some((twin_ekey, centroid.distance_squared(point)))
@@ -294,17 +295,11 @@ impl Graph {
     }
 
     pub fn get_open_air_vertices(&self) -> Vec<VertexKey> {
-        let open_air_key = self
-            .bubbles
+        self.bubbles
             .iter()
             .find(|(_, b)| matches!(b.style, BubbleStyle::OpenAir))
-            .map(|(k, _)| k);
-
-        if let Some(key) = open_air_key {
-            self.bubbles[key].edges.iter().map(|e| e.vertex).collect()
-        } else {
-            Vec::new()
-        }
+            .map(|(_, b)| b.edges.iter().map(|e| e.vertex).collect())
+            .unwrap_or_default()
     }
 
     pub fn spawn(&mut self, vkey: VertexKey, style: BubbleStyle) {

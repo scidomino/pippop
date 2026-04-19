@@ -19,5 +19,6 @@ pub fn get_group(size: usize) -> Vec<Color> {
 }
 
 pub fn random_game_color() -> Color {
-    ALL_COLORS[macroquad::rand::gen_range(0, ALL_COLORS.len())]
+    use macroquad::rand::ChooseRandom;
+    *ALL_COLORS.choose().unwrap()
 }

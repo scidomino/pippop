@@ -21,11 +21,8 @@ pub enum BubbleStyle {
 
 impl BubbleStyle {
     pub fn merge(&self, other: &BubbleStyle) -> BubbleStyle {
-        if *self == BubbleStyle::OpenAir || *other == BubbleStyle::OpenAir {
-            return BubbleStyle::OpenAir;
-        }
-
         match (self, other) {
+            (BubbleStyle::OpenAir, _) | (_, BubbleStyle::OpenAir) => BubbleStyle::OpenAir,
             (
                 BubbleStyle::Standard {
                     size: s1,

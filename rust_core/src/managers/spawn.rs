@@ -78,29 +78,23 @@ impl SpawnManager {
 
     fn get_distant_colors(&self, graph: &Graph, vkey: VertexKey) -> Vec<Color> {
         let mut available_colors = self.colors.clone();
-        
-        // Porting the logic from SpawnManager.java:
-        // Collect bubbles near the vertex and exclude their colors.
         let vertex = &graph.vertices[vkey];
-        let mut nearby_bubbles = Vec::new();
 
-        for e in &vertex.edges {
-            nearby_bubbles.push(e.bubble);
-            nearby_bubbles.push(graph.get_edge(e.twin).bubble);
-            
-            // To be thorough like Java, we could traverse more neighbors, 
-            // but bubble.edges is the primary way in this structure.
-            // For now, let's just get the immediate neighbors.
-        }
-
-        for bkey in nearby_bubbles {
-            if let Some(bubble) = graph.bubbles.get(bkey) {
-                if let BubbleStyle::Standard { color, .. } = bubble.style {
-                    available_colors.retain(|&c| c != color);
+        let nearby_colors: Vec<_> = vertex
+            .edges
+            .iter()
+            .flat_map(|e| [e.bubble, graph.get_edge(e.twin).bubble])
+            .filter_map(|bkey| graph.bubbles.get(bkey))
+            .filter_map(|b| {
+                if let BubbleStyle::Standard { color, .. } = b.style {
+                    Some(color)
+                } else {
+                    None
                 }
-            }
-        }
+            })
+            .collect();
 
+        available_colors.retain(|c| !nearby_colors.contains(c));
         available_colors
     }
 
