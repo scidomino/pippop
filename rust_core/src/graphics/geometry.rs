@@ -32,15 +32,8 @@ fn flatten_bezier_recursive(points: &mut Vec<Vec2>, p1: Vec2, p2: Vec2, p3: Vec2
 }
 
 pub fn rotate_points(points: &[Vec2], pivot: Vec2, angle: f32) -> Vec<Vec2> {
-    let (sin, cos) = angle.sin_cos();
-    points.iter().map(|p| {
-        let dx = p.x - pivot.x;
-        let dy = p.y - pivot.y;
-        Vec2::new(
-            cos * dx - sin * dy + pivot.x,
-            sin * dx + cos * dy + pivot.y,
-        )
-    }).collect()
+    let mat = Mat2::from_angle(angle);
+    points.iter().map(|&p| mat * (p - pivot) + pivot).collect()
 }
 
 pub fn tween_points(a: &[Vec2], b: &[Vec2], progress: f32) -> Vec<Vec2> {
@@ -97,12 +90,12 @@ fn calculate_miter(points: &[Vec2], i: usize, width: f32, closed: bool) -> Miter
     if t1.length_squared() == 0.0 { t1 = t2; }
     if t2.length_squared() == 0.0 { t2 = t1; }
     if t1.length_squared() == 0.0 { 
-        t1 = Vec2::new(1.0, 0.0); 
-        t2 = Vec2::new(1.0, 0.0); 
+        t1 = Vec2::X;
+        t2 = Vec2::X;
     }
 
-    let n1 = Vec2::new(-t1.y, t1.x);
-    let n2 = Vec2::new(-t2.y, t2.x);
+    let n1 = t1.perp();
+    let n2 = t2.perp();
 
     let mut miter_normal = (n1 + n2).normalize_or_zero();
     let mut dot = miter_normal.dot(n1);
@@ -369,7 +362,7 @@ pub fn triangulate(points: &[Vec2]) -> Vec<(Vec2, Vec2, Vec2)> {
         let v1 = p_curr - p_prev;
         let v2 = p_next - p_curr;
         // Cross product logic for CCW polygons
-        let cross = v1.x * v2.y - v1.y * v2.x;
+        let cross = v1.perp_dot(v2);
 
         if cross > 0.0 {
             let mut is_ear = true;

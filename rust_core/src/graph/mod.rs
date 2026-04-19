@@ -320,11 +320,8 @@ impl Graph {
         let epoint1 = vertex.edges[0].point.position;
         let epoint2 = vertex.edges[1].point.position;
 
-        let mid_point1 = Point::new((vpoint.x + epoint1.x) / 2.0, (vpoint.y + epoint1.y) / 2.0);
-        let mid_point2 = Point::new((vpoint.x + epoint2.x) / 2.0, (vpoint.y + epoint2.y) / 2.0);
-
-        let new_vkey1 = self.vertices.insert(Vertex::new(mid_point1));
-        let new_vkey2 = self.vertices.insert(Vertex::new(mid_point2));
+        let new_vkey1 = self.vertices.insert(Vertex::new(Point::from_vec2((vpoint + epoint1) / 2.0)));
+        let new_vkey2 = self.vertices.insert(Vertex::new(Point::from_vec2((vpoint + epoint2) / 2.0)));
 
         let new_ekeys1 = new_vkey1.edge_keys();
         let new_ekeys2 = new_vkey2.edge_keys();

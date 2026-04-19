@@ -13,4 +13,11 @@ impl Point {
             velocity: Vec2::ZERO,
         }
     }
+
+    pub fn from_vec2(position: Vec2) -> Self {
+        Point {
+            position,
+            velocity: Vec2::ZERO,
+        }
+    }
 }
