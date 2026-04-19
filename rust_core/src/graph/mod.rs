@@ -218,7 +218,7 @@ impl Graph {
         self.get_edge_mut(b).twin = a;
     }
 
-    fn rebubble(&mut self, bkey: BubbleKey, ekey: EdgeKey) {
+    pub fn rebubble(&mut self, bkey: BubbleKey, ekey: EdgeKey) {
         self.bubbles[bkey].edges.clear();
 
         let mut next_edge = ekey;
@@ -408,5 +408,35 @@ mod tests {
         let ekey = closest.unwrap();
         // The edge should belong to b2, since it is the swappable twin of the player's edge
         assert_eq!(graph.get_edge(ekey).bubble, b2);
+    }
+
+    #[test]
+    fn test_rebubble_reorders_edges() {
+        let mut graph = Graph::new();
+        graph.init(
+            BubbleStyle::Player,
+            BubbleStyle::Standard {
+                size: 1,
+                max_size: 5,
+                color: crate::graphics::colors::TURQUOISE,
+            },
+        );
+
+        let bkey = graph.bubbles.keys().next().unwrap();
+        let original_edges = graph.bubbles[bkey].edges.clone();
+        assert!(original_edges.len() >= 2);
+
+        // Rebubble starting from the second edge
+        let new_start = original_edges[1];
+        graph.rebubble(bkey, new_start);
+
+        let new_edges = &graph.bubbles[bkey].edges;
+        assert_eq!(new_edges[0], new_start);
+        assert_eq!(new_edges.len(), original_edges.len());
+
+        // Ensure it's a cyclic shift
+        for i in 0..new_edges.len() {
+            assert_eq!(new_edges[i], original_edges[(i + 1) % original_edges.len()]);
+        }
     }
 }

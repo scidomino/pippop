@@ -86,6 +86,10 @@ impl SwapManager {
         let bottom_bkey = graph.get_edge(edge_key).bubble;
         let top_bkey = graph.get_edge(twin_key).bubble;
 
+        // Align bubble edge lists to start at the shared boundary for smooth tweening
+        graph.rebubble(bottom_bkey, edge_key);
+        graph.rebubble(top_bkey, twin_key);
+
         let bottom_style = graph.bubbles[bottom_bkey].style.clone();
         let top_style = graph.bubbles[top_bkey].style.clone();
 
