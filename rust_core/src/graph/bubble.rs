@@ -83,20 +83,17 @@ impl Bubble {
 
     pub fn contains(&self, point: Vec2, graph: &crate::graph::Graph) -> bool {
         let points = crate::graphics::bubble::get_points_for_bubble(graph, self);
-        let mut inside = false;
-        let mut j = points.len() - 1;
-        for i in 0..points.len() {
-            if ((points[i].y > point.y) != (points[j].y > point.y))
-                && (point.x
-                    < (points[j].x - points[i].x) * (point.y - points[i].y)
-                        / (points[j].y - points[i].y)
-                        + points[i].x)
-            {
-                inside = !inside;
-            }
-            j = i;
+        if points.len() < 3 {
+            return false;
         }
-        inside
+
+        points.iter()
+            .zip(points.iter().cycle().skip(1))
+            .filter(|(p1, p2)| {
+                ((p1.y > point.y) != (p2.y > point.y)) &&
+                (point.x < (p2.x - p1.x) * (point.y - p1.y) / (p2.y - p1.y) + p1.x)
+            })
+            .count() % 2 != 0
     }
 
     pub fn get_pressure(&self, area: f32) -> f32 {
