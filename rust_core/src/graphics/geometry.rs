@@ -345,3 +345,115 @@ fn calculate_half_partial_centroid(sx: f32, sy: f32, scx: f32, scy: f32, ecx: f3
         + sx * sx * (-280.0 * sy - 105.0 * scy - 30.0 * ecy - 5.0 * ey))
         / 840.0
 }
+
+pub fn triangulate(points: &[Vec2]) -> Vec<(Vec2, Vec2, Vec2)> {
+    let mut clean_points: Vec<Vec2> = Vec::with_capacity(points.len());
+    for &p in points {
+        if clean_points.is_empty() || clean_points.last().unwrap().distance_squared(p) > 0.01 {
+            clean_points.push(p);
+        }
+    }
+    if clean_points.len() > 1 && clean_points[0].distance_squared(*clean_points.last().unwrap()) <= 0.01 {
+        clean_points.pop();
+    }
+
+    if clean_points.len() < 3 {
+        return vec![];
+    }
+    
+    let mut indices: Vec<usize> = (0..clean_points.len()).collect();
+    let mut triangles = Vec::with_capacity(clean_points.len() - 2);
+    
+    // Ensure the polygon is counter-clockwise (CCW)
+    let mut area = 0.0;
+    for i in 0..clean_points.len() {
+        let p1 = clean_points[i];
+        let p2 = clean_points[(i + 1) % clean_points.len()];
+        area += p1.x * p2.y - p2.x * p1.y;
+    }
+    
+    if area < 0.0 {
+        indices.reverse();
+    }
+
+    let mut i = 0;
+    let mut attempts = 0;
+
+    // Standard Ear Clipping algorithm
+    while indices.len() > 3 && attempts < indices.len() * 2 {
+        let n = indices.len();
+        let prev_idx = indices[(i + n - 1) % n];
+        let curr_idx = indices[i];
+        let next_idx = indices[(i + 1) % n];
+
+        let p_prev = clean_points[prev_idx];
+        let p_curr = clean_points[curr_idx];
+        let p_next = clean_points[next_idx];
+
+        let v1 = p_curr - p_prev;
+        let v2 = p_next - p_curr;
+        // Cross product logic for CCW polygons
+        let cross = v1.x * v2.y - v1.y * v2.x;
+
+        if cross > 0.0 {
+            let mut is_ear = true;
+            for j in 0..n {
+                let test_idx = indices[j];
+                if test_idx == prev_idx || test_idx == curr_idx || test_idx == next_idx {
+                    continue;
+                }
+                if point_in_triangle(clean_points[test_idx], p_prev, p_curr, p_next) {
+                    is_ear = false;
+                    break;
+                }
+            }
+
+            if is_ear {
+                triangles.push((p_prev, p_curr, p_next));
+                indices.remove(i);
+                attempts = 0;
+                if i >= indices.len() {
+                    i = 0;
+                }
+                continue;
+            }
+        }
+        
+        i = (i + 1) % indices.len();
+        attempts += 1;
+    }
+
+    if indices.len() == 3 {
+        triangles.push((clean_points[indices[0]], clean_points[indices[1]], clean_points[indices[2]]));
+    } else {
+        // Fallback for self-intersecting or highly degenerate edge cases
+        let base = clean_points[indices[0]];
+        for j in 1..indices.len()-1 {
+            triangles.push((base, clean_points[indices[j]], clean_points[indices[j+1]]));
+        }
+    }
+
+    triangles
+}
+
+fn point_in_triangle(p: Vec2, a: Vec2, b: Vec2, c: Vec2) -> bool {
+    let v0 = c - a;
+    let v1 = b - a;
+    let v2 = p - a;
+
+    let dot00 = v0.dot(v0);
+    let dot01 = v0.dot(v1);
+    let dot02 = v0.dot(v2);
+    let dot11 = v1.dot(v1);
+    let dot12 = v1.dot(v2);
+
+    let denom = dot00 * dot11 - dot01 * dot01;
+    if denom.abs() < 1e-6 {
+        return false;
+    }
+    let inv_denom = 1.0 / denom;
+    let u = (dot11 * dot02 - dot01 * dot12) * inv_denom;
+    let v = (dot00 * dot12 - dot01 * dot02) * inv_denom;
+
+    (u >= 0.0) && (v >= 0.0) && (u + v <= 1.0)
+}

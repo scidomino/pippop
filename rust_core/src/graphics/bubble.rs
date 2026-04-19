@@ -34,7 +34,7 @@ pub fn get_edge_points(graph: &Graph, ekey: crate::graph::edge::EdgeKey) -> Vec<
     points
 }
 
-pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2], centroid: Vec2) {
+pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2], _centroid: Vec2) {
     if points.is_empty() {
         return;
     }
@@ -45,11 +45,11 @@ pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2], centroid: Vec2) {
         BubbleStyle::OpenAir | BubbleStyle::Waiting { .. } => return,
     };
 
-    // Draw Fill (Triangle Fan)
-    for i in 0..points.len() {
-        let p1 = points[i];
-        let p2 = points[(i + 1) % points.len()];
-        draw_triangle(centroid, p1, p2, color);
+    // Draw Fill (Ear Clipping Triangulation)
+    // This perfectly handles concave shapes with zero overdraw, eliminating spikes.
+    let triangles = geometry::triangulate(points);
+    for (p1, p2, p3) in triangles {
+        draw_triangle(p1, p2, p3, color);
     }
 
     // Draw Outline
