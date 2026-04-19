@@ -44,8 +44,10 @@ impl HighlightManager {
         } else {
             let cycle_time = self.time % TEASER_DELAY;
             if cycle_time > TEASER_DELAY / 2.0 {
-                let ratio = (self.time * std::f32::consts::PI * 2.0 / TEASER_THROB).sin().powi(2);
-                
+                let ratio = (self.time * std::f32::consts::PI * 2.0 / TEASER_THROB)
+                    .sin()
+                    .powi(2);
+
                 if let Some(player_bkey) = graph.get_player_bubble() {
                     let player_bubble = &graph.bubbles[player_bkey];
                     for &ekey in &player_bubble.edges {

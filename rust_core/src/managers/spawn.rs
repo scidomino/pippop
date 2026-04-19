@@ -75,7 +75,6 @@ impl SpawnManager {
         );
     }
 
-
     fn get_distant_colors(&self, graph: &Graph, vkey: VertexKey) -> Vec<Color> {
         let mut available_colors = self.colors.clone();
         let vertex = &graph.vertices[vkey];
@@ -99,7 +98,9 @@ impl SpawnManager {
     }
 
     fn get_next_spawn_time(&self, bubble_count: usize) -> f32 {
-        let average_wait = self.spawn_timer.get_average_wait(bubble_count, self.total_play_time);
+        let average_wait = self
+            .spawn_timer
+            .get_average_wait(bubble_count, self.total_play_time);
         // Exponential distribution: -log(U) * average
         let u: f32 = gen_range(0.0001, 1.0);
         -u.ln() * average_wait
@@ -133,10 +134,10 @@ mod tests {
             doubling_time: 100.0,
         });
         let mut manager = SpawnManager::new(colors::get_group(3), timer);
-        
+
         let initial_time = manager.next_spawn_time;
         manager.update(1.0);
-        
+
         assert_eq!(manager.total_play_time, 1.0);
         assert_eq!(manager.next_spawn_time, initial_time - 1.0);
     }
@@ -145,8 +146,16 @@ mod tests {
     fn test_spawn_integration() {
         let mut graph = Graph::new();
         graph.init(
-            BubbleStyle::Standard { size: 1, max_size: 5, color: colors::TURQUOISE },
-            BubbleStyle::Standard { size: 1, max_size: 5, color: colors::ROSE },
+            BubbleStyle::Standard {
+                size: 1,
+                max_size: 5,
+                color: colors::TURQUOISE,
+            },
+            BubbleStyle::Standard {
+                size: 1,
+                max_size: 5,
+                color: colors::ROSE,
+            },
         );
         let initial_bubbles = graph.bubbles.len();
 
@@ -155,7 +164,7 @@ mod tests {
             doubling_time: 100.0,
         });
         let mut manager = SpawnManager::new(colors::get_group(3), timer);
-        
+
         // Force a spawn by setting time to negative
         manager.next_spawn_time = -1.0;
         manager.possibly_spawn(&mut graph);

@@ -8,7 +8,14 @@ pub fn flatten_bezier(points: &mut Vec<Vec2>, p1: Vec2, p2: Vec2, p3: Vec2, p4: 
     flatten_bezier_recursive(points, p1, p2, p3, p4, 0);
 }
 
-fn flatten_bezier_recursive(points: &mut Vec<Vec2>, p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, depth: u32) {
+fn flatten_bezier_recursive(
+    points: &mut Vec<Vec2>,
+    p1: Vec2,
+    p2: Vec2,
+    p3: Vec2,
+    p4: Vec2,
+    depth: u32,
+) {
     let dx = p4.x - p1.x;
     let dy = p4.y - p1.y;
     let d2 = ((p2.x - p4.x) * dy - (p2.y - p4.y) * dx).abs();
@@ -38,7 +45,11 @@ pub fn rotate_points(points: &[Vec2], pivot: Vec2, angle: f32) -> Vec<Vec2> {
 
 pub fn tween_points(a: &[Vec2], b: &[Vec2], progress: f32) -> Vec<Vec2> {
     if a.len() == b.len() {
-        return a.iter().zip(b.iter()).map(|(&p1, &p2)| p1.lerp(p2, progress)).collect();
+        return a
+            .iter()
+            .zip(b.iter())
+            .map(|(&p1, &p2)| p1.lerp(p2, progress))
+            .collect();
     }
 
     // If lengths differ, we scale the indices as in the Android implementation
@@ -59,7 +70,7 @@ pub fn tween_points(a: &[Vec2], b: &[Vec2], progress: f32) -> Vec<Vec2> {
         let p2 = small[small_idx.min(small_count - 1)];
         out.push(p1.lerp(p2, morph));
     }
-    
+
     out
 }
 
@@ -71,25 +82,37 @@ struct MiterPoint {
 
 fn calculate_miter(points: &[Vec2], i: usize, width: f32, closed: bool) -> MiterPoint {
     let p = points[i];
-    
+
     let prev = if i == 0 {
-        if closed { points[points.len() - 1] } else { p - (points[1] - p) }
+        if closed {
+            points[points.len() - 1]
+        } else {
+            p - (points[1] - p)
+        }
     } else {
         points[i - 1]
     };
     let next = if i == points.len() - 1 {
-        if closed { points[0] } else { p + (p - points[i - 1]) }
+        if closed {
+            points[0]
+        } else {
+            p + (p - points[i - 1])
+        }
     } else {
         points[i + 1]
     };
 
     let mut t1 = (p - prev).normalize_or_zero();
     let mut t2 = (next - p).normalize_or_zero();
-    
+
     // Fallback for coincident points
-    if t1.length_squared() == 0.0 { t1 = t2; }
-    if t2.length_squared() == 0.0 { t2 = t1; }
-    if t1.length_squared() == 0.0 { 
+    if t1.length_squared() == 0.0 {
+        t1 = t2;
+    }
+    if t2.length_squared() == 0.0 {
+        t2 = t1;
+    }
+    if t1.length_squared() == 0.0 {
         t1 = Vec2::X;
         t2 = Vec2::X;
     }
@@ -109,7 +132,11 @@ fn calculate_miter(points: &[Vec2], i: usize, width: f32, closed: bool) -> Miter
     // Limit the miter length to avoid huge spikes at very sharp angles
     let length = (width * 0.5 / dot).min(width * 4.0);
 
-    MiterPoint { center: p, normal: miter_normal, length }
+    MiterPoint {
+        center: p,
+        normal: miter_normal,
+        length,
+    }
 }
 
 /// Generates a ribbon mesh (thick line) from a sequence of points.
@@ -127,19 +154,13 @@ pub fn generate_ribbon_mesh(points: &[Vec2], width: f32, color: Color, closed: b
 
         if i < points.len() - 1 {
             let base = (i * 2) as u16;
-            indices.extend_from_slice(&[
-                base, base + 1, base + 2,
-                base + 2, base + 1, base + 3,
-            ]);
+            indices.extend_from_slice(&[base, base + 1, base + 2, base + 2, base + 1, base + 3]);
         }
     }
 
     if closed && points.len() > 1 {
         let base = ((points.len() - 1) * 2) as u16;
-        indices.extend_from_slice(&[
-            base, base + 1, 0,
-            0, base + 1, 1,
-        ]);
+        indices.extend_from_slice(&[base, base + 1, 0, 0, base + 1, 1]);
     }
 
     Mesh {
@@ -163,21 +184,34 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
         let p_inner = miter.center;
         let p_outer2 = miter.center - miter.normal * miter.length;
 
-        vertices.push(Vertex::new2(vec3(p_outer1.x, p_outer1.y, 0.0), vec2(0.0, 0.0), outer_color));
-        vertices.push(Vertex::new2(vec3(p_inner.x, p_inner.y, 0.0), vec2(0.0, 0.0), inner_color));
-        vertices.push(Vertex::new2(vec3(p_outer2.x, p_outer2.y, 0.0), vec2(0.0, 0.0), outer_color));
+        vertices.push(Vertex::new2(
+            vec3(p_outer1.x, p_outer1.y, 0.0),
+            vec2(0.0, 0.0),
+            outer_color,
+        ));
+        vertices.push(Vertex::new2(
+            vec3(p_inner.x, p_inner.y, 0.0),
+            vec2(0.0, 0.0),
+            inner_color,
+        ));
+        vertices.push(Vertex::new2(
+            vec3(p_outer2.x, p_outer2.y, 0.0),
+            vec2(0.0, 0.0),
+            outer_color,
+        ));
 
         if i < points.len() - 1 {
             let base = (i * 3) as u16;
             // First strip (outer1 to inner)
-            indices.extend_from_slice(&[
-                base, base + 1, base + 3,
-                base + 3, base + 1, base + 4,
-            ]);
+            indices.extend_from_slice(&[base, base + 1, base + 3, base + 3, base + 1, base + 4]);
             // Second strip (inner to outer2)
             indices.extend_from_slice(&[
-                base + 1, base + 2, base + 4,
-                base + 4, base + 2, base + 5,
+                base + 1,
+                base + 2,
+                base + 4,
+                base + 4,
+                base + 2,
+                base + 5,
             ]);
         }
     }
@@ -185,52 +219,68 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
     if closed && points.len() > 1 {
         let base = ((points.len() - 1) * 3) as u16;
         indices.extend_from_slice(&[
-            base, base + 1, 0,
-            0, base + 1, 1,
-            base + 1, base + 2, 1,
-            1, base + 2, 2,
+            base,
+            base + 1,
+            0,
+            0,
+            base + 1,
+            1,
+            base + 1,
+            base + 2,
+            1,
+            1,
+            base + 2,
+            2,
         ]);
     } else if !closed && points.len() > 1 {
         let cap_segments = 10;
-        
+
         // Start Cap
         let p_start = points[0];
         let t_start = (points[1] - points[0]).normalize_or_zero();
         let n_start = Vec2::new(-t_start.y, t_start.x);
         let start_angle = n_start.y.atan2(n_start.x);
-        
+
         let center_idx = 1 as u16;
         let mut prev_idx = 0 as u16; // outer1 at i=0
-        
+
         for s in 1..cap_segments {
             let a = start_angle + (s as f32 / cap_segments as f32) * std::f32::consts::PI;
             let pos = p_start + Vec2::new(a.cos(), a.sin()) * (width * 0.5);
             let new_idx = vertices.len() as u16;
-            vertices.push(Vertex::new2(vec3(pos.x, pos.y, 0.0), vec2(0.0, 0.0), outer_color));
-            
+            vertices.push(Vertex::new2(
+                vec3(pos.x, pos.y, 0.0),
+                vec2(0.0, 0.0),
+                outer_color,
+            ));
+
             indices.extend_from_slice(&[center_idx, prev_idx, new_idx]);
             prev_idx = new_idx;
         }
         let outer2_idx = 2 as u16;
         indices.extend_from_slice(&[center_idx, prev_idx, outer2_idx]);
-        
+
         // End Cap
         let last_i = points.len() - 1;
         let p_end = points[last_i];
         let t_end = (p_end - points[last_i - 1]).normalize_or_zero();
         let n_end = Vec2::new(-t_end.y, t_end.x);
         let end_angle = n_end.y.atan2(n_end.x);
-        
+
         let base = (last_i * 3) as u16;
         let center_idx = base + 1;
         let mut prev_idx = base + 0; // outer1
-        
+
         for s in 1..cap_segments {
             let a = end_angle - (s as f32 / cap_segments as f32) * std::f32::consts::PI;
             let pos = p_end + Vec2::new(a.cos(), a.sin()) * (width * 0.5);
             let new_idx = vertices.len() as u16;
-            vertices.push(Vertex::new2(vec3(pos.x, pos.y, 0.0), vec2(0.0, 0.0), outer_color));
-            
+            vertices.push(Vertex::new2(
+                vec3(pos.x, pos.y, 0.0),
+                vec2(0.0, 0.0),
+                outer_color,
+            ));
+
             indices.extend_from_slice(&[center_idx, new_idx, prev_idx]);
             prev_idx = new_idx;
         }
@@ -245,8 +295,8 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
     }
 }
 
-use crate::graph::Graph;
 use crate::graph::bubble::BubbleKey;
+use crate::graph::Graph;
 
 pub fn calculate_centroid(graph: &Graph, bkey: BubbleKey) -> Vec2 {
     let bubble = &graph.bubbles[bkey];
@@ -270,7 +320,7 @@ pub fn calculate_centroid(graph: &Graph, bkey: BubbleKey) -> Vec2 {
         let half_area = (s.x * (-10.0 * s.y - 6.0 * sc.y - 3.0 * ec.y - e.y)
             + sc.x * (6.0 * s.y - 3.0 * ec.y - 3.0 * e.y))
             / 20.0;
-            
+
         let twin_half_area = (e.x * (-10.0 * e.y - 6.0 * ec.y - 3.0 * sc.y - s.y)
             + ec.x * (6.0 * e.y - 3.0 * sc.y - 3.0 * s.y))
             / 20.0;
@@ -278,23 +328,25 @@ pub fn calculate_centroid(graph: &Graph, bkey: BubbleKey) -> Vec2 {
         area += half_area - twin_half_area;
 
         let half_cx = calculate_half_partial_centroid(s.x, s.y, sc.x, sc.y, ec.x, ec.y, e.x, e.y);
-        let twin_half_cx = calculate_half_partial_centroid(e.x, e.y, ec.x, ec.y, sc.x, sc.y, s.x, s.y);
+        let twin_half_cx =
+            calculate_half_partial_centroid(e.x, e.y, ec.x, ec.y, sc.x, sc.y, s.x, s.y);
         centroid_x += half_cx - twin_half_cx;
 
         let half_cy = calculate_half_partial_centroid(s.y, s.x, sc.y, sc.x, ec.y, ec.x, e.y, e.x);
-        let twin_half_cy = calculate_half_partial_centroid(e.y, e.x, ec.y, ec.x, sc.y, sc.x, s.y, s.x);
+        let twin_half_cy =
+            calculate_half_partial_centroid(e.y, e.x, ec.y, ec.x, sc.y, sc.x, s.y, s.x);
         centroid_y += half_cy - twin_half_cy;
     }
 
     if area.abs() < 1e-6 {
         let (first_edge, first_vertex) = graph.get_edge_and_vertex(bubble.edges[0]);
         let (first_twin, first_twin_vertex) = graph.get_edge_and_vertex(first_edge.twin);
-        
+
         let s = first_vertex.point.position;
         let e = first_twin_vertex.point.position;
         let sc = first_edge.point.position;
         let ec = first_twin.point.position;
-        
+
         return Vec2::new(
             ((s.x + e.x) + 3.0 * (sc.x + ec.x)) / 8.0,
             ((s.y + e.y) + 3.0 * (sc.y + ec.y)) / 8.0,
@@ -304,7 +356,16 @@ pub fn calculate_centroid(graph: &Graph, bkey: BubbleKey) -> Vec2 {
     Vec2::new(centroid_x / area as f32, -centroid_y / area as f32)
 }
 
-fn calculate_half_partial_centroid(sx: f32, sy: f32, scx: f32, scy: f32, ecx: f32, ecy: f32, ex: f32, ey: f32) -> f32 {
+fn calculate_half_partial_centroid(
+    sx: f32,
+    sy: f32,
+    scx: f32,
+    scy: f32,
+    ecx: f32,
+    ecy: f32,
+    ex: f32,
+    ey: f32,
+) -> f32 {
     (scx * ecx * (45.0 * sy + 27.0 * scy)
         + scx * ex * (12.0 * sy + 18.0 * scy)
         + sx * scx * (105.0 * sy - 45.0 * scy - 45.0 * ecy - 15.0 * ey)
@@ -322,17 +383,19 @@ pub fn triangulate(points: &[Vec2]) -> Vec<(Vec2, Vec2, Vec2)> {
             clean_points.push(p);
         }
     }
-    if clean_points.len() > 1 && clean_points[0].distance_squared(*clean_points.last().unwrap()) <= 0.01 {
+    if clean_points.len() > 1
+        && clean_points[0].distance_squared(*clean_points.last().unwrap()) <= 0.01
+    {
         clean_points.pop();
     }
 
     if clean_points.len() < 3 {
         return vec![];
     }
-    
+
     let mut indices: Vec<usize> = (0..clean_points.len()).collect();
     let mut triangles = Vec::with_capacity(clean_points.len() - 2);
-    
+
     // Ensure the polygon is counter-clockwise (CCW)
     let mut area = 0.0;
     for i in 0..clean_points.len() {
@@ -340,7 +403,7 @@ pub fn triangulate(points: &[Vec2]) -> Vec<(Vec2, Vec2, Vec2)> {
         let p2 = clean_points[(i + 1) % clean_points.len()];
         area += p1.x * p2.y - p2.x * p1.y;
     }
-    
+
     if area < 0.0 {
         indices.reverse();
     }
@@ -387,18 +450,22 @@ pub fn triangulate(points: &[Vec2]) -> Vec<(Vec2, Vec2, Vec2)> {
                 continue;
             }
         }
-        
+
         i = (i + 1) % indices.len();
         attempts += 1;
     }
 
     if indices.len() == 3 {
-        triangles.push((clean_points[indices[0]], clean_points[indices[1]], clean_points[indices[2]]));
+        triangles.push((
+            clean_points[indices[0]],
+            clean_points[indices[1]],
+            clean_points[indices[2]],
+        ));
     } else {
         // Fallback for self-intersecting or highly degenerate edge cases
         let base = clean_points[indices[0]];
-        for j in 1..indices.len()-1 {
-            triangles.push((base, clean_points[indices[j]], clean_points[indices[j+1]]));
+        for j in 1..indices.len() - 1 {
+            triangles.push((base, clean_points[indices[j]], clean_points[indices[j + 1]]));
         }
     }
 

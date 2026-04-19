@@ -42,7 +42,7 @@ impl SwapManager {
             self.start_swap(graph, edge_key, false);
             return true;
         }
-        
+
         false
     }
 
@@ -64,7 +64,7 @@ impl SwapManager {
                 // Update the progress in the waiting styles for physics interpolation
                 let top_target_area = swap.top_style.get_target_area();
                 let bottom_target_area = swap.bottom_style.get_target_area();
-                
+
                 graph.bubbles[top_bkey].style = BubbleStyle::Waiting {
                     start_area: top_target_area,
                     end_area: bottom_target_area,
@@ -82,13 +82,13 @@ impl SwapManager {
 
     fn start_swap(&mut self, graph: &mut Graph, edge_key: EdgeKey, return_trip: bool) {
         let twin_key = graph.get_edge(edge_key).twin;
-        
+
         let bottom_bkey = graph.get_edge(edge_key).bubble;
         let top_bkey = graph.get_edge(twin_key).bubble;
 
         let bottom_style = graph.bubbles[bottom_bkey].style.clone();
         let top_style = graph.bubbles[top_bkey].style.clone();
-        
+
         let top_target_area = top_style.get_target_area();
         let bottom_target_area = bottom_style.get_target_area();
 
@@ -97,7 +97,7 @@ impl SwapManager {
             end_area: bottom_target_area,
             progress: 0.0,
         };
-        
+
         graph.bubbles[bottom_bkey].style = BubbleStyle::Waiting {
             start_area: bottom_target_area,
             end_area: top_target_area,

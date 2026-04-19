@@ -36,7 +36,9 @@ impl Renderer {
         highlight_manager: &crate::managers::highlight::HighlightManager,
     ) {
         // Collect visible bubble geometry
-        let bubble_render_data: Vec<_> = graph.bubbles.iter()
+        let bubble_render_data: Vec<_> = graph
+            .bubbles
+            .iter()
             .filter_map(|(bkey, bubble)| {
                 let points = bubble::get_bubble_points(graph, bkey);
                 (!points.is_empty()).then(|| {
@@ -70,7 +72,9 @@ impl Renderer {
         // Draw Highlights (Touch & Teaser)
         let glow_requests = highlight_manager.get_glow_requests(graph);
         for (bkey, intensity) in glow_requests {
-            if let Some((_, _, points, _)) = bubble_render_data.iter().find(|(k, _, _, _)| *k == bkey) {
+            if let Some((_, _, points, _)) =
+                bubble_render_data.iter().find(|(k, _, _, _)| *k == bkey)
+            {
                 let width = 20.0 * intensity;
                 let glow_mesh = geometry::generate_glow_mesh(points, width, colors::WHITE, true);
                 draw_mesh(&glow_mesh);
@@ -100,7 +104,12 @@ impl Renderer {
         self.effects.draw(camera, &self.font);
     }
 
-    fn draw_swapping_bubbles(&self, graph: &Graph, swap: &crate::managers::swap::ActiveSwap, center: Vec2) {
+    fn draw_swapping_bubbles(
+        &self,
+        graph: &Graph,
+        swap: &crate::managers::swap::ActiveSwap,
+        center: Vec2,
+    ) {
         let top_points = bubble::get_bubble_points(graph, swap.top_bkey);
         let bottom_points = bubble::get_bubble_points(graph, swap.bottom_bkey);
 
@@ -109,14 +118,26 @@ impl Renderer {
         }
 
         // Top Bubble Animation
-        let rotated_top_start = geometry::rotate_points(&top_points, center, swap.progress * std::f32::consts::PI);
-        let rotated_top_end = geometry::rotate_points(&bottom_points, center, (swap.progress - 1.0) * std::f32::consts::PI);
-        let morphed_top = geometry::tween_points(&rotated_top_start, &rotated_top_end, swap.progress);
-        
+        let rotated_top_start =
+            geometry::rotate_points(&top_points, center, swap.progress * std::f32::consts::PI);
+        let rotated_top_end = geometry::rotate_points(
+            &bottom_points,
+            center,
+            (swap.progress - 1.0) * std::f32::consts::PI,
+        );
+        let morphed_top =
+            geometry::tween_points(&rotated_top_start, &rotated_top_end, swap.progress);
+
         // Bottom Bubble Animation
-        let rotated_bottom_start = geometry::rotate_points(&bottom_points, center, swap.progress * std::f32::consts::PI);
-        let rotated_bottom_end = geometry::rotate_points(&top_points, center, (swap.progress - 1.0) * std::f32::consts::PI);
-        let morphed_bottom = geometry::tween_points(&rotated_bottom_start, &rotated_bottom_end, swap.progress);
+        let rotated_bottom_start =
+            geometry::rotate_points(&bottom_points, center, swap.progress * std::f32::consts::PI);
+        let rotated_bottom_end = geometry::rotate_points(
+            &top_points,
+            center,
+            (swap.progress - 1.0) * std::f32::consts::PI,
+        );
+        let morphed_bottom =
+            geometry::tween_points(&rotated_bottom_start, &rotated_bottom_end, swap.progress);
 
         bubble::draw_bubble_body(&swap.top_style, &morphed_top, center);
         bubble::draw_bubble_body(&swap.bottom_style, &morphed_bottom, center);

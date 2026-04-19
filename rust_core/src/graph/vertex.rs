@@ -1,5 +1,5 @@
-use super::point::Point;
 use super::edge::{Edge, EdgeKey};
+use super::point::Point;
 use slotmap::new_key_type;
 
 new_key_type! {

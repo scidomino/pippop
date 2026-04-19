@@ -1,5 +1,5 @@
-pub mod spawn;
-pub mod slide;
 pub mod burst;
-pub mod swap;
 pub mod highlight;
+pub mod slide;
+pub mod spawn;
+pub mod swap;

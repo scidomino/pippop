@@ -36,7 +36,7 @@ impl BurstManager {
         while let Some(ekey) = self.find_burst_starter(graph) {
             let bkey = graph.get_edge(ekey).bubble;
             self.burst(graph, ekey);
-            
+
             // After one burst, the bubble that "won" might have new burstable neighbors.
             // We find a neighbor of the merged bubble and keep going.
             while let Some(next_ekey) = self.find_burstable_edge_in_bubble(graph, bkey) {
@@ -100,12 +100,18 @@ impl BurstManager {
     }
 
     fn find_all_burstable_in_bubble(&self, graph: &Graph, bkey: BubbleKey) -> HashSet<EdgeKey> {
-        graph.bubbles.get(bkey).map(|bubble| {
-            bubble.edges.iter()
-                .filter(|&&ekey| self.is_burstable(graph, ekey))
-                .copied()
-                .collect()
-        }).unwrap_or_default()
+        graph
+            .bubbles
+            .get(bkey)
+            .map(|bubble| {
+                bubble
+                    .edges
+                    .iter()
+                    .filter(|&&ekey| self.is_burstable(graph, ekey))
+                    .copied()
+                    .collect()
+            })
+            .unwrap_or_default()
     }
 
     pub fn is_burstable(&self, graph: &Graph, ekey: EdgeKey) -> bool {
@@ -120,10 +126,9 @@ impl BurstManager {
         let s2 = &graph.bubbles[twin.bubble].style;
 
         match (s1, s2) {
-            (
-                BubbleStyle::Standard { color: c1, .. },
-                BubbleStyle::Standard { color: c2, .. },
-            ) => c1 == c2,
+            (BubbleStyle::Standard { color: c1, .. }, BubbleStyle::Standard { color: c2, .. }) => {
+                c1 == c2
+            }
             _ => false,
         }
     }

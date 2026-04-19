@@ -1,7 +1,7 @@
-use crate::graph::Graph;
 use crate::graph::bubble::{Bubble, BubbleStyle};
-use crate::graphics::geometry;
+use crate::graph::Graph;
 use crate::graphics::colors;
+use crate::graphics::geometry;
 use macroquad::prelude::*;
 
 pub fn get_bubble_points(graph: &Graph, bkey: crate::graph::bubble::BubbleKey) -> Vec<Vec2> {

@@ -1,13 +1,13 @@
 use macroquad::prelude::*;
 use rust_core::graph::Graph;
-use rust_core::graphics::Renderer;
-use rust_core::physics;
-use rust_core::managers::spawn::{SpawnManager, RatchetSpawnTimer};
-use rust_core::managers::slide::SlideManager;
-use rust_core::managers::burst::BurstManager;
-use rust_core::managers::swap::SwapManager;
-use rust_core::managers::highlight::HighlightManager;
 use rust_core::graphics::colors;
+use rust_core::graphics::Renderer;
+use rust_core::managers::burst::BurstManager;
+use rust_core::managers::highlight::HighlightManager;
+use rust_core::managers::slide::SlideManager;
+use rust_core::managers::spawn::{RatchetSpawnTimer, SpawnManager};
+use rust_core::managers::swap::SwapManager;
+use rust_core::physics;
 
 #[macroquad::main("PipPop")]
 async fn main() {
@@ -17,7 +17,11 @@ async fn main() {
     let mut graph = Graph::new();
     graph.init(
         rust_core::graph::bubble::BubbleStyle::Player,
-        rust_core::graph::bubble::BubbleStyle::Standard { size: 1, max_size: 5, color: colors::TURQUOISE }
+        rust_core::graph::bubble::BubbleStyle::Standard {
+            size: 1,
+            max_size: 5,
+            color: colors::TURQUOISE,
+        },
     );
 
     let mut renderer = Renderer::new();
@@ -57,7 +61,7 @@ async fn main() {
             swap_manager.otter_swap(&mut graph, world_pos);
             highlight_manager.set_point(None);
         }
-        
+
         // Physics update (fixed timestep approx 60fps)
         if get_time() - last_physics_time > 0.016 {
             physics::advance_frame(&mut graph);
@@ -68,7 +72,7 @@ async fn main() {
         spawn_manager.update(dt);
         spawn_manager.possibly_spawn(&mut graph);
         highlight_manager.update(dt);
-        
+
         let mut did_graph_change = false;
 
         if slide_manager.slide_slidable_edges(&mut graph, dt) {
@@ -109,7 +113,13 @@ async fn main() {
         clear_background(BLACK);
 
         // Rendering
-        renderer.draw(&graph, &camera, &swap_manager, &burst_manager, &highlight_manager);
+        renderer.draw(
+            &graph,
+            &camera,
+            &swap_manager,
+            &burst_manager,
+            &highlight_manager,
+        );
 
         draw_text(&format!("FPS: {:03}", get_fps()), 10.0, 30.0, 30.0, WHITE);
 

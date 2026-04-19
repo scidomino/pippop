@@ -44,9 +44,11 @@ impl BubbleStyle {
             BubbleStyle::Standard { size, .. } => 3000.0 * (*size as f32).sqrt(),
             BubbleStyle::Player => 3000.0,
             BubbleStyle::OpenAir => 0.0,
-            BubbleStyle::Waiting { start_area, end_area, progress } => {
-                (1.0 - progress) * start_area + progress * end_area
-            }
+            BubbleStyle::Waiting {
+                start_area,
+                end_area,
+                progress,
+            } => (1.0 - progress) * start_area + progress * end_area,
         }
     }
 }
@@ -61,7 +63,7 @@ new_key_type! {
 #[derive(Debug, Clone)]
 pub struct Bubble {
     pub style: BubbleStyle,
-    /// A clockwise sequence of half-edges that form the continuous boundary 
+    /// A clockwise sequence of half-edges that form the continuous boundary
     /// of this bubble. For every edge in this list, `edge.bubble == this bubble`.
     pub edges: Vec<EdgeKey>,
 }
@@ -84,13 +86,16 @@ impl Bubble {
             return false;
         }
 
-        points.iter()
+        points
+            .iter()
             .zip(points.iter().cycle().skip(1))
             .filter(|(p1, p2)| {
-                ((p1.y > point.y) != (p2.y > point.y)) &&
-                (point.x < (p2.x - p1.x) * (point.y - p1.y) / (p2.y - p1.y) + p1.x)
+                ((p1.y > point.y) != (p2.y > point.y))
+                    && (point.x < (p2.x - p1.x) * (point.y - p1.y) / (p2.y - p1.y) + p1.x)
             })
-            .count() % 2 != 0
+            .count()
+            % 2
+            != 0
     }
 
     pub fn get_pressure(&self, area: f32) -> f32 {
@@ -111,22 +116,30 @@ mod tests {
     fn test_bubble_contains() {
         let mut graph = Graph::new();
         graph.init(
-            BubbleStyle::Standard { size: 1, max_size: 5, color: crate::graphics::colors::TURQUOISE },
-            BubbleStyle::Standard { size: 1, max_size: 5, color: crate::graphics::colors::ROSE },
+            BubbleStyle::Standard {
+                size: 1,
+                max_size: 5,
+                color: crate::graphics::colors::TURQUOISE,
+            },
+            BubbleStyle::Standard {
+                size: 1,
+                max_size: 5,
+                color: crate::graphics::colors::ROSE,
+            },
         );
-        
+
         // Run physics a few frames to expand the bubbles from their initial degenerate state
         for _ in 0..10 {
             crate::physics::advance_frame(&mut graph);
         }
-        
+
         let bkey = graph.bubbles.keys().next().unwrap();
         let bubble = &graph.bubbles[bkey];
-        
+
         // The centroid of a valid bubble should be inside it
         let centroid = crate::graphics::geometry::calculate_centroid(&graph, bkey);
         assert!(bubble.contains(centroid, &graph));
-        
+
         // A point far outside the graph should not be inside
         assert!(!bubble.contains(Vec2::new(1000.0, 1000.0), &graph));
     }

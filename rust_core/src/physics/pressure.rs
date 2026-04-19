@@ -17,11 +17,15 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
             let ekey = key.edge_key(offset as u8);
             let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
 
-            let pressure_diff = (bubble_to_pressure[edge.bubble] - bubble_to_pressure[twin.bubble]).clamp(-2.0, 2.0);
+            let pressure_diff = (bubble_to_pressure[edge.bubble] - bubble_to_pressure[twin.bubble])
+                .clamp(-2.0, 2.0);
             let pressure = pressure_diff * PRESSURE_TENSION;
 
             vertex_force += pressure * vertex_pressure_force(vertex, edge, twin, twin_vertex);
-            force.add_edge(ekey, pressure * edge_pressure_force(vertex, twin, twin_vertex));
+            force.add_edge(
+                ekey,
+                pressure * edge_pressure_force(vertex, twin, twin_vertex),
+            );
         }
 
         force.add_vertex(key, vertex_force);

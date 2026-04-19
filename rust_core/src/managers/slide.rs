@@ -43,22 +43,22 @@ impl SlideManager {
         for (vkey, vertex) in graph.vertices.iter() {
             for (offset, edge) in vertex.edges.iter().enumerate() {
                 let edge_key = vkey.edge_key(offset as u8);
-                
+
                 // Avoid checking duplicate edges (only check one direction)
                 if !graph.vertices.contains_key(edge.twin.vertex) {
                     continue;
                 }
-                
+
                 let twin_vertex = &graph.vertices[edge.twin.vertex];
-                
+
                 let start_pos = vertex.point.position;
                 let end_pos = twin_vertex.point.position;
-                
+
                 let length = start_pos.distance(end_pos);
-                
-                if length < MIN_LENGTH 
-                    && !self.recently_slid.contains_key(&edge_key) 
-                    && !self.recently_slid.contains_key(&edge.twin) 
+
+                if length < MIN_LENGTH
+                    && !self.recently_slid.contains_key(&edge_key)
+                    && !self.recently_slid.contains_key(&edge.twin)
                 {
                     return Some(edge_key);
                 }

@@ -12,7 +12,7 @@ use vertex::{Vertex, VertexKey};
 use crate::graph::point::Point;
 
 /// A Half-Edge data structure representing the planar graph of bubbles.
-/// 
+///
 /// This graph enforces a trivalent (honeycomb) topology, meaning every
 /// vertex is connected to exactly three edges. This naturally simulates
 /// Plateau's Laws for foams, where bubble walls always meet at 120-degree angles.
@@ -80,8 +80,11 @@ impl Graph {
         // If v1 and v2 share another edge, then t1_next, t1_prev, t2_next, or t2_prev
         // will originate from the vertex we are about to delete.
         // In a proper foam simulation, this can occur if a bubble is a digon (2 edges).
-        if t1_next.vertex == twin.vertex || t1_prev.vertex == twin.vertex ||
-           t2_next.vertex == ekey.vertex || t2_prev.vertex == ekey.vertex {
+        if t1_next.vertex == twin.vertex
+            || t1_prev.vertex == twin.vertex
+            || t2_next.vertex == ekey.vertex
+            || t2_prev.vertex == ekey.vertex
+        {
             // Removing one edge of a digon creates a bridge (degenerate edge)
             // For now, we safely abort the merge to prevent graph corruption.
             return;
@@ -91,7 +94,7 @@ impl Graph {
         let b2_style = self.bubbles[b2].style.clone();
         let b1_bubble = &mut self.bubbles[b1];
         b1_bubble.style = b1_bubble.style.merge(&b2_style);
-        
+
         // Find all edges of b2 and set them to b1
         for (_, vertex) in self.vertices.iter_mut() {
             for edge in vertex.edges.iter_mut() {
@@ -105,13 +108,13 @@ impl Graph {
         // Update control points for smoother transition
         let p_t1_next = self.get_edge(t1_next).point.position;
         let p_e1_prev = self.get_edge(e1_prev).point.position;
-        
+
         let p_t1_prev = self.get_edge(t1_prev).point.position;
         let p_e1_next = self.get_edge(e1_next).point.position;
-        
+
         let p_t2_next = self.get_edge(t2_next).point.position;
         let p_e2_prev = self.get_edge(e2_prev).point.position;
-        
+
         let p_t2_prev = self.get_edge(t2_prev).point.position;
         let p_e2_next = self.get_edge(e2_next).point.position;
 
@@ -231,7 +234,10 @@ impl Graph {
             }
             i += 1;
             if i > 1000 {
-                panic!("Infinite loop detected in rebubble for bubble {:?}. Started at edge {:?}", bkey, ekey);
+                panic!(
+                    "Infinite loop detected in rebubble for bubble {:?}. Started at edge {:?}",
+                    bkey, ekey
+                );
             }
         }
     }
@@ -312,8 +318,12 @@ impl Graph {
         let epoint1 = vertex.edges[0].point.position;
         let epoint2 = vertex.edges[1].point.position;
 
-        let new_vkey1 = self.vertices.insert(Vertex::new(Point::from_vec2((vpoint + epoint1) / 2.0)));
-        let new_vkey2 = self.vertices.insert(Vertex::new(Point::from_vec2((vpoint + epoint2) / 2.0)));
+        let new_vkey1 = self
+            .vertices
+            .insert(Vertex::new(Point::from_vec2((vpoint + epoint1) / 2.0)));
+        let new_vkey2 = self
+            .vertices
+            .insert(Vertex::new(Point::from_vec2((vpoint + epoint2) / 2.0)));
 
         let new_ekeys1 = new_vkey1.edge_keys();
         let new_ekeys2 = new_vkey2.edge_keys();
@@ -344,17 +354,25 @@ mod tests {
     fn test_get_player_bubble() {
         let mut graph = Graph::new();
         graph.init(
-            BubbleStyle::Standard { size: 1, max_size: 5, color: crate::graphics::colors::TURQUOISE },
-            BubbleStyle::Standard { size: 1, max_size: 5, color: crate::graphics::colors::ROSE },
+            BubbleStyle::Standard {
+                size: 1,
+                max_size: 5,
+                color: crate::graphics::colors::TURQUOISE,
+            },
+            BubbleStyle::Standard {
+                size: 1,
+                max_size: 5,
+                color: crate::graphics::colors::ROSE,
+            },
         );
-        
+
         // Initially no player bubble in init()
         assert_eq!(graph.get_player_bubble(), None);
-        
+
         // Set first bubble to Player
         let bkey = graph.bubbles.keys().next().unwrap();
         graph.bubbles[bkey].style = BubbleStyle::Player;
-        
+
         assert_eq!(graph.get_player_bubble(), Some(bkey));
     }
 
@@ -363,20 +381,24 @@ mod tests {
         let mut graph = Graph::new();
         graph.init(
             BubbleStyle::Player,
-            BubbleStyle::Standard { size: 1, max_size: 5, color: crate::graphics::colors::TURQUOISE },
+            BubbleStyle::Standard {
+                size: 1,
+                max_size: 5,
+                color: crate::graphics::colors::TURQUOISE,
+            },
         );
-        
+
         // Assign b1 as player and b2 as a standard bubble.
         let mut keys = graph.bubbles.keys();
         let b1 = keys.next().unwrap();
         let b2 = keys.next().unwrap();
-        
+
         // Find a point near b2
         let centroid2 = crate::graphics::geometry::calculate_centroid(&graph, b2);
-        
+
         let closest = graph.get_closest_otter_swappable(centroid2);
         assert!(closest.is_some());
-        
+
         let ekey = closest.unwrap();
         // The edge should belong to b2, since it is the swappable twin of the player's edge
         assert_eq!(graph.get_edge(ekey).bubble, b2);
