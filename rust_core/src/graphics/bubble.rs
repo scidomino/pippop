@@ -45,9 +45,6 @@ pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2], centroid: Vec2) {
     }
 
     // Draw Outline
-    for i in 0..points.len() {
-        let p1 = points[i];
-        let p2 = points[(i + 1) % points.len()];
-        draw_line(p1.x, p1.y, p2.x, p2.y, 2.0, colors::WHITE);
-    }
+    let outline_mesh = geometry::generate_ribbon_mesh(points, 4.0, colors::WHITE, true);
+    draw_mesh(&outline_mesh);
 }

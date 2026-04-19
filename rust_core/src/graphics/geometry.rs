@@ -1,4 +1,4 @@
-use macroquad::math::Vec2;
+use macroquad::prelude::*;
 
 const FLATNESS: f32 = 0.5;
 const MAX_DEPTH: u32 = 10;
@@ -68,6 +68,81 @@ pub fn tween_points(a: &[Vec2], b: &[Vec2], progress: f32) -> Vec<Vec2> {
     }
     
     out
+}
+
+/// Generates a ribbon mesh (thick line) from a sequence of points.
+pub fn generate_ribbon_mesh(points: &[Vec2], width: f32, color: Color, closed: bool) -> Mesh {
+    let mut vertices = Vec::with_capacity(points.len() * 2);
+    let mut indices = Vec::with_capacity(points.len() * 6);
+
+    for i in 0..points.len() {
+        let p = points[i];
+        
+        let prev = if i == 0 {
+            if closed { points[points.len() - 1] } else { p - (points[1] - p) }
+        } else {
+            points[i - 1]
+        };
+        let next = if i == points.len() - 1 {
+            if closed { points[0] } else { p + (p - points[i - 1]) }
+        } else {
+            points[i + 1]
+        };
+
+        let mut t1 = (p - prev).normalize_or_zero();
+        let mut t2 = (next - p).normalize_or_zero();
+        
+        // Fallback for coincident points
+        if t1.length_squared() == 0.0 { t1 = t2; }
+        if t2.length_squared() == 0.0 { t2 = t1; }
+        if t1.length_squared() == 0.0 { 
+            t1 = Vec2::new(1.0, 0.0); 
+            t2 = Vec2::new(1.0, 0.0); 
+        }
+
+        let n1 = Vec2::new(-t1.y, t1.x);
+        let n2 = Vec2::new(-t2.y, t2.x);
+
+        let mut miter_normal = (n1 + n2).normalize_or_zero();
+        let mut dot = miter_normal.dot(n1);
+
+        // Fallback if normals are exactly opposite
+        if dot < 0.1 {
+            miter_normal = n1;
+            dot = 1.0;
+        }
+
+        // Limit the miter length to avoid huge spikes at very sharp angles
+        let miter_length = (width * 0.5 / dot).min(width * 4.0);
+
+        let p1 = p + miter_normal * miter_length;
+        let p2 = p - miter_normal * miter_length;
+
+        vertices.push(Vertex::new2(vec3(p1.x, p1.y, 0.0), vec2(0.0, 0.0), color));
+        vertices.push(Vertex::new2(vec3(p2.x, p2.y, 0.0), vec2(0.0, 0.0), color));
+
+        if i < points.len() - 1 {
+            let base = (i * 2) as u16;
+            indices.extend_from_slice(&[
+                base, base + 1, base + 2,
+                base + 2, base + 1, base + 3,
+            ]);
+        }
+    }
+
+    if closed && points.len() > 1 {
+        let base = ((points.len() - 1) * 2) as u16;
+        indices.extend_from_slice(&[
+            base, base + 1, 0,
+            0, base + 1, 1,
+        ]);
+    }
+
+    Mesh {
+        vertices,
+        indices,
+        texture: None,
+    }
 }
 
 use crate::graph::Graph;
