@@ -99,7 +99,7 @@ impl Bubble {
     }
 
     pub fn get_pressure(&self, area: f32) -> f32 {
-        if self.style == BubbleStyle::OpenAir {
+        if matches!(self.style, BubbleStyle::OpenAir) {
             return 1.0;
         }
         self.style.get_target_area() / area.max(100.0)

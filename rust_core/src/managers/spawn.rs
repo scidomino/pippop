@@ -76,25 +76,23 @@ impl SpawnManager {
     }
 
     fn get_distant_colors(&self, graph: &Graph, vkey: VertexKey) -> Vec<Color> {
-        let mut available_colors = self.colors.clone();
         let vertex = &graph.vertices[vkey];
 
         let nearby_colors: Vec<_> = vertex
             .edges
             .iter()
             .flat_map(|e| [e.bubble, graph.get_edge(e.twin).bubble])
-            .filter_map(|bkey| graph.bubbles.get(bkey))
-            .filter_map(|b| {
-                if let BubbleStyle::Standard { color, .. } = b.style {
-                    Some(color)
-                } else {
-                    None
-                }
+            .filter_map(|bkey| match graph.bubbles.get(bkey)?.style {
+                BubbleStyle::Standard { color, .. } => Some(color),
+                _ => None,
             })
             .collect();
 
-        available_colors.retain(|c| !nearby_colors.contains(c));
-        available_colors
+        self.colors
+            .iter()
+            .filter(|c| !nearby_colors.contains(c))
+            .cloned()
+            .collect()
     }
 
     fn get_next_spawn_time(&self, bubble_count: usize) -> f32 {

@@ -37,15 +37,11 @@ impl EffectsManager {
     }
 
     pub fn update(&mut self, dt: f32) {
-        for effect in &mut self.effects {
-            match effect {
-                Effect::RisingPoints { timer, .. } => {
-                    *timer -= dt;
-                }
+        self.effects.retain_mut(|effect| match effect {
+            Effect::RisingPoints { timer, .. } => {
+                *timer -= dt;
+                *timer > 0.0
             }
-        }
-        self.effects.retain(|e| match e {
-            Effect::RisingPoints { timer, .. } => *timer > 0.0,
         });
     }
 

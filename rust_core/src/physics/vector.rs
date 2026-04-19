@@ -24,13 +24,13 @@ impl GraphVector {
     pub fn get_vertex(&self, key: VertexKey) -> Vec2 {
         self.vertex_to_value
             .get(key)
-            .map_or_else(Vec2::default, |p| p.vertex)
+            .map_or(Vec2::ZERO, |p| p.vertex)
     }
 
     pub fn get_edge(&self, key: EdgeKey) -> Vec2 {
         self.vertex_to_value
             .get(key.vertex)
-            .map_or_else(Vec2::default, |p| p.edges[key.offset as usize])
+            .map_or(Vec2::ZERO, |p| p.edges[key.offset as usize])
     }
 
     fn get_mut(&mut self, key: VertexKey) -> &mut Value {

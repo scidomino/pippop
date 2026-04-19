@@ -55,18 +55,16 @@ impl BurstManager {
 
     /// Finds a bubble that has at least `threshold` burstable edges.
     pub fn find_burst_starter(&self, graph: &Graph) -> Option<EdgeKey> {
-        // Don't start bursts if there are too few bubbles (matches Android logic)
         if graph.bubbles.len() <= 5 {
             return None;
         }
 
-        for bkey in graph.bubbles.keys() {
+        graph.bubbles.keys().find_map(|bkey| {
             let burstable = self.find_all_burstable_in_bubble(graph, bkey);
-            if burstable.len() >= self.threshold {
-                return burstable.into_iter().next();
-            }
-        }
-        None
+            (burstable.len() >= self.threshold)
+                .then(|| burstable.into_iter().next())
+                .flatten()
+        })
     }
 
     /// Sets up the manager to process a burst with a freeze delay.

@@ -54,10 +54,9 @@ fn edge_pressure_force(vertex: &Vertex, twin: &Edge, twin_vertex: &Vertex) -> Ve
 }
 
 fn get_bubble_to_pressure(graph: &Graph) -> SecondaryMap<BubbleKey, f32> {
-    let mut bubble_to_area: SecondaryMap<BubbleKey, f32> = SecondaryMap::new();
-    for (key, _) in graph.bubbles.iter() {
-        bubble_to_area.insert(key, 0.0);
-    }
+    let mut bubble_to_area: SecondaryMap<BubbleKey, f32> =
+        graph.bubbles.keys().map(|k| (k, 0.0)).collect();
+
     for vertex in graph.vertices.values() {
         for edge in vertex.edges.iter() {
             let (twin, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
@@ -67,11 +66,11 @@ fn get_bubble_to_pressure(graph: &Graph) -> SecondaryMap<BubbleKey, f32> {
         }
     }
 
-    let mut bubble_to_pressure: SecondaryMap<BubbleKey, f32> = SecondaryMap::new();
-    for (key, bubble) in graph.bubbles.iter() {
-        bubble_to_pressure.insert(key, bubble.get_pressure(bubble_to_area[key]));
-    }
-    bubble_to_pressure
+    graph
+        .bubbles
+        .iter()
+        .map(|(key, bubble)| (key, bubble.get_pressure(bubble_to_area[key])))
+        .collect()
 }
 
 fn get_half_area(vertex: &Vertex, edge: &Edge, twin_vertex: &Vertex, twin: &Edge) -> f32 {
