@@ -2,9 +2,17 @@
 
 A 2-D bubble-swapping puzzle game without a grid! Join 5 bubbles of the same color to make them pop!
 
+<div align="center">
+
 [![PipPop Gameplay Demo](demo.gif)](https://scidomino.github.io/pippop/)
 
-[**Play Online!**](https://scidomino.github.io/pippop/)
+</div>
+<p align="center">
+    <br><br>
+    <a href="https://scidomino.github.io/pippop/">
+    <strong>Play Online!</strong>
+  </a>
+</p>
 
 # History
 
