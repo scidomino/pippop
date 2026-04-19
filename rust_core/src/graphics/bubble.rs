@@ -9,29 +9,25 @@ pub fn get_bubble_points(graph: &Graph, bkey: crate::graph::bubble::BubbleKey) -
 }
 
 pub fn get_points_for_bubble(graph: &Graph, bubble: &Bubble) -> Vec<Vec2> {
-    let mut points = Vec::new();
+    let mut points = Vec::with_capacity(bubble.edges.len() * 12);
 
     for &ekey in &bubble.edges {
-        points.extend(get_edge_points(graph, ekey));
+        push_edge_points(graph, ekey, &mut points);
     }
     points
 }
 
-pub fn get_edge_points(graph: &Graph, ekey: crate::graph::edge::EdgeKey) -> Vec<Vec2> {
-    let mut points = Vec::new();
+pub fn push_edge_points(graph: &Graph, ekey: crate::graph::edge::EdgeKey, points: &mut Vec<Vec2>) {
     let (edge, vertex) = graph.get_edge_and_vertex(ekey);
     let (twin_edge, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
 
     geometry::flatten_bezier(
-        &mut points,
+        points,
         vertex.point.position,
         edge.point.position,
         twin_edge.point.position,
         twin_vertex.point.position,
     );
-    // Add the final point which flatten_bezier omits
-    points.push(twin_vertex.point.position);
-    points
 }
 
 pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2], _centroid: Vec2) {

@@ -78,7 +78,11 @@ impl Renderer {
 
         // Draw Burst Glow
         if let Some(ekey) = burst_manager.active_edge {
-            let points = bubble::get_edge_points(graph, ekey);
+            let mut points = Vec::with_capacity(12);
+            bubble::push_edge_points(graph, ekey, &mut points);
+            let twin_key = graph.get_edge(ekey).twin;
+            points.push(graph.vertices[twin_key.vertex].point.position);
+
             let progress = 1.0 - (burst_manager.timer / 0.5).clamp(0.0, 1.0);
             let width = 40.0 * progress;
             let glow_mesh = geometry::generate_glow_mesh(&points, width, colors::WHITE, false);
