@@ -145,6 +145,91 @@ pub fn generate_ribbon_mesh(points: &[Vec2], width: f32, color: Color, closed: b
     }
 }
 
+/// Generates a glow mesh (thick line with alpha falloff) from a sequence of points.
+pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: bool) -> Mesh {
+    let mut vertices = Vec::with_capacity(points.len() * 3);
+    let mut indices = Vec::with_capacity(points.len() * 12);
+
+    let inner_color = color;
+    let outer_color = Color::new(color.r, color.g, color.b, 0.0);
+
+    for i in 0..points.len() {
+        let p = points[i];
+        
+        let prev = if i == 0 {
+            if closed { points[points.len() - 1] } else { p - (points[1] - p) }
+        } else {
+            points[i - 1]
+        };
+        let next = if i == points.len() - 1 {
+            if closed { points[0] } else { p + (p - points[i - 1]) }
+        } else {
+            points[i + 1]
+        };
+
+        let mut t1 = (p - prev).normalize_or_zero();
+        let mut t2 = (next - p).normalize_or_zero();
+        
+        if t1.length_squared() == 0.0 { t1 = t2; }
+        if t2.length_squared() == 0.0 { t2 = t1; }
+        if t1.length_squared() == 0.0 { 
+            t1 = Vec2::new(1.0, 0.0); 
+            t2 = Vec2::new(1.0, 0.0); 
+        }
+
+        let n1 = Vec2::new(-t1.y, t1.x);
+        let n2 = Vec2::new(-t2.y, t2.x);
+
+        let mut miter_normal = (n1 + n2).normalize_or_zero();
+        let mut dot = miter_normal.dot(n1);
+
+        if dot < 0.1 {
+            miter_normal = n1;
+            dot = 1.0;
+        }
+
+        let miter_length = (width * 0.5 / dot).min(width * 4.0);
+
+        let p_outer1 = p + miter_normal * miter_length;
+        let p_inner = p;
+        let p_outer2 = p - miter_normal * miter_length;
+
+        vertices.push(Vertex::new2(vec3(p_outer1.x, p_outer1.y, 0.0), vec2(0.0, 0.0), outer_color));
+        vertices.push(Vertex::new2(vec3(p_inner.x, p_inner.y, 0.0), vec2(0.0, 0.0), inner_color));
+        vertices.push(Vertex::new2(vec3(p_outer2.x, p_outer2.y, 0.0), vec2(0.0, 0.0), outer_color));
+
+        if i < points.len() - 1 {
+            let base = (i * 3) as u16;
+            // First strip (outer1 to inner)
+            indices.extend_from_slice(&[
+                base, base + 1, base + 3,
+                base + 3, base + 1, base + 4,
+            ]);
+            // Second strip (inner to outer2)
+            indices.extend_from_slice(&[
+                base + 1, base + 2, base + 4,
+                base + 4, base + 2, base + 5,
+            ]);
+        }
+    }
+
+    if closed && points.len() > 1 {
+        let base = ((points.len() - 1) * 3) as u16;
+        indices.extend_from_slice(&[
+            base, base + 1, 0,
+            0, base + 1, 1,
+            base + 1, base + 2, 1,
+            1, base + 2, 2,
+        ]);
+    }
+
+    Mesh {
+        vertices,
+        indices,
+        texture: None,
+    }
+}
+
 use crate::graph::Graph;
 use crate::graph::bubble::BubbleKey;
 

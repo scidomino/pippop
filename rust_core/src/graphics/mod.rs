@@ -27,7 +27,13 @@ impl Renderer {
         self.effects.update(dt);
     }
 
-    pub fn draw(&self, graph: &Graph, camera: &Camera2D, swap_manager: &crate::managers::swap::SwapManager) {
+    pub fn draw(
+        &self,
+        graph: &Graph,
+        camera: &Camera2D,
+        swap_manager: &crate::managers::swap::SwapManager,
+        burst_manager: &crate::managers::burst::BurstManager,
+    ) {
         // Collect visible bubble geometry
         let mut bubble_render_data = Vec::new();
         for (bkey, bubble) in graph.bubbles.iter() {
@@ -57,6 +63,15 @@ impl Renderer {
             for (_, style, points, centroid) in &bubble_render_data {
                 bubble::draw_bubble_body(style, points, *centroid);
             }
+        }
+
+        // Draw Burst Glow
+        if let Some(ekey) = burst_manager.active_edge {
+            let points = bubble::get_edge_points(graph, ekey);
+            let progress = 1.0 - (burst_manager.timer / 0.5).clamp(0.0, 1.0);
+            let width = 40.0 * progress;
+            let glow_mesh = geometry::generate_glow_mesh(&points, width, colors::WHITE, false);
+            draw_mesh(&glow_mesh);
         }
 
         // --- Pass 2: Screen Space (UI & Effects) ---

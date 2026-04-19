@@ -46,7 +46,7 @@ impl SwapManager {
         false
     }
 
-    pub fn update(&mut self, graph: &mut Graph, dt: f32) {
+    pub fn update(&mut self, graph: &mut Graph, dt: f32) -> bool {
         if let Some(swap) = &mut self.active_swap {
             swap.progress += dt / SWAP_TIME;
 
@@ -59,6 +59,7 @@ impl SwapManager {
                 graph.bubbles[bottom_bkey].style = swap.top_style.clone();
 
                 self.active_swap = None;
+                return true;
             } else {
                 // Update the progress in the waiting styles for physics interpolation
                 let top_target_area = swap.top_style.get_target_area();
@@ -76,6 +77,7 @@ impl SwapManager {
                 };
             }
         }
+        false
     }
 
     fn start_swap(&mut self, graph: &mut Graph, edge_key: EdgeKey, return_trip: bool) {

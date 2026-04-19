@@ -1,6 +1,5 @@
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
-use crate::managers::burst::BurstManager;
 use std::collections::HashMap;
 
 const TIMEOUT: f32 = 1.0; // 1 second
@@ -23,14 +22,14 @@ impl SlideManager {
         }
     }
 
-    pub fn slide_slidable_edges(&mut self, graph: &mut Graph, burst: &BurstManager, dt: f32) {
+    pub fn slide_slidable_edges(&mut self, graph: &mut Graph, dt: f32) -> bool {
         self.prune(dt);
         if let Some(edge_key) = self.get_first_slidable(graph) {
             graph.slide(edge_key);
             self.recently_slid.insert(edge_key, TIMEOUT);
-            
-            burst.burst_all(graph); 
+            return true;
         }
+        false
     }
 
     fn prune(&mut self, dt: f32) {

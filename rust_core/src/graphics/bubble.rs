@@ -12,17 +12,25 @@ pub fn get_points_for_bubble(graph: &Graph, bubble: &Bubble) -> Vec<Vec2> {
     let mut points = Vec::new();
 
     for &ekey in &bubble.edges {
-        let (edge, vertex) = graph.get_edge_and_vertex(ekey);
-        let (twin_edge, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
-
-        geometry::flatten_bezier(
-            &mut points,
-            vertex.point.position,
-            edge.point.position,
-            twin_edge.point.position,
-            twin_vertex.point.position,
-        );
+        points.extend(get_edge_points(graph, ekey));
     }
+    points
+}
+
+pub fn get_edge_points(graph: &Graph, ekey: crate::graph::edge::EdgeKey) -> Vec<Vec2> {
+    let mut points = Vec::new();
+    let (edge, vertex) = graph.get_edge_and_vertex(ekey);
+    let (twin_edge, twin_vertex) = graph.get_edge_and_vertex(edge.twin);
+
+    geometry::flatten_bezier(
+        &mut points,
+        vertex.point.position,
+        edge.point.position,
+        twin_edge.point.position,
+        twin_vertex.point.position,
+    );
+    // Add the final point which flatten_bezier omits
+    points.push(twin_vertex.point.position);
     points
 }
 
@@ -45,6 +53,6 @@ pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2], centroid: Vec2) {
     }
 
     // Draw Outline
-    let outline_mesh = geometry::generate_ribbon_mesh(points, 4.0, colors::WHITE, true);
+    let outline_mesh = geometry::generate_ribbon_mesh(points, 1.5, colors::WHITE, true);
     draw_mesh(&outline_mesh);
 }

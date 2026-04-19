@@ -30,7 +30,7 @@ async fn main() {
         }),
     );
     let mut slide_manager = SlideManager::new();
-    let burst_manager = BurstManager::new(1);
+    let mut burst_manager = BurstManager::new(1);
     let mut swap_manager = SwapManager::new();
 
     loop {
@@ -60,8 +60,40 @@ async fn main() {
         // Managers update
         spawn_manager.update(dt);
         spawn_manager.possibly_spawn(&mut graph);
-        slide_manager.slide_slidable_edges(&mut graph, &burst_manager, dt);
-        swap_manager.update(&mut graph, dt);
+        
+        let mut did_graph_change = false;
+
+        if slide_manager.slide_slidable_edges(&mut graph, dt) {
+            did_graph_change = true;
+        }
+
+        if swap_manager.update(&mut graph, dt) {
+            // Swap finished, check for bursts
+            did_graph_change = true;
+        }
+
+        if did_graph_change && burst_manager.active_edge.is_none() {
+            burst_manager.find_and_set_burstable_edge(&graph);
+        }
+
+        if burst_manager.update(dt) {
+            // Burst delay finished
+            if let Some(ekey) = burst_manager.active_edge {
+                // Ensure edge is still valid
+                if graph.vertices.contains_key(ekey.vertex) {
+                    let bkey = graph.get_edge(ekey).bubble;
+                    burst_manager.burst(&mut graph, ekey);
+                    // Look for chain bursts
+                    if !burst_manager.find_and_set_next_burstable(&graph, bkey) {
+                        burst_manager.active_edge = None;
+                        // Look for new unrelated bursts
+                        burst_manager.find_and_set_burstable_edge(&graph);
+                    }
+                } else {
+                    burst_manager.active_edge = None;
+                }
+            }
+        }
 
         // Animation update
         renderer.update(dt);
@@ -69,7 +101,7 @@ async fn main() {
         clear_background(BLACK);
 
         // Rendering
-        renderer.draw(&graph, &camera, &swap_manager);
+        renderer.draw(&graph, &camera, &swap_manager, &burst_manager);
 
         draw_text(&format!("FPS: {:03}", get_fps()), 10.0, 30.0, 30.0, WHITE);
 
