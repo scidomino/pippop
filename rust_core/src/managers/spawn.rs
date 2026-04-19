@@ -63,14 +63,7 @@ impl SpawnManager {
             .choose()
             .unwrap_or_else(|| self.colors.choose().unwrap());
 
-        graph.spawn(
-            vkey,
-            BubbleStyle::Standard {
-                size: 1,
-                max_size: 5,
-                color,
-            },
-        );
+        graph.spawn(vkey, BubbleStyle::Standard { size: 1, color });
     }
 
     fn get_distant_colors(&self, graph: &Graph, vkey: VertexKey) -> Vec<Color> {
@@ -144,12 +137,10 @@ mod tests {
         graph.init(
             BubbleStyle::Standard {
                 size: 1,
-                max_size: 5,
                 color: colors::TURQUOISE,
             },
             BubbleStyle::Standard {
                 size: 1,
-                max_size: 5,
                 color: colors::ROSE,
             },
         );

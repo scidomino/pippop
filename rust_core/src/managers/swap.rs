@@ -55,8 +55,8 @@ impl SwapManager {
 
             if swap.progress >= 1.0 {
                 // Perform the final style switch
-                graph.bubbles[top_bkey].style = swap.bottom_style.clone();
-                graph.bubbles[bottom_bkey].style = swap.top_style.clone();
+                graph.bubbles[top_bkey].style = swap.bottom_style;
+                graph.bubbles[bottom_bkey].style = swap.top_style;
 
                 self.active_swap = None;
                 return true;
@@ -90,8 +90,8 @@ impl SwapManager {
         graph.rebubble(bottom_bkey, edge_key);
         graph.rebubble(top_bkey, twin_key);
 
-        let bottom_style = graph.bubbles[bottom_bkey].style.clone();
-        let top_style = graph.bubbles[top_bkey].style.clone();
+        let bottom_style = graph.bubbles[bottom_bkey].style;
+        let top_style = graph.bubbles[top_bkey].style;
 
         let top_target_area = top_style.get_target_area();
         let bottom_target_area = bottom_style.get_target_area();

@@ -19,7 +19,6 @@ async fn main() {
         rust_core::graph::bubble::BubbleStyle::Player,
         rust_core::graph::bubble::BubbleStyle::Standard {
             size: 1,
-            max_size: 5,
             color: colors::TURQUOISE,
         },
     );

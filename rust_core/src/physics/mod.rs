@@ -95,12 +95,10 @@ mod tests {
         graph.init(
             crate::graph::bubble::BubbleStyle::Standard {
                 size: 1,
-                max_size: 5,
                 color: crate::graphics::colors::TURQUOISE,
             },
             crate::graph::bubble::BubbleStyle::Standard {
                 size: 1,
-                max_size: 5,
                 color: crate::graphics::colors::ROSE,
             },
         );

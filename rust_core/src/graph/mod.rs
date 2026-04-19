@@ -89,7 +89,7 @@ impl Graph {
         }
 
         // Merge b2 into b1
-        let b2_style = self.bubbles[b2].style.clone();
+        let b2_style = self.bubbles[b2].style;
         let b1_bubble = &mut self.bubbles[b1];
         b1_bubble.style = b1_bubble.style.merge(&b2_style);
 
@@ -364,12 +364,10 @@ mod tests {
         graph.init(
             BubbleStyle::Standard {
                 size: 1,
-                max_size: 5,
                 color: crate::graphics::colors::TURQUOISE,
             },
             BubbleStyle::Standard {
                 size: 1,
-                max_size: 5,
                 color: crate::graphics::colors::ROSE,
             },
         );
@@ -391,7 +389,6 @@ mod tests {
             BubbleStyle::Player,
             BubbleStyle::Standard {
                 size: 1,
-                max_size: 5,
                 color: crate::graphics::colors::TURQUOISE,
             },
         );
@@ -417,7 +414,6 @@ mod tests {
             BubbleStyle::Player,
             BubbleStyle::Standard {
                 size: 1,
-                max_size: 5,
                 color: crate::graphics::colors::TURQUOISE,
             },
         );

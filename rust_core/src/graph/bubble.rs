@@ -7,7 +7,6 @@ use slotmap::new_key_type;
 pub enum BubbleStyle {
     Standard {
         size: i32,
-        max_size: i32,
         color: Color,
     },
     Player,
@@ -23,18 +22,12 @@ impl BubbleStyle {
     pub fn merge(&self, other: &BubbleStyle) -> BubbleStyle {
         match (self, other) {
             (BubbleStyle::OpenAir, _) | (_, BubbleStyle::OpenAir) => BubbleStyle::OpenAir,
-            (
+            (BubbleStyle::Standard { size: s1, color }, BubbleStyle::Standard { size: s2, .. }) => {
                 BubbleStyle::Standard {
-                    size: s1,
-                    max_size: m1,
-                    color,
-                },
-                BubbleStyle::Standard { size: s2, .. },
-            ) => BubbleStyle::Standard {
-                size: s1 + s2,
-                max_size: *m1,
-                color: *color,
-            },
+                    size: s1 + s2,
+                    color: *color,
+                }
+            }
             _ => unreachable!("merge should only be called with Standard or OpenAir styles"),
         }
     }
@@ -118,12 +111,10 @@ mod tests {
         graph.init(
             BubbleStyle::Standard {
                 size: 1,
-                max_size: 5,
                 color: crate::graphics::colors::TURQUOISE,
             },
             BubbleStyle::Standard {
                 size: 1,
-                max_size: 5,
                 color: crate::graphics::colors::ROSE,
             },
         );
