@@ -6,6 +6,7 @@ use rust_core::managers::spawn::{SpawnManager, RatchetSpawnTimer};
 use rust_core::managers::slide::SlideManager;
 use rust_core::managers::burst::BurstManager;
 use rust_core::managers::swap::SwapManager;
+use rust_core::managers::highlight::HighlightManager;
 use rust_core::graphics::colors;
 
 #[macroquad::main("PipPop")]
@@ -32,6 +33,7 @@ async fn main() {
     let mut slide_manager = SlideManager::new();
     let mut burst_manager = BurstManager::new(1);
     let mut swap_manager = SwapManager::new();
+    let mut highlight_manager = HighlightManager::new();
 
     loop {
         let dt = get_frame_time();
@@ -45,10 +47,15 @@ async fn main() {
         };
 
         // Input handling
-        if is_mouse_button_pressed(MouseButton::Left) {
+        if is_mouse_button_down(MouseButton::Left) {
+            let mouse_pos = mouse_position();
+            let world_pos = camera.screen_to_world(vec2(mouse_pos.0, mouse_pos.1));
+            highlight_manager.set_point(Some(world_pos));
+        } else if is_mouse_button_released(MouseButton::Left) {
             let mouse_pos = mouse_position();
             let world_pos = camera.screen_to_world(vec2(mouse_pos.0, mouse_pos.1));
             swap_manager.otter_swap(&mut graph, world_pos);
+            highlight_manager.set_point(None);
         }
         
         // Physics update (fixed timestep approx 60fps)
@@ -60,6 +67,7 @@ async fn main() {
         // Managers update
         spawn_manager.update(dt);
         spawn_manager.possibly_spawn(&mut graph);
+        highlight_manager.update(dt);
         
         let mut did_graph_change = false;
 
@@ -101,7 +109,7 @@ async fn main() {
         clear_background(BLACK);
 
         // Rendering
-        renderer.draw(&graph, &camera, &swap_manager, &burst_manager);
+        renderer.draw(&graph, &camera, &swap_manager, &burst_manager, &highlight_manager);
 
         draw_text(&format!("FPS: {:03}", get_fps()), 10.0, 30.0, 30.0, WHITE);
 

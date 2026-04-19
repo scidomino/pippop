@@ -33,6 +33,7 @@ impl Renderer {
         camera: &Camera2D,
         swap_manager: &crate::managers::swap::SwapManager,
         burst_manager: &crate::managers::burst::BurstManager,
+        highlight_manager: &crate::managers::highlight::HighlightManager,
     ) {
         // Collect visible bubble geometry
         let mut bubble_render_data = Vec::new();
@@ -62,6 +63,16 @@ impl Renderer {
         } else {
             for (_, style, points, centroid) in &bubble_render_data {
                 bubble::draw_bubble_body(style, points, *centroid);
+            }
+        }
+
+        // Draw Highlights (Touch & Teaser)
+        let glow_requests = highlight_manager.get_glow_requests(graph);
+        for (bkey, intensity) in glow_requests {
+            if let Some((_, _, points, _)) = bubble_render_data.iter().find(|(k, _, _, _)| *k == bkey) {
+                let width = 20.0 * intensity;
+                let glow_mesh = geometry::generate_glow_mesh(points, width, colors::WHITE, true);
+                draw_mesh(&glow_mesh);
             }
         }
 
