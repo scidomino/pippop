@@ -40,30 +40,21 @@ impl SlideManager {
     }
 
     fn get_first_slidable(&self, graph: &Graph) -> Option<EdgeKey> {
-        for (vkey, vertex) in graph.vertices.iter() {
-            for (offset, edge) in vertex.edges.iter().enumerate() {
+        graph.vertices.iter().find_map(|(vkey, vertex)| {
+            vertex.edges.iter().enumerate().find_map(|(offset, edge)| {
                 let edge_key = vkey.edge_key(offset as u8);
 
-                // Avoid checking duplicate edges (only check one direction)
-                if !graph.vertices.contains_key(edge.twin.vertex) {
-                    continue;
-                }
-
-                let twin_vertex = &graph.vertices[edge.twin.vertex];
-
-                let start_pos = vertex.point.position;
-                let end_pos = twin_vertex.point.position;
-
-                let length = start_pos.distance(end_pos);
-
-                if length < MIN_LENGTH
-                    && !self.recently_slid.contains_key(&edge_key)
-                    && !self.recently_slid.contains_key(&edge.twin)
-                {
-                    return Some(edge_key);
-                }
-            }
-        }
-        None
+                graph
+                    .vertices
+                    .get(edge.twin.vertex)
+                    .and_then(|twin_vertex| {
+                        let length = vertex.point.position.distance(twin_vertex.point.position);
+                        (length < MIN_LENGTH
+                            && !self.recently_slid.contains_key(&edge_key)
+                            && !self.recently_slid.contains_key(&edge.twin))
+                        .then_some(edge_key)
+                    })
+            })
+        })
     }
 }

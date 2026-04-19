@@ -348,7 +348,6 @@ impl Graph {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use macroquad::math::Vec2;
 
     #[test]
     fn test_get_player_bubble() {
@@ -389,9 +388,7 @@ mod tests {
         );
 
         // Assign b1 as player and b2 as a standard bubble.
-        let mut keys = graph.bubbles.keys();
-        let b1 = keys.next().unwrap();
-        let b2 = keys.next().unwrap();
+        let b2 = graph.bubbles.keys().nth(1).unwrap();
 
         // Find a point near b2
         let centroid2 = crate::graphics::geometry::calculate_centroid(&graph, b2);

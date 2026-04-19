@@ -59,11 +59,9 @@ impl SpawnManager {
         let vkey = *open_air_vertices.choose().unwrap();
         let choices = self.get_distant_colors(graph, vkey);
 
-        let color = if choices.is_empty() {
-            *self.colors.choose().unwrap()
-        } else {
-            *choices.choose().unwrap()
-        };
+        let color = *choices
+            .choose()
+            .unwrap_or_else(|| self.colors.choose().unwrap());
 
         graph.spawn(
             vkey,

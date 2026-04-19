@@ -7,7 +7,7 @@ use super::vertex::VertexKey;
 /// Instead of a global edge pool, edges are owned by their originating vertex.
 /// The key is a combination of the origin `VertexKey` and an `offset` (0, 1, or 2),
 /// representing which of the three outgoing slots this edge occupies.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct EdgeKey {
     pub vertex: VertexKey,
     pub offset: u8, // 0, 1, or 2
@@ -32,15 +32,6 @@ impl EdgeKey {
         EdgeKey {
             vertex: self.vertex,
             offset: (self.offset + 2) % 3,
-        }
-    }
-}
-
-impl Default for EdgeKey {
-    fn default() -> Self {
-        EdgeKey {
-            vertex: VertexKey::default(),
-            offset: 0,
         }
     }
 }

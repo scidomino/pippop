@@ -47,31 +47,25 @@ pub fn tween_points(a: &[Vec2], b: &[Vec2], progress: f32) -> Vec<Vec2> {
     if a.len() == b.len() {
         return a
             .iter()
-            .zip(b.iter())
+            .zip(b)
             .map(|(&p1, &p2)| p1.lerp(p2, progress))
             .collect();
     }
 
-    // If lengths differ, we scale the indices as in the Android implementation
     let (big, small, morph) = if a.len() > b.len() {
         (a, b, progress)
     } else {
         (b, a, 1.0 - progress)
     };
 
-    let big_count = big.len();
-    let small_count = small.len();
-    let ratio = big_count as f32 / small_count as f32;
-    let mut out = Vec::with_capacity(big_count);
-
-    for i in 0..big_count {
-        let small_idx = (i as f32 / ratio) as usize;
-        let p1 = big[i];
-        let p2 = small[small_idx.min(small_count - 1)];
-        out.push(p1.lerp(p2, morph));
-    }
-
-    out
+    let ratio = big.len() as f32 / small.len() as f32;
+    big.iter()
+        .enumerate()
+        .map(|(i, &p1)| {
+            let p2 = small[((i as f32 / ratio) as usize).min(small.len() - 1)];
+            p1.lerp(p2, morph)
+        })
+        .collect()
 }
 
 struct MiterPoint {
