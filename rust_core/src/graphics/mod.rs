@@ -36,14 +36,15 @@ impl Renderer {
         highlight_manager: &crate::managers::highlight::HighlightManager,
     ) {
         // Collect visible bubble geometry
-        let mut bubble_render_data = Vec::new();
-        for (bkey, bubble) in graph.bubbles.iter() {
-            let points = bubble::get_bubble_points(graph, bkey);
-            if !points.is_empty() {
-                let centroid = geometry::calculate_centroid(graph, bkey);
-                bubble_render_data.push((bkey, &bubble.style, points, centroid));
-            }
-        }
+        let bubble_render_data: Vec<_> = graph.bubbles.iter()
+            .filter_map(|(bkey, bubble)| {
+                let points = bubble::get_bubble_points(graph, bkey);
+                (!points.is_empty()).then(|| {
+                    let centroid = geometry::calculate_centroid(graph, bkey);
+                    (bkey, &bubble.style, points, centroid)
+                })
+            })
+            .collect();
 
         // --- Pass 1: World Space (Bubbles & Debug) ---
         set_camera(camera);

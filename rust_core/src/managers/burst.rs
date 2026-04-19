@@ -100,15 +100,12 @@ impl BurstManager {
     }
 
     fn find_all_burstable_in_bubble(&self, graph: &Graph, bkey: BubbleKey) -> HashSet<EdgeKey> {
-        let mut burstable = HashSet::new();
-        if let Some(bubble) = graph.bubbles.get(bkey) {
-            for &ekey in &bubble.edges {
-                if self.is_burstable(graph, ekey) {
-                    burstable.insert(ekey);
-                }
-            }
-        }
-        burstable
+        graph.bubbles.get(bkey).map(|bubble| {
+            bubble.edges.iter()
+                .filter(|&&ekey| self.is_burstable(graph, ekey))
+                .copied()
+                .collect()
+        }).unwrap_or_default()
     }
 
     pub fn is_burstable(&self, graph: &Graph, ekey: EdgeKey) -> bool {

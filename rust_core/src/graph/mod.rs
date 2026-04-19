@@ -305,16 +305,8 @@ impl Graph {
     pub fn spawn(&mut self, vkey: VertexKey, style: BubbleStyle) {
         let vertex: Vertex = self.vertices[vkey];
         let ekeys: [EdgeKey; 3] = vkey.edge_keys();
-        let twin_ekeys = [
-            vertex.edges[0].twin,
-            vertex.edges[1].twin,
-            vertex.edges[2].twin,
-        ];
-        let bkeys = [
-            vertex.edges[0].bubble,
-            vertex.edges[1].bubble,
-            vertex.edges[2].bubble,
-        ];
+        let twin_ekeys = vertex.edges.map(|e| e.twin);
+        let bkeys = vertex.edges.map(|e| e.bubble);
 
         let vpoint = vertex.point.position;
         let epoint1 = vertex.edges[0].point.position;

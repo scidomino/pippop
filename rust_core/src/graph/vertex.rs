@@ -33,7 +33,7 @@ impl Vertex {
     pub fn new(point: Point) -> Self {
         Vertex {
             point,
-            edges: [Edge::new(point), Edge::new(point), Edge::new(point)],
+            edges: [Edge::new(point); 3],
         }
     }
 
