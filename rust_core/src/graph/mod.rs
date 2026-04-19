@@ -65,34 +65,93 @@ impl Graph {
     }
 
     pub fn remove_edge(&mut self, ekey: EdgeKey) {
-        let (twin, bkey) = {
-            let edge = self.get_edge(ekey);
-            (edge.twin, edge.bubble)
-        };
-        let twin_bkey = self.get_edge(twin).bubble;
-        if bkey == twin_bkey {
+        let twin = self.get_edge(ekey).twin;
+        let b1 = self.get_edge(ekey).bubble;
+        let b2 = self.get_edge(twin).bubble;
+
+        if b1 == b2 {
             // Cannot remove edge with same bubble on both sides
             return;
         }
 
-        let retained = self.get_edge(ekey.prev_on_vertex()).twin;
-        let twin_retained = self.get_edge(twin.prev_on_vertex()).twin;
+        let e1_next = ekey.next_on_vertex();
+        let e1_prev = ekey.prev_on_vertex();
+        let e2_next = twin.next_on_vertex();
+        let e2_prev = twin.prev_on_vertex();
 
-        let retained_bkey = self.get_edge(retained).bubble;
-        let twin_retaned_bkey = self.get_edge(twin_retained).bubble;
+        let t1_next = self.get_edge(e1_next).twin;
+        let t1_prev = self.get_edge(e1_prev).twin;
+        let t2_next = self.get_edge(e2_next).twin;
+        let t2_prev = self.get_edge(e2_prev).twin;
 
-        self.half_slide(retained);
-        self.half_slide(twin_retained);
+        // Ensure we are not dealing with a multigraph where two vertices share >1 edge.
+        // If v1 and v2 share another edge, then t1_next, t1_prev, t2_next, or t2_prev
+        // will originate from the vertex we are about to delete.
+        // In a proper foam simulation, this can occur if a bubble is a digon (2 edges).
+        if t1_next.vertex == twin.vertex || t1_prev.vertex == twin.vertex ||
+           t2_next.vertex == ekey.vertex || t2_prev.vertex == ekey.vertex {
+            // Removing one edge of a digon creates a bridge (degenerate edge)
+            // For now, we safely abort the merge to prevent graph corruption.
+            return;
+        }
 
-        let b2 = self.bubbles[twin_retaned_bkey].clone();
-        let b1 = &mut self.bubbles[retained_bkey];
+        // Merge b2 into b1
+        let b2_style = self.bubbles[b2].style.clone();
+        let b1_bubble = &mut self.bubbles[b1];
+        b1_bubble.style = b1_bubble.style.merge(&b2_style);
+        
+        // Find all edges of b2 and set them to b1
+        for (_, vertex) in self.vertices.iter_mut() {
+            for edge in vertex.edges.iter_mut() {
+                if edge.bubble == b2 {
+                    edge.bubble = b1;
+                }
+            }
+        }
+        self.bubbles.remove(b2);
 
-        b1.merge(&b2);
-        self.bubbles.remove(twin_retaned_bkey);
-        self.rebubble(retained_bkey, retained);
+        // Update control points for smoother transition
+        let p_t1_next = self.get_edge(t1_next).point.position;
+        let p_e1_prev = self.get_edge(e1_prev).point.position;
+        
+        let p_t1_prev = self.get_edge(t1_prev).point.position;
+        let p_e1_next = self.get_edge(e1_next).point.position;
+        
+        let p_t2_next = self.get_edge(t2_next).point.position;
+        let p_e2_prev = self.get_edge(e2_prev).point.position;
+        
+        let p_t2_prev = self.get_edge(t2_prev).point.position;
+        let p_e2_next = self.get_edge(e2_next).point.position;
 
+        self.get_edge_mut(t1_next).point.position = (p_t1_next + p_e1_prev) / 2.0;
+        self.get_edge_mut(t1_prev).point.position = (p_t1_prev + p_e1_next) / 2.0;
+        self.get_edge_mut(t2_next).point.position = (p_t2_next + p_e2_prev) / 2.0;
+        self.get_edge_mut(t2_prev).point.position = (p_t2_prev + p_e2_next) / 2.0;
+
+        // Bypass v1
+        self.link_twins(t1_next, t1_prev);
+        // Bypass v2
+        self.link_twins(t2_next, t2_prev);
+
+        // Get the new bubbles bounded by these edges (after b2 was merged)
+        let b_t1_next = self.get_edge(t1_next).bubble;
+        let b_t1_prev = self.get_edge(t1_prev).bubble;
+        let b_t2_next = self.get_edge(t2_next).bubble;
+        let b_t2_prev = self.get_edge(t2_prev).bubble;
+
+        // Remove v1 and v2
         self.vertices.remove(ekey.vertex);
         self.vertices.remove(twin.vertex);
+
+        // Rebuild edge lists for the affected bubbles
+        self.rebubble(b_t1_next, t1_next);
+        self.rebubble(b_t1_prev, t1_prev);
+        if self.bubbles.contains_key(b_t2_next) {
+            self.rebubble(b_t2_next, t2_next);
+        }
+        if self.bubbles.contains_key(b_t2_prev) {
+            self.rebubble(b_t2_prev, t2_prev);
+        }
     }
 
     /*
@@ -161,22 +220,6 @@ impl Graph {
         self.rebubble(b_bottom, e);
     }
 
-    // Re-links neighbors of an edge to bypass a vertex, effectively "straightening"
-    // a 2-way junction. Used during bubble removal.
-    fn half_slide(&mut self, ekey: EdgeKey) -> EdgeKey {
-        // In CW traversal, the edge pointing to ekey's start is ekey.next_on_vertex().twin
-        let prev_on_bubble = self.prev_on_bubble(ekey);
-        let next_on_vertex = ekey.next_on_vertex();
-        let other_neighbor_twin = self.get_edge(next_on_vertex).twin;
-
-        self.link_twins(ekey, other_neighbor_twin);
-
-        let b = self.get_edge(ekey).bubble;
-        self.rebubble(b, ekey);
-
-        prev_on_bubble
-    }
-
     fn link_twins(&mut self, a: EdgeKey, b: EdgeKey) {
         self.get_edge_mut(a).twin = b;
         self.get_edge_mut(b).twin = a;
@@ -204,11 +247,6 @@ impl Graph {
     // next edge on the same bubble in clockwise order
     fn next_on_bubble(&self, key: EdgeKey) -> EdgeKey {
         self.get_edge(key).twin.prev_on_vertex()
-    }
-
-    // previous edge on the same bubble in clockwise order
-    fn prev_on_bubble(&self, key: EdgeKey) -> EdgeKey {
-        self.get_edge(key.next_on_vertex()).twin
     }
 
     pub fn get_edge(&self, key: EdgeKey) -> &Edge {

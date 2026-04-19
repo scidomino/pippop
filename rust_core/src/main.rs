@@ -4,6 +4,7 @@ use rust_core::graphics::Renderer;
 use rust_core::physics;
 use rust_core::managers::spawn::{SpawnManager, RatchetSpawnTimer};
 use rust_core::managers::slide::SlideManager;
+use rust_core::managers::burst::BurstManager;
 use rust_core::graphics::colors;
 
 #[macroquad::main("PipPop")]
@@ -25,6 +26,7 @@ async fn main() {
         }),
     );
     let mut slide_manager = SlideManager::new();
+    let burst_manager = BurstManager::new(1);
 
     loop {
         let dt = get_frame_time();
@@ -38,7 +40,7 @@ async fn main() {
         // Managers update
         spawn_manager.update(dt);
         spawn_manager.possibly_spawn(&mut graph);
-        slide_manager.slide_slidable_edges(&mut graph, dt);
+        slide_manager.slide_slidable_edges(&mut graph, &burst_manager, dt);
 
         // Animation update
         renderer.update(dt);
