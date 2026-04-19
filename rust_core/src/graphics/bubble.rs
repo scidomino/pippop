@@ -1,11 +1,14 @@
 use crate::graph::Graph;
-use crate::graph::bubble::BubbleStyle;
+use crate::graph::bubble::{Bubble, BubbleStyle};
 use crate::graphics::geometry;
 use crate::graphics::colors;
 use macroquad::prelude::*;
 
 pub fn get_bubble_points(graph: &Graph, bkey: crate::graph::bubble::BubbleKey) -> Vec<Vec2> {
-    let bubble = &graph.bubbles[bkey];
+    get_points_for_bubble(graph, &graph.bubbles[bkey])
+}
+
+pub fn get_points_for_bubble(graph: &Graph, bubble: &Bubble) -> Vec<Vec2> {
     let mut points = Vec::new();
 
     for &ekey in &bubble.edges {

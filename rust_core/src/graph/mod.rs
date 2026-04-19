@@ -6,6 +6,7 @@ pub mod vertex;
 use crate::graphics::colors;
 use bubble::{Bubble, BubbleKey, BubbleStyle};
 use edge::{Edge, EdgeKey};
+use macroquad::math::Vec2;
 use slotmap::SlotMap;
 use vertex::{Vertex, VertexKey};
 
@@ -244,6 +245,38 @@ impl Graph {
         }
     }
 
+    pub fn get_player_bubble(&self) -> Option<BubbleKey> {
+        self.bubbles
+            .iter()
+            .find(|(_, b)| b.style == BubbleStyle::Player)
+            .map(|(k, _)| k)
+    }
+
+    pub fn get_closest_otter_swappable(&self, point: Vec2) -> Option<EdgeKey> {
+        let player_bkey = self.get_player_bubble()?;
+        let player_bubble = &self.bubbles[player_bkey];
+
+        let mut min_dist = f32::MAX;
+        let mut closest_edge = None;
+
+        for &ekey in &player_bubble.edges {
+            let edge = self.get_edge(ekey);
+            let twin_ekey = edge.twin;
+            let bkey = self.get_edge(twin_ekey).bubble;
+            let twin_bubble = &self.bubbles[bkey];
+
+            if let BubbleStyle::Standard { .. } = twin_bubble.style {
+                let centroid = crate::graphics::geometry::calculate_centroid(self, bkey);
+                let dist = centroid.distance(point);
+                if dist < min_dist {
+                    min_dist = dist;
+                    closest_edge = Some(twin_ekey);
+                }
+            }
+        }
+        closest_edge
+    }
+
     // next edge on the same bubble in clockwise order
     fn next_on_bubble(&self, key: EdgeKey) -> EdgeKey {
         self.get_edge(key).twin.prev_on_vertex()
@@ -330,5 +363,49 @@ impl Graph {
         self.rebubble(bkeys[1], ekeys[1]);
         self.rebubble(bkeys[2], ekeys[2]);
         self.rebubble(bkeys[0], new_ekeys2[0]);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use macroquad::math::Vec2;
+
+    #[test]
+    fn test_get_player_bubble() {
+        let mut graph = Graph::new();
+        graph.init();
+        
+        // Initially no player bubble in init()
+        assert_eq!(graph.get_player_bubble(), None);
+        
+        // Set first bubble to Player
+        let bkey = graph.bubbles.keys().next().unwrap();
+        graph.bubbles[bkey].style = BubbleStyle::Player;
+        
+        assert_eq!(graph.get_player_bubble(), Some(bkey));
+    }
+
+    #[test]
+    fn test_get_closest_otter_swappable() {
+        let mut graph = Graph::new();
+        graph.init();
+        
+        // Assign b1 as player and b2 as a standard bubble.
+        let mut keys = graph.bubbles.keys();
+        let b1 = keys.next().unwrap();
+        let b2 = keys.next().unwrap();
+        
+        graph.bubbles[b1].style = BubbleStyle::Player;
+        
+        // Find a point near b2
+        let centroid2 = crate::graphics::geometry::calculate_centroid(&graph, b2);
+        
+        let closest = graph.get_closest_otter_swappable(centroid2);
+        assert!(closest.is_some());
+        
+        let ekey = closest.unwrap();
+        // The edge should belong to b2, since it is the swappable twin of the player's edge
+        assert_eq!(graph.get_edge(ekey).bubble, b2);
     }
 }
