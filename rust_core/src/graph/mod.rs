@@ -14,8 +14,12 @@ use crate::graph::point::Point;
 /// A Half-Edge data structure representing the planar graph of bubbles.
 ///
 /// This graph enforces a trivalent (honeycomb) topology, meaning every
-/// vertex is connected to exactly three edges. This naturally simulates
-/// Plateau's Laws for foams, where bubble walls always meet at 120-degree angles.
+/// vertex is connected to exactly three edges. The graph is planar and always
+/// connected, with a single "open air" bubble representing the outside.
+///
+/// The graph supports all valid planar topologies, including "degenerate" cases
+/// such as monogons (bubbles with only one vertex and a self-looped edge) and
+/// digons (bubbles with only two vertices).
 pub struct Graph {
     pub vertices: SlotMap<VertexKey, Vertex>,
     pub bubbles: SlotMap<BubbleKey, Bubble>,
@@ -54,191 +58,127 @@ impl Graph {
         }
     }
 
+    /// Removes an edge and its twin by removing their vertices and merging the two bubbles they separate.
+    ///
+    /// ```text
+    /// Before:           After:
+    /// \        /
+    ///  \      /
+    ///    -  -              \      /
+    ///  /      \            /      \
+    /// /        \
+    /// ```
     pub fn remove_edge(&mut self, ekey: EdgeKey) {
-        let twin = self.get_edge(ekey).twin;
-        let b1 = self.get_edge(ekey).bubble;
-        let b2 = self.get_edge(twin).bubble;
+        let tkey = self.get_edge(ekey).twin;
+        let b_top = self.get_edge(ekey).bubble;
+        let b_bottom = self.get_edge(tkey).bubble;
 
-        if b1 == b2 {
+        if b_top == b_bottom {
             // Cannot remove edge with same bubble on both sides
+            // This should be rare but can occur in cases like when
+            // a popped bubble shares more than one wall with a neighbor.
             return;
         }
 
-        let e1_next = ekey.next_on_vertex();
-        let e1_prev = ekey.prev_on_vertex();
-        let e2_next = twin.next_on_vertex();
-        let e2_prev = twin.prev_on_vertex();
+        let ekey_next = ekey.next_on_vertex();
+        let ekey_prev = ekey.prev_on_vertex();
+        let tkey_next = tkey.next_on_vertex();
+        let tkey_prev = tkey.prev_on_vertex();
 
-        let t1_next = self.get_edge(e1_next).twin;
-        let t1_prev = self.get_edge(e1_prev).twin;
-        let t2_next = self.get_edge(e2_next).twin;
-        let t2_prev = self.get_edge(e2_prev).twin;
+        let ekey_next_twin = self.get_edge(ekey_next).twin;
+        let ekey_prev_twin = self.get_edge(ekey_prev).twin;
+        let tkey_next_twin = self.get_edge(tkey_next).twin;
+        let tkey_prev_twin = self.get_edge(tkey_prev).twin;
 
-        // Ensure we are not dealing with a multigraph where two vertices share >1 edge.
-        // If v1 and v2 share another edge, then t1_next, t1_prev, t2_next, or t2_prev
-        // will originate from the vertex we are about to delete.
-        // In a proper foam simulation, this can occur if a bubble is a digon (2 edges).
-        if t1_next.vertex == twin.vertex
-            || t1_prev.vertex == twin.vertex
-            || t2_next.vertex == ekey.vertex
-            || t2_prev.vertex == ekey.vertex
+        if ekey_next_twin == ekey_prev
+            || tkey_next_twin == tkey_prev
+            || ekey_next == tkey_prev_twin
+            || tkey_next == ekey_prev_twin
         {
-            // Removing one edge of a digon creates a bridge (degenerate edge)
-            // For now, we safely abort the merge to prevent graph corruption.
             return;
         }
 
-        // Merge b2 into b1
-        let b2_style = self.bubbles[b2].style;
-        let b1_bubble = &mut self.bubbles[b1];
-        b1_bubble.style = b1_bubble.style.merge(&b2_style);
+        let b_right = self.get_edge(ekey_next).bubble;
+        let b_left = self.get_edge(tkey_next).bubble;
 
-        // Find all edges of b2 and set them to b1
-        for (_, vertex) in self.vertices.iter_mut() {
-            for edge in vertex.edges.iter_mut() {
-                if edge.bubble == b2 {
-                    edge.bubble = b1;
-                }
-            }
-        }
-        self.bubbles.remove(b2);
+        // Merge b_bottom into b_top
+        let bottom_style = self.bubbles[b_bottom].style;
+        let mut_b_top = &mut self.bubbles[b_top];
+        mut_b_top.style = mut_b_top.style.merge(&bottom_style);
 
-        // Update control points for smoother transition
-        let p_t1_next = self.get_edge(t1_next).point.position;
-        let p_e1_prev = self.get_edge(e1_prev).point.position;
+        self.bubbles.remove(b_bottom);
 
-        let p_t1_prev = self.get_edge(t1_prev).point.position;
-        let p_e1_next = self.get_edge(e1_next).point.position;
+        // Bypass the removed vertices by linking their neighbors together
+        self.link_twins(ekey_next_twin, ekey_prev_twin);
+        self.link_twins(tkey_next_twin, tkey_prev_twin);
 
-        let p_t2_next = self.get_edge(t2_next).point.position;
-        let p_e2_prev = self.get_edge(e2_prev).point.position;
-
-        let p_t2_prev = self.get_edge(t2_prev).point.position;
-        let p_e2_next = self.get_edge(e2_next).point.position;
-
-        self.get_edge_mut(t1_next).point.position = (p_t1_next + p_e1_prev) / 2.0;
-        self.get_edge_mut(t1_prev).point.position = (p_t1_prev + p_e1_next) / 2.0;
-        self.get_edge_mut(t2_next).point.position = (p_t2_next + p_e2_prev) / 2.0;
-        self.get_edge_mut(t2_prev).point.position = (p_t2_prev + p_e2_next) / 2.0;
-
-        // Bypass v1
-        self.link_twins(t1_next, t1_prev);
-        // Bypass v2
-        self.link_twins(t2_next, t2_prev);
-
-        // Get the new bubbles bounded by these edges (after b2 was merged)
-        let b_t1_next = self.get_edge(t1_next).bubble;
-        let b_t1_prev = self.get_edge(t1_prev).bubble;
-        let b_t2_next = self.get_edge(t2_next).bubble;
-        let b_t2_prev = self.get_edge(t2_prev).bubble;
-
-        // Remove v1 and v2
+        // Remove the two vertices
         self.vertices.remove(ekey.vertex);
-        self.vertices.remove(twin.vertex);
+        self.vertices.remove(tkey.vertex);
 
-        // Rebuild edge lists for the affected bubbles
-        self.rebubble(b_t1_next, t1_next);
-        self.rebubble(b_t1_prev, t1_prev);
-        if self.bubbles.contains_key(b_t2_next) {
-            self.rebubble(b_t2_next, t2_next);
-        }
-        if self.bubbles.contains_key(b_t2_prev) {
-            self.rebubble(b_t2_prev, t2_prev);
-        }
+        self.rebubble(b_top, ekey_next_twin);
+        self.rebubble(b_right, ekey_prev_twin);
+        self.rebubble(b_left, tkey_prev_twin);
 
-        // Find degenerate edges (bridges) in the absorbing bubble and slide them.
-        // We only do this for OpenAir because sliding an internal bridge would split
-        // a finite bubble into two disconnected boundaries, which the engine doesn't support.
-        if matches!(self.bubbles[b1].style, BubbleStyle::OpenAir) {
-            let mut degenerates = Vec::new();
-            for &edge_key in &self.bubbles[b1].edges {
-                let twin = self.get_edge(edge_key).twin;
-                if self.get_edge(twin).bubble == b1 {
-                    degenerates.push(edge_key);
-                }
-            }
-
-            let mut to_slide = Vec::new();
-            for d in degenerates {
-                let twin = self.get_edge(d).twin;
-                if !to_slide.contains(&twin) && !to_slide.contains(&d) {
-                    to_slide.push(d);
-                }
-            }
-            for d in to_slide {
-                self.slide(d);
-            }
+        for degenerate in self.get_degenerate_edges(b_top) {
+            self.slide(degenerate);
         }
     }
 
-    /*
-    When a wall gets too short, We change its orientation: moving its
-    edges from the bubble they are on to the ones opposite.
-    This is a topological T1 flip.
-
-    Before:           After:
-    \        /          \   /
-     \      /            \ /
-      ------              |
-     /      \            / \
-    /        \          /   \
-    */
+    /// When a wall gets too short, We change its orientation: moving its
+    /// edges from the bubble they are on to the ones opposite.
+    /// This is a topological T1 flip.
+    ///
+    /// Before:           After:
+    /// \        /          \   /
+    ///  \      /            \ /
+    ///    -  -               ¦
+    ///  /      \            / \
+    /// /        \          /   \
     pub fn slide(&mut self, ekey: EdgeKey) {
-        let e = ekey;
-        let t = self.get_edge(e).twin;
+        let tkey = self.get_edge(ekey).twin;
 
-        let b_left = self.get_edge(e).bubble;
-        let b_right = self.get_edge(t).bubble;
+        let b_top = self.get_edge(ekey).bubble;
+        let b_bottom = self.get_edge(tkey).bubble;
 
-        // Safety: cannot slide an edge that has the same bubble on both sides (a bridge).
-        // UNLESS that bubble is OpenAir, because sliding an OpenAir bridge merges two disconnected
-        // masses safely without splitting a finite interior.
-        if b_left == b_right {
-            if !matches!(self.bubbles[b_left].style, BubbleStyle::OpenAir) {
-                return;
-            }
-        }
+        // note: it is possible for b_top == b_bottom if a bubble borders itself.
+        // We still want to slide in this case.
 
-        let e1 = e.next_on_vertex();
-        let e2 = e.prev_on_vertex();
-        let t1 = t.next_on_vertex();
-        let t2 = t.prev_on_vertex();
+        let ekey_prev = ekey.prev_on_vertex();
+        let tkey_prev = tkey.prev_on_vertex();
 
-        let b_top = self.get_edge(e1).bubble;
-        let b_bottom = self.get_edge(t1).bubble;
+        let ekey_prev_tkey = self.get_edge(ekey_prev).twin;
+        let tkey_prev_tkey = self.get_edge(tkey_prev).twin;
 
-        // Safety: cannot slide if it would merge two different boundaries of the same bubble
-        // or create other topological monstrosities.
-        if b_top == b_bottom {
+        let b_right = self.get_edge(ekey_prev_tkey).bubble;
+        let b_left = self.get_edge(tkey_prev_tkey).bubble;
+
+        if b_right == b_left {
+            // Don't slide if it would cause a bubble to border itself
             return;
         }
 
-        let old_e1_twin = self.get_edge(e1).twin;
-        let old_e2_twin = self.get_edge(e2).twin;
-        let old_t1_twin = self.get_edge(t1).twin;
-        let old_t2_twin = self.get_edge(t2).twin;
-
-        let p_e1 = self.get_edge(e1).point;
-        let p_e2 = self.get_edge(e2).point;
-        let p_t1 = self.get_edge(t1).point;
-        let p_t2 = self.get_edge(t2).point;
+        let e_point = self.get_edge(ekey).point;
+        let t_point = self.get_edge(tkey).point;
+        let eprev_point = self.get_edge(ekey_prev).point;
+        let tprev_point = self.get_edge(tkey_prev).point;
 
         // Perform topological flip by rotating the external connections
-        self.link_twins(e1, old_t2_twin);
-        self.link_twins(t2, old_t1_twin);
-        self.link_twins(t1, old_e2_twin);
-        self.link_twins(e2, old_e1_twin);
+        self.link_twins(ekey, tkey_prev_tkey);
+        self.link_twins(tkey, ekey_prev_tkey);
+        self.link_twins(tkey_prev, ekey_prev);
 
-        self.get_edge_mut(e1).point = p_t2;
-        self.get_edge_mut(t2).point = p_t1;
-        self.get_edge_mut(t1).point = p_e2;
-        self.get_edge_mut(e2).point = p_e1;
+        // Update control points
+        self.get_edge_mut(ekey).point = tprev_point;
+        self.get_edge_mut(tkey).point = eprev_point;
+        self.get_edge_mut(tkey_prev).point = e_point;
+        self.get_edge_mut(ekey_prev).point = t_point;
 
         // Rebuild the boundaries of the 4 affected bubbles
-        self.rebubble(b_left, e1);
-        self.rebubble(b_right, t1);
-        self.rebubble(b_top, t);
-        self.rebubble(b_bottom, e);
+        self.rebubble(b_top, ekey);
+        self.rebubble(b_bottom, tkey);
+        self.rebubble(b_left, ekey_prev);
+        self.rebubble(b_right, tkey_prev);
     }
 
     fn link_twins(&mut self, a: EdgeKey, b: EdgeKey) {
@@ -345,6 +285,26 @@ impl Graph {
             .unwrap_or_default()
     }
 
+    pub fn get_degenerate_edges(&self, bkey: BubbleKey) -> Vec<EdgeKey> {
+        let mut degenerates = Vec::new();
+        if let Some(bubble) = self.bubbles.get(bkey) {
+            for &ekey in &bubble.edges {
+                let twin_ekey = self.get_edge(ekey).twin;
+                if self.get_edge(twin_ekey).bubble == bkey {
+                    // Prevent returning both the edge and its twin
+                    if !degenerates.contains(&ekey) && !degenerates.contains(&twin_ekey) {
+                        degenerates.push(ekey);
+                    }
+                }
+            }
+        }
+        degenerates
+    }
+
+    /// Spawns a new bubble by "splitting" a vertex into three vertices.
+    ///
+    /// This operation inserts two new vertices and creates a small triangular
+    /// bubble between the original vertex and the two new ones.
     pub fn spawn(&mut self, vkey: VertexKey, style: BubbleStyle) {
         let vertex: Vertex = self.vertices[vkey];
         let ekeys: [EdgeKey; 3] = vkey.edge_keys();
