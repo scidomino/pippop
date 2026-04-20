@@ -145,6 +145,30 @@ impl Graph {
         if self.bubbles.contains_key(b_t2_prev) {
             self.rebubble(b_t2_prev, t2_prev);
         }
+
+        // Find degenerate edges (bridges) in the absorbing bubble and slide them.
+        // We only do this for OpenAir because sliding an internal bridge would split
+        // a finite bubble into two disconnected boundaries, which the engine doesn't support.
+        if matches!(self.bubbles[b1].style, BubbleStyle::OpenAir) {
+            let mut degenerates = Vec::new();
+            for &edge_key in &self.bubbles[b1].edges {
+                let twin = self.get_edge(edge_key).twin;
+                if self.get_edge(twin).bubble == b1 {
+                    degenerates.push(edge_key);
+                }
+            }
+
+            let mut to_slide = Vec::new();
+            for d in degenerates {
+                let twin = self.get_edge(d).twin;
+                if !to_slide.contains(&twin) && !to_slide.contains(&d) {
+                    to_slide.push(d);
+                }
+            }
+            for d in to_slide {
+                self.slide(d);
+            }
+        }
     }
 
     /*
@@ -167,8 +191,12 @@ impl Graph {
         let b_right = self.get_edge(t).bubble;
 
         // Safety: cannot slide an edge that has the same bubble on both sides (a bridge).
+        // UNLESS that bubble is OpenAir, because sliding an OpenAir bridge merges two disconnected
+        // masses safely without splitting a finite interior.
         if b_left == b_right {
-            return;
+            if !matches!(self.bubbles[b_left].style, BubbleStyle::OpenAir) {
+                return;
+            }
         }
 
         let e1 = e.next_on_vertex();
@@ -434,5 +462,79 @@ mod tests {
         for i in 0..new_edges.len() {
             assert_eq!(new_edges[i], original_edges[(i + 1) % original_edges.len()]);
         }
+    }
+
+    #[test]
+    fn test_bridge_creation_and_resolution() {
+        let mut graph = Graph::new();
+        // Create a large enough graph by spawning a few times
+        graph.init(
+            BubbleStyle::Standard {
+                size: 1,
+                color: crate::graphics::colors::TURQUOISE,
+            },
+            BubbleStyle::Standard {
+                size: 1,
+                color: crate::graphics::colors::ROSE,
+            },
+        );
+
+        let oa_key = graph
+            .bubbles
+            .iter()
+            .find(|(_, b)| matches!(b.style, BubbleStyle::OpenAir))
+            .unwrap()
+            .0;
+
+        // Spawn a couple times to get a non-trivial graph
+        let mut vkeys: Vec<_> = graph.vertices.keys().collect();
+        graph.spawn(
+            vkeys[0],
+            BubbleStyle::Standard {
+                size: 1,
+                color: crate::graphics::colors::GREEN,
+            },
+        );
+        vkeys = graph.vertices.keys().collect();
+        graph.spawn(
+            vkeys[2],
+            BubbleStyle::Standard {
+                size: 1,
+                color: crate::graphics::colors::YELLOW,
+            },
+        );
+
+        // Find an edge that separates two distinct standard bubbles
+        let mut target_ekey = None;
+        for (vkey, vertex) in &graph.vertices {
+            for (offset, edge) in vertex.edges.iter().enumerate() {
+                let twin_bubble = graph.get_edge(edge.twin).bubble;
+                if edge.bubble != oa_key && twin_bubble != oa_key && edge.bubble != twin_bubble {
+                    target_ekey = Some(vkey.edge_key(offset as u8));
+                    break;
+                }
+            }
+            if target_ekey.is_some() {
+                break;
+            }
+        }
+
+        let ekey = target_ekey.expect("Could not find internal edge");
+
+        // Make it a bridge by setting both sides to OpenAir
+        graph.get_edge_mut(ekey).bubble = oa_key;
+        graph.get_edge_mut(graph.get_edge(ekey).twin).bubble = oa_key;
+
+        // Slide it!
+        graph.slide(ekey);
+
+        // Verify that after sliding, the edge does not have OpenAir on both sides
+        let new_b1 = graph.get_edge(ekey).bubble;
+        let new_b2 = graph.get_edge(graph.get_edge(ekey).twin).bubble;
+
+        assert!(
+            new_b1 != oa_key || new_b2 != oa_key,
+            "Bridge was not resolved!"
+        );
     }
 }
