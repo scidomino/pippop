@@ -327,12 +327,19 @@ impl Graph {
         dump
     }
 
-    pub fn get_open_air_vertices(&self) -> Vec<VertexKey> {
+    pub fn get_open_air(&self) -> BubbleKey {
         self.bubbles
             .iter()
-            .find(|(_, b)| matches!(b.style, BubbleStyle::OpenAir))
-            .map(|(_, b)| b.edges.iter().map(|e| e.vertex).collect())
-            .unwrap_or_default()
+            .find_map(|(k, b)| matches!(b.style, BubbleStyle::OpenAir).then_some(k))
+            .expect("Graph must contain an open air bubble")
+    }
+
+    pub fn get_open_air_vertices(&self) -> Vec<VertexKey> {
+        self.bubbles[self.get_open_air()]
+            .edges
+            .iter()
+            .map(|e| e.vertex)
+            .collect()
     }
 
     pub fn get_degenerate_edges(&self, bkey: BubbleKey) -> Vec<EdgeKey> {
@@ -498,11 +505,7 @@ mod tests {
                 )
             })
             .unwrap();
-        let oa = graph
-            .bubbles
-            .keys()
-            .find(|&k| matches!(graph.bubbles[k].style, BubbleStyle::OpenAir))
-            .unwrap();
+        let oa = graph.get_open_air();
 
         // 1. Remove one internal wall to merge standard bubbles.
         let e12 = graph.bubbles[s1]
@@ -545,12 +548,7 @@ mod tests {
             },
         );
 
-        let oa_key = graph
-            .bubbles
-            .iter()
-            .find(|(_, b)| matches!(b.style, BubbleStyle::OpenAir))
-            .unwrap()
-            .0;
+        let oa_key = graph.get_open_air();
 
         // Spawn a couple times to get a non-trivial graph
         let mut vkeys: Vec<_> = graph.vertices.keys().collect();

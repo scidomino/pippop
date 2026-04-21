@@ -1,3 +1,4 @@
+pub mod gravity;
 pub mod pressure;
 pub mod surface;
 pub mod vector;
@@ -16,6 +17,7 @@ pub fn advance_frame(graph: &mut Graph) {
 
     pressure::update_force(graph, &mut force);
     surface::update_force(graph, &mut force);
+    gravity::update_force(graph, &mut force);
 
     let vertex_accels = solve_vertex(graph, &force);
     let accels = solve_edge(graph, &force, &vertex_accels);
