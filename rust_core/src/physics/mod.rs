@@ -104,7 +104,7 @@ mod tests {
         );
         for _ in 0..5 {
             advance_frame(&mut graph);
-            graph.print_graph();
+            println!("{}", graph.dump_state());
         }
     }
 }

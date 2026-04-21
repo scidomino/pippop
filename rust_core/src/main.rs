@@ -67,6 +67,22 @@ async fn main() {
             highlight_manager.set_point(None);
         }
 
+        if is_key_pressed(KeyCode::D) {
+            let dump = graph.dump_state();
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                use std::io::Write;
+                if let Ok(mut file) = std::fs::File::create("graph_dump.txt") {
+                    let _ = file.write_all(dump.as_bytes());
+                    log::info!("Graph state dumped to graph_dump.txt");
+                }
+            }
+            #[cfg(target_arch = "wasm32")]
+            {
+                log::info!("{}", dump);
+            }
+        }
+
         // Physics update (fixed timestep approx 60fps)
         if get_time() - last_physics_time > 0.016 {
             physics::advance_frame(&mut graph);

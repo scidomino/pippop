@@ -273,17 +273,41 @@ impl Graph {
         &mut self.vertices[key.vertex].edges[key.offset as usize]
     }
 
-    pub fn print_graph(&self) {
+    pub fn dump_state(&self) -> String {
+        let mut dump = String::new();
+        dump.push_str("--- Graph State Dump ---\n");
+
+        dump.push_str(&format!("Vertices: {}\n", self.vertices.len()));
         for (vkey, vertex) in &self.vertices {
-            println!("Vertex {:?}: ({:?})", vkey, vertex.point);
-            for edge in &vertex.edges {
-                let twin_vertex = &self.vertices[edge.twin.vertex];
-                println!(
-                    "  Edge to Vertex {:?}: ({:?})",
-                    edge.twin.vertex, twin_vertex.point
-                );
+            dump.push_str(&format!(
+                "  Vertex {:?}: pos={:?}, vel={:?}\n",
+                vkey, vertex.point.position, vertex.point.velocity
+            ));
+            for (i, edge) in vertex.edges.iter().enumerate() {
+                dump.push_str(&format!(
+                    "    Edge {}: twin={:?}, bubble={:?}, ctrl_pos={:?}\n",
+                    i, edge.twin, edge.bubble, edge.point.position
+                ));
             }
         }
+
+        dump.push_str(&format!("\nBubbles: {}\n", self.bubbles.len()));
+        for (bkey, bubble) in &self.bubbles {
+            let area: f32 = bubble
+                .edges
+                .iter()
+                .map(|&e| self.get_bezier(e).area())
+                .sum();
+            let pressure = bubble.get_pressure(area);
+            dump.push_str(&format!(
+                "  Bubble {:?}: style={:?}, area={:.2}, pressure={:.2}\n",
+                bkey, bubble.style, area, pressure
+            ));
+            dump.push_str(&format!("    Edges: {:?}\n", bubble.edges));
+        }
+
+        dump.push_str("--- End Dump ---\n");
+        dump
     }
 
     pub fn get_open_air_vertices(&self) -> Vec<VertexKey> {
