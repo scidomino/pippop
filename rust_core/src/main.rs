@@ -5,6 +5,7 @@ use rust_core::graphics::Renderer;
 use rust_core::managers::burst::BurstManager;
 use rust_core::managers::highlight::HighlightManager;
 use rust_core::managers::pop::PopManager;
+use rust_core::managers::sanity::SanityManager;
 use rust_core::managers::slide::SlideManager;
 use rust_core::managers::spawn::{RatchetSpawnTimer, SpawnManager};
 use rust_core::managers::swap::SwapManager;
@@ -41,6 +42,7 @@ async fn main() {
     let mut swap_manager = SwapManager::new();
     let mut pop_manager = PopManager::new();
     let mut highlight_manager = HighlightManager::new();
+    let sanity_manager = SanityManager::new();
 
     loop {
         let dt = get_frame_time();
@@ -133,6 +135,10 @@ async fn main() {
             &burst_manager,
             &highlight_manager,
         );
+
+        if let Err(e) = sanity_manager.check_invariants(&graph) {
+            panic!("Graph Invariant Failure: {}", e);
+        }
 
         draw_text(&format!("FPS: {:03}", get_fps()), 10.0, 30.0, 30.0, WHITE);
 
