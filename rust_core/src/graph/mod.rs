@@ -60,6 +60,9 @@ impl Graph {
 
     /// Removes an edge and its twin by removing their vertices and merging the two bubbles they separate.
     ///
+    /// Special cases:
+    /// - If the edge has the same bubble on both sides, it cannot be removed.
+    ///
     /// ```text
     /// Before:           After:
     /// \        /
@@ -74,9 +77,9 @@ impl Graph {
         let b_bottom = self.get_edge(tkey).bubble;
 
         if b_top == b_bottom {
-            // Cannot remove edge with same bubble on both sides
-            // This should be rare but can occur in cases like when
-            // a popped bubble shares more than one wall with a neighbor.
+            // Can't remove edge with same bubble on both sides
+            // as this would create a disconnected graph.
+            log::info!("remove_edge: skipped (same bubble on both sides)");
             return;
         }
 
@@ -90,14 +93,6 @@ impl Graph {
         let tkey_next_twin = self.get_edge(tkey_next).twin;
         let tkey_prev_twin = self.get_edge(tkey_prev).twin;
 
-        if ekey_next_twin == ekey_prev
-            || tkey_next_twin == tkey_prev
-            || ekey_next == tkey_prev_twin
-            || tkey_next == ekey_prev_twin
-        {
-            return;
-        }
-
         let b_right = self.get_edge(ekey_next).bubble;
         let b_left = self.get_edge(tkey_next).bubble;
 
@@ -106,21 +101,38 @@ impl Graph {
         let mut_b_top = &mut self.bubbles[b_top];
         mut_b_top.style = mut_b_top.style.merge(&bottom_style);
 
+        if ekey_next == tkey_prev_twin {
+            // the top bubble only has two edges so b_left == b_right.
+            log::info!("remove_edge: top bubble only has two edges");
+
+            self.link_twins(ekey_prev_twin, tkey_next_twin);
+
+            self.rebubble(b_top, tkey_next_twin);
+            self.rebubble(b_right, ekey_prev_twin);
+        } else if ekey_prev == tkey_next_twin {
+            // the bottom bubble only has two edges so b_left == b_right.
+            log::info!("remove_edge: bottom bubble only has two edges");
+
+            self.link_twins(ekey_next_twin, tkey_prev_twin);
+
+            self.rebubble(b_top, tkey_prev_twin);
+            self.rebubble(b_right, ekey_next_twin);
+        } else {
+            log::info!("remove_edge: standard merge");
+            self.link_twins(ekey_next_twin, ekey_prev_twin);
+            self.link_twins(tkey_next_twin, tkey_prev_twin);
+
+            self.rebubble(b_top, ekey_next_twin);
+            self.rebubble(b_right, ekey_prev_twin);
+            self.rebubble(b_left, tkey_prev_twin);
+        }
+
         self.bubbles.remove(b_bottom);
-
-        // Bypass the removed vertices by linking their neighbors together
-        self.link_twins(ekey_next_twin, ekey_prev_twin);
-        self.link_twins(tkey_next_twin, tkey_prev_twin);
-
-        // Remove the two vertices
         self.vertices.remove(ekey.vertex);
         self.vertices.remove(tkey.vertex);
 
-        self.rebubble(b_top, ekey_next_twin);
-        self.rebubble(b_right, ekey_prev_twin);
-        self.rebubble(b_left, tkey_prev_twin);
-
         for degenerate in self.get_degenerate_edges(b_top) {
+            log::info!("remove_edge: found degenerate edge {:?}", degenerate);
             self.slide(degenerate);
         }
     }
@@ -190,22 +202,19 @@ impl Graph {
         self.bubbles[bkey].edges.clear();
 
         let mut next_edge = ekey;
-        let mut i = 0;
-        loop {
+        for _ in 0..1000 {
             self.get_edge_mut(next_edge).bubble = bkey;
             self.bubbles[bkey].edges.push(next_edge);
             next_edge = self.next_on_bubble(next_edge);
             if next_edge == ekey {
-                break;
-            }
-            i += 1;
-            if i > 1000 {
-                panic!(
-                    "Infinite loop detected in rebubble for bubble {:?}. Started at edge {:?}",
-                    bkey, ekey
-                );
+                return;
             }
         }
+
+        panic!(
+            "Infinite loop detected in rebubble for bubble {:?}. Started at edge {:?}",
+            bkey, ekey
+        );
     }
 
     pub fn get_player_bubble(&self) -> Option<BubbleKey> {
@@ -236,7 +245,7 @@ impl Graph {
     }
 
     // next edge on the same bubble in clockwise order
-    fn next_on_bubble(&self, key: EdgeKey) -> EdgeKey {
+    pub fn next_on_bubble(&self, key: EdgeKey) -> EdgeKey {
         self.get_edge(key).twin.prev_on_vertex()
     }
 
