@@ -12,6 +12,8 @@ use rust_core::physics;
 
 #[macroquad::main("PipPop")]
 async fn main() {
+    env_logger::init();
+
     // Seed the random number generator using the current system time
     rand::srand(miniquad::date::now() as u64);
 
