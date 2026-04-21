@@ -72,6 +72,10 @@ impl Graph {
     /// /        \
     /// ```
     pub fn remove_edge(&mut self, ekey: EdgeKey) {
+        if self.vertices.len() <= 2 {
+            return;
+        }
+
         let tkey = self.get_edge(ekey).twin;
         let b_top = self.get_edge(ekey).bubble;
         let b_bottom = self.get_edge(tkey).bubble;
@@ -88,13 +92,26 @@ impl Graph {
         let tkey_next = tkey.next_on_vertex();
         let tkey_prev = tkey.prev_on_vertex();
 
+        let b_right = self.get_edge(ekey_next).bubble;
+        let b_left = self.get_edge(tkey_next).bubble;
+
+        if b_top == b_left || b_top == b_right || b_bottom == b_left || b_bottom == b_right {
+            // Can't remove edge with same bubble on both sides
+            // as this would create a disconnected graph.
+            log::info!("remove_edge: skipped (would disconnect graph)");
+            return;
+        }
+
         let ekey_next_twin = self.get_edge(ekey_next).twin;
         let ekey_prev_twin = self.get_edge(ekey_prev).twin;
         let tkey_next_twin = self.get_edge(tkey_next).twin;
         let tkey_prev_twin = self.get_edge(tkey_prev).twin;
 
-        let b_right = self.get_edge(ekey_next).bubble;
-        let b_left = self.get_edge(tkey_next).bubble;
+        if ekey_next == ekey_prev_twin || tkey_next == tkey_prev_twin {
+            // the left or right bubble only has one edge.
+            log::info!("remove_edge: left or right bubble only has one edge");
+            return;
+        }
 
         // Merge b_bottom into b_top
         let bottom_style = self.bubbles[b_bottom].style;
@@ -454,6 +471,62 @@ mod tests {
         // Ensure it's a cyclic shift
         for i in 0..new_edges.len() {
             assert_eq!(new_edges[i], original_edges[(i + 1) % original_edges.len()]);
+        }
+    }
+
+    #[test]
+    fn test_remove_edge_with_duplicate_neighbors() {
+        let mut graph = Graph::new();
+        graph.init(
+            BubbleStyle::Standard {
+                size: 1,
+                color: crate::graphics::colors::TURQUOISE,
+            },
+            BubbleStyle::Standard {
+                size: 1,
+                color: crate::graphics::colors::ROSE,
+            },
+        );
+
+        let s1 = graph
+            .bubbles
+            .keys()
+            .find(|&k| {
+                matches!(
+                    graph.bubbles[k].style,
+                    BubbleStyle::Standard { size: 1, .. }
+                )
+            })
+            .unwrap();
+        let oa = graph
+            .bubbles
+            .keys()
+            .find(|&k| matches!(graph.bubbles[k].style, BubbleStyle::OpenAir))
+            .unwrap();
+
+        // 1. Remove one internal wall to merge standard bubbles.
+        let e12 = graph.bubbles[s1]
+            .edges
+            .iter()
+            .find(|&&e| graph.get_edge(graph.get_edge(e).twin).bubble != oa)
+            .cloned()
+            .unwrap();
+        graph.remove_edge(e12);
+
+        // 2. Try to remove a wall between the merged bubble and OpenAir.
+        let e_s1_oa = graph.bubbles[s1]
+            .edges
+            .iter()
+            .find(|&&e| graph.get_edge(graph.get_edge(e).twin).bubble == oa)
+            .cloned()
+            .unwrap();
+        graph.remove_edge(e_s1_oa);
+
+        // Check for stale keys (simulating a draw call)
+        for bubble in graph.bubbles.values() {
+            for &ekey in &bubble.edges {
+                graph.get_bezier(ekey);
+            }
         }
     }
 

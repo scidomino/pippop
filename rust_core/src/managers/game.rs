@@ -61,10 +61,11 @@ impl GameController {
     pub fn update(&mut self, graph: &mut Graph, dt: f32) {
         // Unconditional updates
         self.spawn_manager.update(dt);
-        self.pop_manager.remove_deflated(graph, &self.burst_manager);
 
         match self.state {
             GameState::Normal => {
+                self.pop_manager.remove_deflated(graph, &self.burst_manager);
+
                 if self.slide_manager.slide_slidable_edges(graph, dt) {
                     // Sliding can create new matches
                     if self.burst_manager.find_and_set_burstable_edge(graph) {
