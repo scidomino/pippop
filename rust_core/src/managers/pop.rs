@@ -3,7 +3,7 @@ use crate::graph::Graph;
 use crate::managers::burst::BurstManager;
 
 const POPPING_TIME: f32 = 0.5;
-const UNOTICEABLE_AREA: f32 = 100.0; // Slightly larger than Android to be safe with physics
+const UNNOTICEABLE_AREA: f32 = 100.0; // Slightly larger than Android to be safe with physics
 
 #[derive(Default)]
 pub struct PopManager {
@@ -100,7 +100,7 @@ impl PopManager {
                     .iter()
                     .map(|&e| graph.get_bezier(e).area())
                     .sum::<f32>();
-                if area.abs() < UNOTICEABLE_AREA {
+                if area < UNNOTICEABLE_AREA {
                     // Find a neighbor that shares exactly one edge to merge into
                     if let Some((&neighbor_key, _)) =
                         adjacent_count.iter().find(|&(_, &count)| count == 1)
