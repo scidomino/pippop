@@ -107,7 +107,7 @@ impl Graph {
         let tkey_next_twin = self.vertices.get_edge(tkey_next).twin;
         let tkey_prev_twin = self.vertices.get_edge(tkey_prev).twin;
 
-        if ekey_next == ekey_prev_twin || tkey_next == tkey_prev_twin {
+        if ekey_next == tkey_prev_twin || tkey_next == ekey_prev_twin {
             // the left or right bubble only has one edge.
             log::info!("remove_edge: left or right bubble only has one edge");
             return;
@@ -123,6 +123,8 @@ impl Graph {
             log::info!("remove_edge: top bubble only has two edges");
 
             self.link_twins(ekey_prev_twin, tkey_next_twin);
+            self.average_control_points(ekey_prev_twin, ekey_next);
+            self.average_control_points(tkey_next_twin, tkey_prev);
 
             self.rebubble(b_top, tkey_next_twin);
             self.rebubble(b_right, ekey_prev_twin);
@@ -131,6 +133,8 @@ impl Graph {
             log::info!("remove_edge: bottom bubble only has two edges");
 
             self.link_twins(ekey_next_twin, tkey_prev_twin);
+            self.average_control_points(ekey_next_twin, ekey_prev);
+            self.average_control_points(tkey_prev_twin, tkey_next);
 
             self.rebubble(b_top, tkey_prev_twin);
             self.rebubble(b_right, ekey_next_twin);
@@ -138,6 +142,11 @@ impl Graph {
             log::info!("remove_edge: standard merge");
             self.link_twins(ekey_next_twin, ekey_prev_twin);
             self.link_twins(tkey_next_twin, tkey_prev_twin);
+
+            self.average_control_points(ekey_next_twin, ekey_prev);
+            self.average_control_points(ekey_prev_twin, ekey_next);
+            self.average_control_points(tkey_next_twin, tkey_prev);
+            self.average_control_points(tkey_prev_twin, tkey_next);
 
             self.rebubble(b_top, ekey_next_twin);
             self.rebubble(b_right, ekey_prev_twin);
@@ -153,6 +162,12 @@ impl Graph {
             self.slide(degenerate);
         }
         self.update_cache();
+    }
+
+    fn average_control_points(&mut self, target: EdgeKey, source: EdgeKey) {
+        let p1 = self.vertices.get_edge(target).point.position;
+        let p2 = self.vertices.get_edge(source).point.position;
+        self.vertices.get_edge_mut(target).point.position = (p1 + p2) / 2.0;
     }
 
     /// When a wall gets too short, We change its orientation: moving its
