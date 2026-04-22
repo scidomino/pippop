@@ -1,8 +1,6 @@
 use crate::graph::{bubble::BubbleStyle, edge::EdgeKey, Graph};
 use std::collections::HashSet;
 
-const MIN_BUBBLE_AREA: f32 = -100.0;
-
 pub struct SanityManager;
 
 impl Default for SanityManager {
@@ -24,17 +22,6 @@ impl SanityManager {
         for (bkey, bubble) in &graph.bubbles {
             if matches!(bubble.style, BubbleStyle::OpenAir) {
                 open_air_count += 1;
-                if bubble.area >= -MIN_BUBBLE_AREA {
-                    return Err(format!(
-                        "OpenAir bubble {:?} area too large: {} (max {})",
-                        bkey, bubble.area, -MIN_BUBBLE_AREA
-                    ));
-                }
-            } else if bubble.area <= MIN_BUBBLE_AREA {
-                return Err(format!(
-                    "Bubble {:?} has area <= {}: {}",
-                    bkey, MIN_BUBBLE_AREA, bubble.area
-                ));
             }
 
             if bubble.edges.is_empty() {

@@ -95,6 +95,7 @@ impl Graph {
         let b_right = self.vertices.get_edge(ekey_next).bubble;
         let b_left = self.vertices.get_edge(tkey_next).bubble;
 
+        // Note: it's ok if b_left == b_right. We handle that below.
         if b_top == b_left || b_top == b_right || b_bottom == b_left || b_bottom == b_right {
             // Can't remove edge with same bubble on both sides
             // as this would create a disconnected graph.
@@ -107,7 +108,7 @@ impl Graph {
         let tkey_next_twin = self.vertices.get_edge(tkey_next).twin;
         let tkey_prev_twin = self.vertices.get_edge(tkey_prev).twin;
 
-        if ekey_next == tkey_prev_twin || tkey_next == ekey_prev_twin {
+        if ekey_next == ekey_prev_twin || tkey_next == tkey_prev_twin {
             // the left or right bubble only has one edge.
             log::info!("remove_edge: left or right bubble only has one edge");
             return;

@@ -17,8 +17,3 @@ pub const ALL_COLORS: [Color; 6] = [TURQUOISE, ROSE, GREEN, YELLOW, RED, ORANGE]
 pub fn get_group(size: usize) -> Vec<Color> {
     ALL_COLORS[..size.min(ALL_COLORS.len())].to_vec()
 }
-
-pub fn random_game_color() -> Color {
-    use macroquad::rand::ChooseRandom;
-    *ALL_COLORS.choose().unwrap()
-}

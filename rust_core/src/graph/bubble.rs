@@ -98,10 +98,6 @@ impl Bubble {
         }
     }
 
-    pub fn merge(&mut self, other: &Bubble) {
-        self.style = self.style.merge(&other.style);
-    }
-
     pub fn contains(&self, point: Vec2, graph: &crate::graph::Graph) -> bool {
         let points = crate::graphics::bubble::get_points_for_bubble(graph, self);
         if points.len() < 3 {
