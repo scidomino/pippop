@@ -120,7 +120,7 @@ impl Bubble {
         if matches!(self.style, BubbleStyle::OpenAir) {
             return 1.0;
         }
-        self.style.get_target_area() / self.area.max(100.0)
+        self.style.get_target_area() / self.area.max(1.0)
     }
 }
 
