@@ -1,6 +1,8 @@
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
+use crate::graphics::bubble;
+use crate::graphics::geometry;
 use macroquad::math::Vec2;
 
 const SWAP_TIME: f32 = 0.2; // 200ms in Android
@@ -23,6 +25,54 @@ pub struct SwapManager {
 impl SwapManager {
     pub fn new() -> Self {
         Self { active_swap: None }
+    }
+
+    pub fn is_handling(&self, bkey: BubbleKey) -> bool {
+        if let Some(swap) = &self.active_swap {
+            return swap.top_bkey == bkey || swap.bottom_bkey == bkey;
+        }
+        false
+    }
+
+    pub fn draw_world(&self, graph: &Graph) {
+        if let Some(swap) = &self.active_swap {
+            let center = graph.vertices.get_edge(swap.edge).point.position;
+            self.draw_swapping_bubbles(graph, swap, center);
+        }
+    }
+
+    fn draw_swapping_bubbles(&self, graph: &Graph, swap: &ActiveSwap, center: Vec2) {
+        let top_points = bubble::get_bubble_points(graph, swap.top_bkey);
+        let bottom_points = bubble::get_bubble_points(graph, swap.bottom_bkey);
+
+        if top_points.is_empty() || bottom_points.is_empty() {
+            return;
+        }
+
+        // Top Bubble Animation
+        let rotated_top_start =
+            geometry::rotate_points(&top_points, center, swap.progress * std::f32::consts::PI);
+        let rotated_top_end = geometry::rotate_points(
+            &bottom_points,
+            center,
+            (swap.progress - 1.0) * std::f32::consts::PI,
+        );
+        let morphed_top =
+            geometry::tween_points(&rotated_top_start, &rotated_top_end, swap.progress);
+
+        // Bottom Bubble Animation
+        let rotated_bottom_start =
+            geometry::rotate_points(&bottom_points, center, swap.progress * std::f32::consts::PI);
+        let rotated_bottom_end = geometry::rotate_points(
+            &top_points,
+            center,
+            (swap.progress - 1.0) * std::f32::consts::PI,
+        );
+        let morphed_bottom =
+            geometry::tween_points(&rotated_bottom_start, &rotated_bottom_end, swap.progress);
+
+        bubble::draw_bubble_body(&swap.top_style, &morphed_top);
+        bubble::draw_bubble_body(&swap.bottom_style, &morphed_bottom);
     }
 
     pub fn otter_swap(&mut self, graph: &mut Graph, point: Vec2) -> bool {

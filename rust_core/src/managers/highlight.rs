@@ -1,6 +1,9 @@
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
+use crate::graphics::colors;
+use crate::graphics::geometry;
 use macroquad::math::Vec2;
+use macroquad::prelude::*;
 
 const TEASER_DELAY: f32 = 4.0;
 const TEASER_THROB: f32 = 1.0;
@@ -21,6 +24,18 @@ impl HighlightManager {
         Self {
             point: None,
             time: 0.0,
+        }
+    }
+
+    pub fn draw_world(&self, graph: &Graph) {
+        let glow_requests = self.get_glow_requests(graph);
+        for (bkey, intensity) in glow_requests {
+            let points = crate::graphics::bubble::get_bubble_points(graph, bkey);
+            if !points.is_empty() {
+                let width = 20.0 * intensity;
+                let glow_mesh = geometry::generate_glow_mesh(&points, width, colors::WHITE, true);
+                draw_mesh(&glow_mesh);
+            }
         }
     }
 

@@ -1,6 +1,10 @@
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
+use crate::graphics::bubble;
+use crate::graphics::colors;
+use crate::graphics::geometry;
+use macroquad::prelude::*;
 use std::collections::HashSet;
 
 pub struct BurstManager {
@@ -18,6 +22,20 @@ impl BurstManager {
             active_edge: None,
             timer: 0.0,
             freeze_duration: 0.5, // 500ms
+        }
+    }
+
+    pub fn draw_world(&self, graph: &Graph) {
+        if let Some(ekey) = self.active_edge {
+            let mut points = Vec::with_capacity(12);
+            bubble::push_edge_points(graph, ekey, &mut points);
+            let twin_key = graph.vertices.get_edge(ekey).twin;
+            points.push(graph.vertices[twin_key.vertex].point.position);
+
+            let progress = 1.0 - (self.timer / 0.5).clamp(0.0, 1.0);
+            let width = 40.0 * progress;
+            let glow_mesh = geometry::generate_glow_mesh(&points, width, colors::WHITE, false);
+            draw_mesh(&glow_mesh);
         }
     }
 
@@ -55,7 +73,7 @@ impl BurstManager {
 
     /// Finds a bubble that has at least `threshold` burstable edges.
     pub fn find_burst_starter(&self, graph: &Graph) -> Option<EdgeKey> {
-        if graph.bubbles.len() <= 5 {
+        if graph.bubbles.len() <= 3 {
             return None;
         }
 

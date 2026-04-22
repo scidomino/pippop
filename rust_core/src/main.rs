@@ -91,13 +91,7 @@ async fn main() {
         clear_background(BLACK);
 
         // Rendering
-        renderer.draw(
-            &graph,
-            &camera,
-            &controller.swap_manager,
-            &controller.burst_manager,
-            &controller.highlight_manager,
-        );
+        renderer.draw(&graph, &camera, &controller);
 
         draw_text(&format!("FPS: {:03}", get_fps()), 10.0, 30.0, 30.0, WHITE);
 

@@ -1,6 +1,7 @@
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::Graph;
 use crate::managers::burst::BurstManager;
+use macroquad::math::{vec2, Vec2};
 
 const POPPING_TIME: f32 = 0.5;
 const UNNOTICEABLE_AREA: f32 = 100.0; // Slightly larger than Android to be safe with physics
@@ -14,6 +15,54 @@ pub struct PopManager {
 impl PopManager {
     pub fn new() -> Self {
         Self { pending_pop: None }
+    }
+
+    pub fn is_handling(&self, bkey: BubbleKey) -> bool {
+        self.pending_pop == Some(bkey)
+    }
+
+    pub fn draw_world(&self, graph: &Graph) {
+        if let Some(bkey) = self.pending_pop {
+            let bubble = &graph.bubbles[bkey];
+            let points = crate::graphics::bubble::get_bubble_points(graph, bkey);
+            if points.is_empty() {
+                return;
+            }
+
+            if let BubbleStyle::Popping { size, timer, .. } = bubble.style {
+                let progress = (timer / 0.5).clamp(0.0, 1.0);
+                let morphed_points = self.apply_pop_morph(&points, bubble.centroid, size, progress);
+                crate::graphics::bubble::draw_bubble_body(&bubble.style, &morphed_points);
+            }
+        }
+    }
+
+    fn apply_pop_morph(
+        &self,
+        points: &[Vec2],
+        centroid: Vec2,
+        size: i32,
+        progress: f32,
+    ) -> Vec<Vec2> {
+        let target_area = 3000.0 * (size as f32).sqrt();
+        let radius = 5.0 * (target_area / std::f32::consts::PI).sqrt();
+
+        let first_p = points[0];
+        let start_angle = (first_p.y - centroid.y).atan2(first_p.x - centroid.x);
+
+        let n = points.len();
+        let morph_ratio = progress.powi(2);
+        let inv_morph = 1.0 - morph_ratio;
+
+        points
+            .iter()
+            .enumerate()
+            .map(|(i, &p)| {
+                let angle = start_angle - (2.0 * std::f32::consts::PI) * (i as f32 / n as f32);
+                let circle_p = centroid + vec2(angle.cos() * radius, angle.sin() * radius);
+                p * morph_ratio + circle_p * inv_morph
+            })
+            .collect()
     }
 
     /// Checks if any bubble is ready to pop and transitions it to the Popping state.
