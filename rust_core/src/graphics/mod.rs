@@ -59,7 +59,7 @@ impl Renderer {
         set_camera(camera);
 
         if let Some(swap) = &swap_manager.active_swap {
-            let center = graph.get_edge(swap.edge).point.position;
+            let center = graph.vertices.get_edge(swap.edge).point.position;
 
             for (bkey, style, points, centroid) in &bubble_render_data {
                 if *bkey == swap.top_bkey || *bkey == swap.bottom_bkey {
@@ -92,7 +92,7 @@ impl Renderer {
         if let Some(ekey) = burst_manager.active_edge {
             let mut points = Vec::with_capacity(12);
             bubble::push_edge_points(graph, ekey, &mut points);
-            let twin_key = graph.get_edge(ekey).twin;
+            let twin_key = graph.vertices.get_edge(ekey).twin;
             points.push(graph.vertices[twin_key.vertex].point.position);
 
             let progress = 1.0 - (burst_manager.timer / 0.5).clamp(0.0, 1.0);

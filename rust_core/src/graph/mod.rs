@@ -3,11 +3,10 @@ pub mod edge;
 pub mod point;
 pub mod vertex;
 
-use bubble::{Bubble, BubbleKey, BubbleStyle};
-use edge::{Edge, EdgeKey};
+use bubble::{Bubble, BubbleKey, BubbleSet, BubbleStyle};
+use edge::EdgeKey;
 use macroquad::math::Vec2;
-use slotmap::SlotMap;
-use vertex::{Vertex, VertexKey};
+use vertex::{Vertex, VertexKey, VertexSet};
 
 use crate::graph::point::Point;
 
@@ -21,8 +20,8 @@ use crate::graph::point::Point;
 /// such as monogons (bubbles with only one vertex and a self-looped edge) and
 /// digons (bubbles with only two vertices).
 pub struct Graph {
-    pub vertices: SlotMap<VertexKey, Vertex>,
-    pub bubbles: SlotMap<BubbleKey, Bubble>,
+    pub vertices: VertexSet,
+    pub bubbles: BubbleSet,
 }
 
 impl Default for Graph {
@@ -34,8 +33,8 @@ impl Default for Graph {
 impl Graph {
     pub fn new() -> Self {
         Graph {
-            vertices: SlotMap::with_key(),
-            bubbles: SlotMap::with_key(),
+            vertices: VertexSet::new(),
+            bubbles: BubbleSet::new(),
         }
     }
 
@@ -76,9 +75,9 @@ impl Graph {
             return;
         }
 
-        let tkey = self.get_edge(ekey).twin;
-        let b_top = self.get_edge(ekey).bubble;
-        let b_bottom = self.get_edge(tkey).bubble;
+        let tkey = self.vertices.get_edge(ekey).twin;
+        let b_top = self.vertices.get_edge(ekey).bubble;
+        let b_bottom = self.vertices.get_edge(tkey).bubble;
 
         if b_top == b_bottom {
             // Can't remove edge with same bubble on both sides
@@ -92,8 +91,8 @@ impl Graph {
         let tkey_next = tkey.next_on_vertex();
         let tkey_prev = tkey.prev_on_vertex();
 
-        let b_right = self.get_edge(ekey_next).bubble;
-        let b_left = self.get_edge(tkey_next).bubble;
+        let b_right = self.vertices.get_edge(ekey_next).bubble;
+        let b_left = self.vertices.get_edge(tkey_next).bubble;
 
         if b_top == b_left || b_top == b_right || b_bottom == b_left || b_bottom == b_right {
             // Can't remove edge with same bubble on both sides
@@ -102,10 +101,10 @@ impl Graph {
             return;
         }
 
-        let ekey_next_twin = self.get_edge(ekey_next).twin;
-        let ekey_prev_twin = self.get_edge(ekey_prev).twin;
-        let tkey_next_twin = self.get_edge(tkey_next).twin;
-        let tkey_prev_twin = self.get_edge(tkey_prev).twin;
+        let ekey_next_twin = self.vertices.get_edge(ekey_next).twin;
+        let ekey_prev_twin = self.vertices.get_edge(ekey_prev).twin;
+        let tkey_next_twin = self.vertices.get_edge(tkey_next).twin;
+        let tkey_prev_twin = self.vertices.get_edge(tkey_prev).twin;
 
         if ekey_next == ekey_prev_twin || tkey_next == tkey_prev_twin {
             // the left or right bubble only has one edge.
@@ -165,10 +164,10 @@ impl Graph {
     ///  /      \            / \
     /// /        \          /   \
     pub fn slide(&mut self, ekey: EdgeKey) {
-        let tkey = self.get_edge(ekey).twin;
+        let tkey = self.vertices.get_edge(ekey).twin;
 
-        let b_top = self.get_edge(ekey).bubble;
-        let b_bottom = self.get_edge(tkey).bubble;
+        let b_top = self.vertices.get_edge(ekey).bubble;
+        let b_bottom = self.vertices.get_edge(tkey).bubble;
 
         // note: it is possible for b_top == b_bottom if a bubble borders itself.
         // We still want to slide in this case.
@@ -176,21 +175,21 @@ impl Graph {
         let ekey_prev = ekey.prev_on_vertex();
         let tkey_prev = tkey.prev_on_vertex();
 
-        let ekey_prev_tkey = self.get_edge(ekey_prev).twin;
-        let tkey_prev_tkey = self.get_edge(tkey_prev).twin;
+        let ekey_prev_tkey = self.vertices.get_edge(ekey_prev).twin;
+        let tkey_prev_tkey = self.vertices.get_edge(tkey_prev).twin;
 
-        let b_right = self.get_edge(ekey_prev_tkey).bubble;
-        let b_left = self.get_edge(tkey_prev_tkey).bubble;
+        let b_right = self.vertices.get_edge(ekey_prev_tkey).bubble;
+        let b_left = self.vertices.get_edge(tkey_prev_tkey).bubble;
 
         if b_right == b_left {
             // Don't slide if it would cause a bubble to border itself
             return;
         }
 
-        let e_point = self.get_edge(ekey).point;
-        let t_point = self.get_edge(tkey).point;
-        let eprev_point = self.get_edge(ekey_prev).point;
-        let tprev_point = self.get_edge(tkey_prev).point;
+        let e_point = self.vertices.get_edge(ekey).point;
+        let t_point = self.vertices.get_edge(tkey).point;
+        let eprev_point = self.vertices.get_edge(ekey_prev).point;
+        let tprev_point = self.vertices.get_edge(tkey_prev).point;
 
         // Perform topological flip by rotating the external connections
         self.link_twins(ekey, tkey_prev_tkey);
@@ -198,10 +197,10 @@ impl Graph {
         self.link_twins(tkey_prev, ekey_prev);
 
         // Update control points
-        self.get_edge_mut(ekey).point = tprev_point;
-        self.get_edge_mut(tkey).point = eprev_point;
-        self.get_edge_mut(tkey_prev).point = e_point;
-        self.get_edge_mut(ekey_prev).point = t_point;
+        self.vertices.get_edge_mut(ekey).point = tprev_point;
+        self.vertices.get_edge_mut(tkey).point = eprev_point;
+        self.vertices.get_edge_mut(tkey_prev).point = e_point;
+        self.vertices.get_edge_mut(ekey_prev).point = t_point;
 
         // Rebuild the boundaries of the 4 affected bubbles
         self.rebubble(b_top, ekey);
@@ -211,8 +210,8 @@ impl Graph {
     }
 
     fn link_twins(&mut self, a: EdgeKey, b: EdgeKey) {
-        self.get_edge_mut(a).twin = b;
-        self.get_edge_mut(b).twin = a;
+        self.vertices.get_edge_mut(a).twin = b;
+        self.vertices.get_edge_mut(b).twin = a;
     }
 
     pub fn rebubble(&mut self, bkey: BubbleKey, ekey: EdgeKey) {
@@ -220,9 +219,9 @@ impl Graph {
 
         let mut next_edge = ekey;
         for _ in 0..1000 {
-            self.get_edge_mut(next_edge).bubble = bkey;
+            self.vertices.get_edge_mut(next_edge).bubble = bkey;
             self.bubbles[bkey].edges.push(next_edge);
-            next_edge = self.next_on_bubble(next_edge);
+            next_edge = self.vertices.next_on_bubble(next_edge);
             if next_edge == ekey {
                 return;
             }
@@ -234,21 +233,15 @@ impl Graph {
         );
     }
 
-    pub fn get_player_bubble(&self) -> Option<BubbleKey> {
-        self.bubbles
-            .iter()
-            .find_map(|(k, b)| matches!(b.style, BubbleStyle::Player).then_some(k))
-    }
-
     pub fn get_closest_otter_swappable(&self, point: Vec2) -> Option<EdgeKey> {
-        let player_bkey = self.get_player_bubble()?;
+        let player_bkey = self.bubbles.get_player_bubble()?;
 
         self.bubbles[player_bkey]
             .edges
             .iter()
             .filter_map(|&ekey| {
-                let twin_ekey = self.get_edge(ekey).twin;
-                let bkey = self.get_edge(twin_ekey).bubble;
+                let twin_ekey = self.vertices.get_edge(ekey).twin;
+                let bkey = self.vertices.get_edge(twin_ekey).bubble;
 
                 if let BubbleStyle::Standard { .. } = self.bubbles[bkey].style {
                     let centroid = crate::graphics::geometry::calculate_centroid(self, bkey);
@@ -259,35 +252,6 @@ impl Graph {
             })
             .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal))
             .map(|(ekey, _)| ekey)
-    }
-
-    // next edge on the same bubble in clockwise order
-    pub fn next_on_bubble(&self, key: EdgeKey) -> EdgeKey {
-        self.get_edge(key).twin.prev_on_vertex()
-    }
-
-    pub fn get_edge(&self, key: EdgeKey) -> &Edge {
-        &self.vertices[key.vertex].edges[key.offset as usize]
-    }
-
-    pub fn get_bezier(&self, ekey: EdgeKey) -> crate::graphics::geometry::Bezier {
-        let (edge, vertex) = self.get_edge_and_vertex(ekey);
-        let (twin, twin_vertex) = self.get_edge_and_vertex(edge.twin);
-        crate::graphics::geometry::Bezier::from_points(
-            vertex.point.position,
-            edge.point.position,
-            twin.point.position,
-            twin_vertex.point.position,
-        )
-    }
-
-    pub fn get_edge_and_vertex(&self, key: EdgeKey) -> (&Edge, &Vertex) {
-        let vertex = &self.vertices[key.vertex];
-        (&vertex.edges[key.offset as usize], vertex)
-    }
-
-    fn get_edge_mut(&mut self, key: EdgeKey) -> &mut Edge {
-        &mut self.vertices[key.vertex].edges[key.offset as usize]
     }
 
     pub fn dump_state(&self) -> String {
@@ -313,7 +277,7 @@ impl Graph {
             let area: f32 = bubble
                 .edges
                 .iter()
-                .map(|&e| self.get_bezier(e).area())
+                .map(|&e| self.vertices.get_bezier(e).area())
                 .sum();
             let pressure = bubble.get_pressure(area);
             dump.push_str(&format!(
@@ -346,8 +310,8 @@ impl Graph {
         let mut degenerates = Vec::new();
         if let Some(bubble) = self.bubbles.get(bkey) {
             for &ekey in &bubble.edges {
-                let twin_ekey = self.get_edge(ekey).twin;
-                if self.get_edge(twin_ekey).bubble == bkey {
+                let twin_ekey = self.vertices.get_edge(ekey).twin;
+                if self.vertices.get_edge(twin_ekey).bubble == bkey {
                     // Prevent returning both the edge and its twin
                     if !degenerates.contains(&ekey) && !degenerates.contains(&twin_ekey) {
                         degenerates.push(ekey);
@@ -418,13 +382,13 @@ mod tests {
         );
 
         // Initially no player bubble in init()
-        assert_eq!(graph.get_player_bubble(), None);
+        assert_eq!(graph.bubbles.get_player_bubble(), None);
 
         // Set first bubble to Player
         let bkey = graph.bubbles.keys().next().unwrap();
         graph.bubbles[bkey].style = BubbleStyle::Player;
 
-        assert_eq!(graph.get_player_bubble(), Some(bkey));
+        assert_eq!(graph.bubbles.get_player_bubble(), Some(bkey));
     }
 
     #[test]
@@ -449,7 +413,7 @@ mod tests {
 
         let ekey = closest.unwrap();
         // The edge should belong to b2, since it is the swappable twin of the player's edge
-        assert_eq!(graph.get_edge(ekey).bubble, b2);
+        assert_eq!(graph.vertices.get_edge(ekey).bubble, b2);
     }
 
     #[test]
@@ -511,7 +475,13 @@ mod tests {
         let e12 = graph.bubbles[s1]
             .edges
             .iter()
-            .find(|&&e| graph.get_edge(graph.get_edge(e).twin).bubble != oa)
+            .find(|&&e| {
+                graph
+                    .vertices
+                    .get_edge(graph.vertices.get_edge(e).twin)
+                    .bubble
+                    != oa
+            })
             .cloned()
             .unwrap();
         graph.remove_edge(e12);
@@ -520,7 +490,13 @@ mod tests {
         let e_s1_oa = graph.bubbles[s1]
             .edges
             .iter()
-            .find(|&&e| graph.get_edge(graph.get_edge(e).twin).bubble == oa)
+            .find(|&&e| {
+                graph
+                    .vertices
+                    .get_edge(graph.vertices.get_edge(e).twin)
+                    .bubble
+                    == oa
+            })
             .cloned()
             .unwrap();
         graph.remove_edge(e_s1_oa);
@@ -528,7 +504,7 @@ mod tests {
         // Check for stale keys (simulating a draw call)
         for bubble in graph.bubbles.values() {
             for &ekey in &bubble.edges {
-                graph.get_bezier(ekey);
+                graph.vertices.get_bezier(ekey);
             }
         }
     }
@@ -572,7 +548,7 @@ mod tests {
         let mut target_ekey = None;
         for (vkey, vertex) in &graph.vertices {
             for (offset, edge) in vertex.edges.iter().enumerate() {
-                let twin_bubble = graph.get_edge(edge.twin).bubble;
+                let twin_bubble = graph.vertices.get_edge(edge.twin).bubble;
                 if edge.bubble != oa_key && twin_bubble != oa_key && edge.bubble != twin_bubble {
                     target_ekey = Some(vkey.edge_key(offset as u8));
                     break;
@@ -586,15 +562,21 @@ mod tests {
         let ekey = target_ekey.expect("Could not find internal edge");
 
         // Make it a bridge by setting both sides to OpenAir
-        graph.get_edge_mut(ekey).bubble = oa_key;
-        graph.get_edge_mut(graph.get_edge(ekey).twin).bubble = oa_key;
+        graph.vertices.get_edge_mut(ekey).bubble = oa_key;
+        graph
+            .vertices
+            .get_edge_mut(graph.vertices.get_edge(ekey).twin)
+            .bubble = oa_key;
 
         // Slide it!
         graph.slide(ekey);
 
         // Verify that after sliding, the edge does not have OpenAir on both sides
-        let new_b1 = graph.get_edge(ekey).bubble;
-        let new_b2 = graph.get_edge(graph.get_edge(ekey).twin).bubble;
+        let new_b1 = graph.vertices.get_edge(ekey).bubble;
+        let new_b2 = graph
+            .vertices
+            .get_edge(graph.vertices.get_edge(ekey).twin)
+            .bubble;
 
         assert!(
             new_b1 != oa_key || new_b2 != oa_key,

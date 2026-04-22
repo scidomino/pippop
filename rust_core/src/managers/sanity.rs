@@ -37,7 +37,7 @@ impl SanityManager {
                     ));
                 }
 
-                let edge = graph.get_edge(ekey);
+                let edge = graph.vertices.get_edge(ekey);
 
                 // Check bubble ownership
                 if edge.bubble != bkey {
@@ -55,13 +55,13 @@ impl SanityManager {
                         ekey, bkey, tkey
                     ));
                 }
-                if graph.get_edge(tkey).twin != ekey {
+                if graph.vertices.get_edge(tkey).twin != ekey {
                     return Err(format!(
                         "Twin inconsistency: {:?}.twin = {:?}, but {:?}.twin = {:?}",
                         ekey,
                         tkey,
                         tkey,
-                        graph.get_edge(tkey).twin
+                        graph.vertices.get_edge(tkey).twin
                     ));
                 }
 
@@ -69,7 +69,7 @@ impl SanityManager {
                 // Note: next_on_bubble is private to Graph but we can call it if we are in the same crate
                 // Actually, let's see if it's pub. It was NOT pub in the previous read.
                 // I should check if I need to make it pub or move the logic here.
-                let next_ekey = graph.next_on_bubble(ekey);
+                let next_ekey = graph.vertices.next_on_bubble(ekey);
                 let expected_next = bubble.edges[(i + 1) % bubble.edges.len()];
                 if next_ekey != expected_next {
                     return Err(format!(

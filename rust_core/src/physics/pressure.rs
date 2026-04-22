@@ -12,9 +12,9 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
         let mut vertex_force = Vec2::ZERO;
 
         for ekey in key.edge_keys() {
-            let edge = graph.get_edge(ekey);
-            let bezier = graph.get_bezier(ekey);
-            let twin_bubble = graph.get_edge(edge.twin).bubble;
+            let edge = graph.vertices.get_edge(ekey);
+            let bezier = graph.vertices.get_bezier(ekey);
+            let twin_bubble = graph.vertices.get_edge(edge.twin).bubble;
 
             let pressure_diff = (bubble_to_pressure[edge.bubble] - bubble_to_pressure[twin_bubble])
                 .clamp(-2.0, 2.0);
@@ -48,9 +48,9 @@ fn get_bubble_to_pressure(graph: &Graph) -> SecondaryMap<BubbleKey, f32> {
 
     for vkey in graph.vertices.keys() {
         for ekey in vkey.edge_keys() {
-            let edge = graph.get_edge(ekey);
-            let bezier = graph.get_bezier(ekey);
-            let twin_bubble = graph.get_edge(edge.twin).bubble;
+            let edge = graph.vertices.get_edge(ekey);
+            let bezier = graph.vertices.get_bezier(ekey);
+            let twin_bubble = graph.vertices.get_edge(edge.twin).bubble;
 
             let half_area = bezier.half_area_contribution();
             bubble_to_area[edge.bubble] += half_area;

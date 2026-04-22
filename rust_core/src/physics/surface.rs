@@ -16,7 +16,7 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
         let mut vertex_force = Vec2::ZERO;
 
         for ekey in key.edge_keys() {
-            let bezier = graph.get_bezier(ekey);
+            let bezier = graph.vertices.get_bezier(ekey);
 
             vertex_force -= SURFACE_TENSION * vertex_surface_force(&bezier);
             force.add_edge(ekey, -SURFACE_TENSION * edge_surface_force(&bezier));

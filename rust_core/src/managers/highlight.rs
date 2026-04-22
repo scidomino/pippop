@@ -38,7 +38,7 @@ impl HighlightManager {
 
         if let Some(p) = self.point {
             if let Some(ekey) = graph.get_closest_otter_swappable(p) {
-                let bkey = graph.get_edge(ekey).bubble;
+                let bkey = graph.vertices.get_edge(ekey).bubble;
                 requests.push((bkey, 1.0));
             }
         } else {
@@ -48,10 +48,13 @@ impl HighlightManager {
                     .sin()
                     .powi(2);
 
-                if let Some(player_bkey) = graph.get_player_bubble() {
+                if let Some(player_bkey) = graph.bubbles.get_player_bubble() {
                     let player_bubble = &graph.bubbles[player_bkey];
                     for &ekey in &player_bubble.edges {
-                        let twin_bkey = graph.get_edge(graph.get_edge(ekey).twin).bubble;
+                        let twin_bkey = graph
+                            .vertices
+                            .get_edge(graph.vertices.get_edge(ekey).twin)
+                            .bubble;
                         if !matches!(graph.bubbles[twin_bkey].style, BubbleStyle::OpenAir) {
                             requests.push((twin_bkey, ratio));
                         }

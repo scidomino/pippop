@@ -348,13 +348,13 @@ pub fn calculate_centroid(graph: &Graph, bkey: BubbleKey) -> Vec2 {
     let mut centroid_sum = Vec2::ZERO;
 
     for &ekey in &bubble.edges {
-        let bezier = graph.get_bezier(ekey);
+        let bezier = graph.vertices.get_bezier(ekey);
         area += bezier.area();
         centroid_sum += bezier.centroid_contribution();
     }
 
     if area.abs() < 1e-6 {
-        let bezier = graph.get_bezier(bubble.edges[0]);
+        let bezier = graph.vertices.get_bezier(bubble.edges[0]);
         return (bezier.s + bezier.e + 3.0 * (bezier.sc + bezier.ec)) / 8.0;
     }
 

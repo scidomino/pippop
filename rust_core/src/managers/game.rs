@@ -99,7 +99,7 @@ impl GameController {
                 if self.burst_manager.update(dt) {
                     if let Some(ekey) = self.burst_manager.active_edge {
                         if graph.vertices.contains_key(ekey.vertex) {
-                            let bkey = graph.get_edge(ekey).bubble;
+                            let bkey = graph.vertices.get_edge(ekey).bubble;
                             self.burst_manager.burst(graph, ekey);
                             if !self.burst_manager.find_and_set_next_burstable(graph, bkey) {
                                 self.burst_manager.active_edge = None;

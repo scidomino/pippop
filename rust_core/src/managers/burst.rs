@@ -34,7 +34,7 @@ impl BurstManager {
     /// Recursively bursts all matching bubbles in the graph immediately.
     pub fn burst_all(&self, graph: &mut Graph) {
         while let Some(ekey) = self.find_burst_starter(graph) {
-            let bkey = graph.get_edge(ekey).bubble;
+            let bkey = graph.vertices.get_edge(ekey).bubble;
             self.burst(graph, ekey);
 
             // After one burst, the bubble that "won" might have new burstable neighbors.
@@ -113,8 +113,8 @@ impl BurstManager {
     }
 
     pub fn is_burstable(&self, graph: &Graph, ekey: EdgeKey) -> bool {
-        let edge = graph.get_edge(ekey);
-        let twin = graph.get_edge(edge.twin);
+        let edge = graph.vertices.get_edge(ekey);
+        let twin = graph.vertices.get_edge(edge.twin);
 
         if edge.bubble == twin.bubble {
             return false;

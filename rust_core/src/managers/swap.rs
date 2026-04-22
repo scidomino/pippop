@@ -32,7 +32,7 @@ impl SwapManager {
         }
 
         // Cannot start a swap if clicking inside the player bubble itself
-        if let Some(player_bkey) = graph.get_player_bubble() {
+        if let Some(player_bkey) = graph.bubbles.get_player_bubble() {
             if graph.bubbles[player_bkey].contains(point, graph) {
                 return false;
             }
@@ -81,10 +81,10 @@ impl SwapManager {
     }
 
     fn start_swap(&mut self, graph: &mut Graph, edge_key: EdgeKey, return_trip: bool) {
-        let twin_key = graph.get_edge(edge_key).twin;
+        let twin_key = graph.vertices.get_edge(edge_key).twin;
 
-        let bottom_bkey = graph.get_edge(edge_key).bubble;
-        let top_bkey = graph.get_edge(twin_key).bubble;
+        let bottom_bkey = graph.vertices.get_edge(edge_key).bubble;
+        let top_bkey = graph.vertices.get_edge(twin_key).bubble;
 
         // Align bubble edge lists to start at the shared boundary for smooth tweening
         graph.rebubble(bottom_bkey, edge_key);

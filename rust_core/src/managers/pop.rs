@@ -79,8 +79,8 @@ impl PopManager {
             let mut adjacent_count = std::collections::HashMap::new();
 
             for &ekey in &bubble.edges {
-                let twin_ekey = graph.get_edge(ekey).twin;
-                let twin_bubble_key = graph.get_edge(twin_ekey).bubble;
+                let twin_ekey = graph.vertices.get_edge(ekey).twin;
+                let twin_bubble_key = graph.vertices.get_edge(twin_ekey).bubble;
                 let twin_bubble = &graph.bubbles[twin_bubble_key];
 
                 if matches!(twin_bubble.style, BubbleStyle::OpenAir) {
@@ -98,7 +98,7 @@ impl PopManager {
                 let area = bubble
                     .edges
                     .iter()
-                    .map(|&e| graph.get_bezier(e).area())
+                    .map(|&e| graph.vertices.get_bezier(e).area())
                     .sum::<f32>();
                 if area < UNNOTICEABLE_AREA {
                     // Find a neighbor that shares exactly one edge to merge into
@@ -110,12 +110,16 @@ impl PopManager {
                             .edges
                             .iter()
                             .find(|&&e| {
-                                graph.get_edge(graph.get_edge(e).twin).bubble == neighbor_key
+                                graph
+                                    .vertices
+                                    .get_edge(graph.vertices.get_edge(e).twin)
+                                    .bubble
+                                    == neighbor_key
                             })
                             .cloned();
 
                         if let Some(ekey) = edge_to_neighbor {
-                            to_remove.push((graph.get_edge(ekey).twin, true));
+                            to_remove.push((graph.vertices.get_edge(ekey).twin, true));
                         }
                     }
                 }

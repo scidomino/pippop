@@ -1,7 +1,8 @@
 use super::edge::EdgeKey;
 use macroquad::math::Vec2;
 use macroquad::prelude::Color;
-use slotmap::new_key_type;
+use slotmap::{new_key_type, SlotMap};
+use std::ops::{Deref, DerefMut};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BubbleStyle {
@@ -116,6 +117,62 @@ impl Bubble {
             return 1.0;
         }
         self.style.get_target_area() / area.max(100.0)
+    }
+}
+
+pub struct BubbleSet {
+    pub inner: SlotMap<BubbleKey, Bubble>,
+}
+
+impl BubbleSet {
+    pub fn new() -> Self {
+        Self {
+            inner: SlotMap::with_key(),
+        }
+    }
+
+    pub fn get_player_bubble(&self) -> Option<BubbleKey> {
+        self.inner
+            .iter()
+            .find_map(|(k, b)| matches!(b.style, BubbleStyle::Player).then_some(k))
+    }
+
+    pub fn get_open_air(&self) -> BubbleKey {
+        self.inner
+            .iter()
+            .find_map(|(k, b)| matches!(b.style, BubbleStyle::OpenAir).then_some(k))
+            .expect("Graph must contain an open air bubble")
+    }
+}
+
+impl Deref for BubbleSet {
+    type Target = SlotMap<BubbleKey, Bubble>;
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl DerefMut for BubbleSet {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
+}
+
+impl<'a> IntoIterator for &'a BubbleSet {
+    type Item = (BubbleKey, &'a Bubble);
+    type IntoIter = slotmap::basic::Iter<'a, BubbleKey, Bubble>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.inner.iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a mut BubbleSet {
+    type Item = (BubbleKey, &'a mut Bubble);
+    type IntoIter = slotmap::basic::IterMut<'a, BubbleKey, Bubble>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.inner.iter_mut()
     }
 }
 

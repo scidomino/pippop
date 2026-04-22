@@ -72,7 +72,7 @@ impl SpawnManager {
         let nearby_colors: Vec<_> = vertex
             .edges
             .iter()
-            .flat_map(|e| [e.bubble, graph.get_edge(e.twin).bubble])
+            .flat_map(|e| [e.bubble, graph.vertices.get_edge(e.twin).bubble])
             .filter_map(|bkey| match graph.bubbles.get(bkey)?.style {
                 BubbleStyle::Standard { color, .. } => Some(color),
                 _ => None,
