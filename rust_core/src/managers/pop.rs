@@ -94,12 +94,7 @@ impl PopManager {
                 to_remove.push((ekey, false));
             } else {
                 // If not touching open air, check if it's tiny
-                // We use the area contribution from the physics model for accuracy
-                let area = bubble
-                    .edges
-                    .iter()
-                    .map(|&e| graph.vertices.get_bezier(e).area())
-                    .sum::<f32>();
+                let area = bubble.area;
                 if area < UNNOTICEABLE_AREA {
                     // Find a neighbor that shares exactly one edge to merge into
                     if let Some((&neighbor_key, _)) =

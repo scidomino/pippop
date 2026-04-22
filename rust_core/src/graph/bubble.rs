@@ -80,6 +80,12 @@ pub struct Bubble {
     /// A clockwise sequence of half-edges that form the continuous boundary
     /// of this bubble. For every edge in this list, `edge.bubble == this bubble`.
     pub edges: Vec<EdgeKey>,
+    /// The cached 2D area of the bubble in world space.
+    /// Updated during `Graph::update_cache` and used for physics pressure calculations.
+    pub area: f32,
+    /// The cached geometric center (center of mass) of the bubble.
+    /// Updated during `Graph::update_cache` and used for UI labels and physics targets.
+    pub centroid: Vec2,
 }
 
 impl Bubble {
@@ -87,6 +93,8 @@ impl Bubble {
         Bubble {
             style,
             edges: Vec::new(),
+            area: 0.0,
+            centroid: Vec2::ZERO,
         }
     }
 
@@ -112,11 +120,11 @@ impl Bubble {
             != 0
     }
 
-    pub fn get_pressure(&self, area: f32) -> f32 {
+    pub fn get_pressure(&self) -> f32 {
         if matches!(self.style, BubbleStyle::OpenAir) {
             return 1.0;
         }
-        self.style.get_target_area() / area.max(100.0)
+        self.style.get_target_area() / self.area.max(100.0)
     }
 }
 
@@ -205,7 +213,7 @@ mod tests {
         let bubble = &graph.bubbles[bkey];
 
         // The centroid of a valid bubble should be inside it
-        let centroid = crate::graphics::geometry::calculate_centroid(&graph, bkey);
+        let centroid = graph.bubbles[bkey].centroid;
         assert!(bubble.contains(centroid, &graph));
 
         // A point far outside the graph should not be inside

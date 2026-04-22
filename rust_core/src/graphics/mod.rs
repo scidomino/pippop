@@ -43,7 +43,7 @@ impl Renderer {
             .filter_map(|(bkey, bubble)| {
                 let mut points = bubble::get_bubble_points(graph, bkey);
                 (!points.is_empty()).then(|| {
-                    let centroid = geometry::calculate_centroid(graph, bkey);
+                    let centroid = bubble.centroid;
 
                     if let BubbleStyle::Popping { size, timer, .. } = bubble.style {
                         let progress = (timer / 0.5).clamp(0.0, 1.0);
@@ -61,18 +61,18 @@ impl Renderer {
         if let Some(swap) = &swap_manager.active_swap {
             let center = graph.vertices.get_edge(swap.edge).point.position;
 
-            for (bkey, style, points, centroid) in &bubble_render_data {
+            for (bkey, style, points, _centroid) in &bubble_render_data {
                 if *bkey == swap.top_bkey || *bkey == swap.bottom_bkey {
                     continue;
                 }
-                bubble::draw_bubble_body(style, points, *centroid);
+                bubble::draw_bubble_body(style, points);
             }
 
             // Draw the two swapping bubbles with morphing
             self.draw_swapping_bubbles(graph, swap, center);
         } else {
-            for (_, style, points, centroid) in &bubble_render_data {
-                bubble::draw_bubble_body(style, points, *centroid);
+            for (_, style, points, _centroid) in &bubble_render_data {
+                bubble::draw_bubble_body(style, points);
             }
         }
 
@@ -146,8 +146,8 @@ impl Renderer {
         let morphed_bottom =
             geometry::tween_points(&rotated_bottom_start, &rotated_bottom_end, swap.progress);
 
-        bubble::draw_bubble_body(&swap.top_style, &morphed_top, center);
-        bubble::draw_bubble_body(&swap.bottom_style, &morphed_bottom, center);
+        bubble::draw_bubble_body(&swap.top_style, &morphed_top);
+        bubble::draw_bubble_body(&swap.bottom_style, &morphed_bottom);
     }
 
     fn apply_pop_morph(

@@ -335,32 +335,6 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
     }
 }
 
-use crate::graph::bubble::BubbleKey;
-use crate::graph::Graph;
-
-pub fn calculate_centroid(graph: &Graph, bkey: BubbleKey) -> Vec2 {
-    let bubble = &graph.bubbles[bkey];
-    if bubble.edges.is_empty() {
-        return Vec2::ZERO;
-    }
-
-    let mut area = 0.0;
-    let mut centroid_sum = Vec2::ZERO;
-
-    for &ekey in &bubble.edges {
-        let bezier = graph.vertices.get_bezier(ekey);
-        area += bezier.area();
-        centroid_sum += bezier.centroid_contribution();
-    }
-
-    if area.abs() < 1e-6 {
-        let bezier = graph.vertices.get_bezier(bubble.edges[0]);
-        return (bezier.s + bezier.e + 3.0 * (bezier.sc + bezier.ec)) / 8.0;
-    }
-
-    centroid_sum / area
-}
-
 fn calculate_half_partial_centroid(
     sx: f32,
     sy: f32,

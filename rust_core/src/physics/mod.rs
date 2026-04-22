@@ -23,6 +23,7 @@ pub fn advance_frame(graph: &mut Graph) {
     let accels = solve_edge(graph, &force, &vertex_accels);
 
     accelerate(graph, &accels);
+    graph.update_cache();
 }
 
 fn solve_vertex(graph: &Graph, force: &GraphVector) -> SecondaryMap<VertexKey, Vec2> {

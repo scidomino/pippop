@@ -55,6 +55,7 @@ impl Graph {
             let b = self.bubbles.insert(Bubble::new(s));
             self.rebubble(b, e);
         }
+        self.update_cache();
     }
 
     /// Removes an edge and its twin by removing their vertices and merging the two bubbles they separate.
@@ -151,6 +152,7 @@ impl Graph {
             log::info!("remove_edge: found degenerate edge {:?}", degenerate);
             self.slide(degenerate);
         }
+        self.update_cache();
     }
 
     /// When a wall gets too short, We change its orientation: moving its
@@ -207,6 +209,7 @@ impl Graph {
         self.rebubble(b_bottom, tkey);
         self.rebubble(b_left, ekey_prev);
         self.rebubble(b_right, tkey_prev);
+        self.update_cache();
     }
 
     fn link_twins(&mut self, a: EdgeKey, b: EdgeKey) {
@@ -233,6 +236,50 @@ impl Graph {
         );
     }
 
+    pub fn update_cache(&mut self) {
+        let Graph { vertices, bubbles } = self;
+
+        // 1. Update edges
+        let vkeys: Vec<_> = vertices.inner.keys().collect();
+        for vkey in vkeys {
+            for offset in 0..3 {
+                let ekey = EdgeKey::new(vkey, offset as u8);
+                let bezier = vertices.get_bezier(ekey);
+                let half_area = bezier.half_area_contribution();
+                let centroid_contribution = bezier.centroid_contribution();
+
+                let edge = vertices.get_edge_mut(ekey);
+                edge.half_area = half_area;
+                edge.centroid_contribution = centroid_contribution;
+            }
+        }
+
+        // 2. Update bubbles
+        for bubble in bubbles.values_mut() {
+            let mut total_area = 0.0;
+            let mut total_centroid = Vec2::ZERO;
+
+            for &ekey in &bubble.edges {
+                let edge = vertices.get_edge(ekey);
+                let twin_edge = vertices.get_edge(edge.twin);
+
+                total_area += edge.half_area - twin_edge.half_area;
+                total_centroid += edge.centroid_contribution;
+            }
+
+            bubble.area = total_area;
+            if total_area.abs() < 1e-6 {
+                if !bubble.edges.is_empty() {
+                    bubble.centroid = vertices[bubble.edges[0].vertex].point.position;
+                } else {
+                    bubble.centroid = Vec2::ZERO;
+                }
+            } else {
+                bubble.centroid = total_centroid / total_area;
+            }
+        }
+    }
+
     pub fn get_closest_otter_swappable(&self, point: Vec2) -> Option<EdgeKey> {
         let player_bkey = self.bubbles.get_player_bubble()?;
 
@@ -244,7 +291,7 @@ impl Graph {
                 let bkey = self.vertices.get_edge(twin_ekey).bubble;
 
                 if let BubbleStyle::Standard { .. } = self.bubbles[bkey].style {
-                    let centroid = crate::graphics::geometry::calculate_centroid(self, bkey);
+                    let centroid = self.bubbles[bkey].centroid;
                     Some((twin_ekey, centroid.distance_squared(point)))
                 } else {
                     None
@@ -259,7 +306,7 @@ impl Graph {
         dump.push_str("--- Graph State Dump ---\n");
 
         dump.push_str(&format!("Vertices: {}\n", self.vertices.len()));
-        for (vkey, vertex) in &self.vertices {
+        for (vkey, vertex) in &self.vertices.inner {
             dump.push_str(&format!(
                 "  Vertex {:?}: pos={:?}, vel={:?}\n",
                 vkey, vertex.point.position, vertex.point.velocity
@@ -273,16 +320,11 @@ impl Graph {
         }
 
         dump.push_str(&format!("\nBubbles: {}\n", self.bubbles.len()));
-        for (bkey, bubble) in &self.bubbles {
-            let area: f32 = bubble
-                .edges
-                .iter()
-                .map(|&e| self.vertices.get_bezier(e).area())
-                .sum();
-            let pressure = bubble.get_pressure(area);
+        for (bkey, bubble) in &self.bubbles.inner {
+            let pressure = bubble.get_pressure();
             dump.push_str(&format!(
                 "  Bubble {:?}: style={:?}, area={:.2}, pressure={:.2}\n",
-                bkey, bubble.style, area, pressure
+                bkey, bubble.style, bubble.area, pressure
             ));
             dump.push_str(&format!("    Edges: {:?}\n", bubble.edges));
         }
@@ -360,6 +402,7 @@ impl Graph {
         self.rebubble(bkeys[1], ekeys[1]);
         self.rebubble(bkeys[2], ekeys[2]);
         self.rebubble(bkeys[0], new_ekeys2[0]);
+        self.update_cache();
     }
 }
 
@@ -406,7 +449,7 @@ mod tests {
         let b2 = graph.bubbles.keys().nth(1).unwrap();
 
         // Find a point near b2
-        let centroid2 = crate::graphics::geometry::calculate_centroid(&graph, b2);
+        let centroid2 = graph.bubbles[b2].centroid;
 
         let closest = graph.get_closest_otter_swappable(centroid2);
         assert!(closest.is_some());

@@ -7,7 +7,7 @@ const GRAVITY_TARGET: Vec2 = vec2(0.0, 0.0);
 
 pub fn update_force(graph: &Graph, force: &mut GraphVector) {
     let oa_key = graph.get_open_air();
-    let bubble_center = crate::graphics::geometry::calculate_centroid(graph, oa_key);
+    let bubble_center = graph.bubbles[oa_key].centroid;
     let gravity_vec = (GRAVITY_TARGET - bubble_center) * GRAVITY_STRENGTH;
 
     for vkey in graph.vertices.keys() {

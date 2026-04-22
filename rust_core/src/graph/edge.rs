@@ -1,6 +1,7 @@
 use super::bubble::BubbleKey;
 use super::point::Point;
 use super::vertex::VertexKey;
+use macroquad::math::Vec2;
 
 /// A unique identifier for a directed half-edge in the graph.
 ///
@@ -50,6 +51,12 @@ pub struct Edge {
     /// The bubble bounded by this edge. By convention, traversing the edges
     /// of a bubble in a clockwise direction will have the bubble on the interior.
     pub bubble: BubbleKey,
+    /// The cached partial area contribution of this directed edge's Bezier curve.
+    /// Subtracting the twin's half_area from this yields the net area under the curve segment.
+    pub half_area: f32,
+    /// The cached partial centroid contribution of this directed edge's Bezier curve.
+    /// Summed over all edges of a bubble and divided by total area to compute the true centroid.
+    pub centroid_contribution: Vec2,
 }
 
 impl Edge {
@@ -58,6 +65,8 @@ impl Edge {
             point,
             twin: EdgeKey::default(),
             bubble: BubbleKey::default(),
+            half_area: 0.0,
+            centroid_contribution: Vec2::ZERO,
         }
     }
 }

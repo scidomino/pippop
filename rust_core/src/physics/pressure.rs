@@ -43,24 +43,9 @@ fn edge_pressure_force(b: &crate::graphics::geometry::Bezier) -> Vec2 {
 }
 
 fn get_bubble_to_pressure(graph: &Graph) -> SecondaryMap<BubbleKey, f32> {
-    let mut bubble_to_area: SecondaryMap<BubbleKey, f32> =
-        graph.bubbles.keys().map(|k| (k, 0.0)).collect();
-
-    for vkey in graph.vertices.keys() {
-        for ekey in vkey.edge_keys() {
-            let edge = graph.vertices.get_edge(ekey);
-            let bezier = graph.vertices.get_bezier(ekey);
-            let twin_bubble = graph.vertices.get_edge(edge.twin).bubble;
-
-            let half_area = bezier.half_area_contribution();
-            bubble_to_area[edge.bubble] += half_area;
-            bubble_to_area[twin_bubble] -= half_area;
-        }
-    }
-
     graph
         .bubbles
         .iter()
-        .map(|(key, bubble)| (key, bubble.get_pressure(bubble_to_area[key])))
+        .map(|(key, bubble)| (key, bubble.get_pressure()))
         .collect()
 }

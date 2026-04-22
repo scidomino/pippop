@@ -21,7 +21,7 @@ pub fn push_edge_points(graph: &Graph, ekey: crate::graph::edge::EdgeKey, points
     graph.vertices.get_bezier(ekey).flatten(points);
 }
 
-pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2], _centroid: Vec2) {
+pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2]) {
     if points.is_empty() {
         return;
     }
