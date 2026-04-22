@@ -16,7 +16,7 @@ A 2-D bubble-swapping puzzle game without a grid! Join 5 bubbles of the same col
 
 # History
 
-I started working on this game as a hobby project way back in 2004. I always meant to get it working well enough to publish it and even got it into beta, but I never got it 100% right. I went through many iterations before I hit on the current system of approximating the bubble walls with cubic beziers and using a full Euler-Lagrange technique.
+I started working on this game as a hobby project way back in 2004. I always meant to get it working well enough to publish it and even got it into beta, but I never got it 100% right. I went through many iterations before I hit on the current system of approximating the bubble walls with cubic beziers and using a full Euler-Lagrange technique. You can read more about the underlying physics and math in [bubblemath.pdf](docs/bubblemath.pdf).
 
 In 2018, Stu Denman at Pine Street Codeworks independently developed a similar idea and published [Tiny Bubbles](https://play.google.com/store/apps/details?id=com.pinestreetcodeworks.TinyBubbles&hl=en_US) which won many well-deserved awards. Honestly, it's a lot better than my game ever was, and I feel a tiny bit vindicated that he proved the idea was a good one, even if I never found time to properly execute it.
 
