@@ -120,7 +120,14 @@ impl Bubble {
         if matches!(self.style, BubbleStyle::OpenAir) {
             return 1.0;
         }
-        self.style.get_target_area() / self.area.max(1.0)
+        let target = self.style.get_target_area();
+        // Use a safe floor for area to prevent division by zero or explosive pressures.
+        // For negative areas (inverted bubbles), we use a softer linear extension
+        // to provide a "healing" gradient without the massive magnitude that breaks stability.
+        if self.area < 100.0 {
+            return (target / 100.0) + (100.0 - self.area) * 0.01;
+        }
+        target / self.area
     }
 }
 
