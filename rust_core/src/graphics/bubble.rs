@@ -21,7 +21,7 @@ pub fn push_edge_points(graph: &Graph, ekey: crate::graph::edge::EdgeKey, points
     graph.vertices.get_bezier(ekey).flatten(points);
 }
 
-pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2]) {
+pub fn draw_bubble(style: &BubbleStyle, points: &[Vec2], centroid: Vec2, font: &Font) {
     if points.is_empty() {
         return;
     }
@@ -38,12 +38,38 @@ pub fn draw_bubble_body(style: &BubbleStyle, points: &[Vec2]) {
 
     // Draw Fill (Ear Clipping Triangulation)
     // This perfectly handles concave shapes with zero overdraw, eliminating spikes.
-    let triangles = geometry::triangulate(points);
-    for (p1, p2, p3) in triangles {
+    for (p1, p2, p3) in geometry::triangulate(points) {
         draw_triangle(p1, p2, p3, color);
     }
 
     // Draw Outline
-    let outline_mesh = geometry::generate_ribbon_mesh(points, 1.5, colors::WHITE, true);
-    draw_mesh(&outline_mesh);
+    draw_mesh(&geometry::generate_ribbon_mesh(
+        points,
+        1.5,
+        colors::WHITE,
+        true,
+    ));
+
+    // Draw Label
+    let label = match style {
+        BubbleStyle::Standard { size, .. } => format!("{size}"),
+        BubbleStyle::Player => "P".to_string(),
+        BubbleStyle::Popping { size, .. } => format!("{size}"),
+        _ => return,
+    };
+
+    let text_dims = measure_text(&label, Some(font), 64, 0.4);
+
+    draw_text_ex(
+        &label,
+        centroid.x - text_dims.width / 2.0,
+        centroid.y + text_dims.height / 2.0,
+        TextParams {
+            font: Some(font),
+            font_size: 64,
+            font_scale: 0.5,
+            color: colors::WHITE,
+            ..Default::default()
+        },
+    );
 }

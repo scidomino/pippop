@@ -25,7 +25,7 @@ impl BurstManager {
         }
     }
 
-    pub fn draw_world(&self, graph: &Graph) {
+    pub fn draw(&self, graph: &Graph) {
         if let Some(ekey) = self.active_edge {
             let mut points = Vec::with_capacity(12);
             bubble::push_edge_points(graph, ekey, &mut points);

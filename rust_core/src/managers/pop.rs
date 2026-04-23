@@ -21,7 +21,7 @@ impl PopManager {
         self.pending_pop == Some(bkey)
     }
 
-    pub fn draw_world(&self, graph: &Graph) {
+    pub fn draw(&self, graph: &Graph, font: &macroquad::text::Font) {
         if let Some(bkey) = self.pending_pop {
             let bubble = &graph.bubbles[bkey];
             let points = crate::graphics::bubble::get_bubble_points(graph, bkey);
@@ -32,7 +32,12 @@ impl PopManager {
             if let BubbleStyle::Popping { size, timer, .. } = bubble.style {
                 let progress = (timer / 0.5).clamp(0.0, 1.0);
                 let morphed_points = self.apply_pop_morph(&points, bubble.centroid, size, progress);
-                crate::graphics::bubble::draw_bubble_body(&bubble.style, &morphed_points);
+                crate::graphics::bubble::draw_bubble(
+                    &bubble.style,
+                    &morphed_points,
+                    bubble.centroid,
+                    font,
+                );
             }
         }
     }

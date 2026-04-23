@@ -27,7 +27,7 @@ impl HighlightManager {
         }
     }
 
-    pub fn draw_world(&self, graph: &Graph) {
+    pub fn draw(&self, graph: &Graph) {
         let glow_requests = self.get_glow_requests(graph);
         for (bkey, intensity) in glow_requests {
             let points = crate::graphics::bubble::get_bubble_points(graph, bkey);

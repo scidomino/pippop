@@ -2,7 +2,6 @@ pub mod bubble;
 pub mod colors;
 pub mod effects;
 pub mod geometry;
-pub mod ui;
 
 use self::effects::EffectsManager;
 use crate::graph::Graph;
@@ -45,18 +44,14 @@ impl Renderer {
             }
 
             let points = bubble::get_bubble_points(graph, bkey);
-            bubble::draw_bubble_body(&bubble.style, &points);
+            bubble::draw_bubble(&bubble.style, &points, bubble.centroid, &self.font);
         }
 
         // Delegate specialized rendering to managers
-        controller.pop_manager.draw_world(graph);
-        controller.swap_manager.draw_world(graph, &self.font);
-        controller.burst_manager.draw_world(graph);
-        controller.highlight_manager.draw_world(graph);
-
-        for (_, bubble) in &graph.bubbles {
-            ui::draw_bubble_label(&bubble.style, bubble.centroid, &self.font);
-        }
+        controller.pop_manager.draw(graph, &self.font);
+        controller.swap_manager.draw(graph, &self.font);
+        controller.burst_manager.draw(graph);
+        controller.highlight_manager.draw(graph);
 
         self.effects.draw(&self.font);
     }

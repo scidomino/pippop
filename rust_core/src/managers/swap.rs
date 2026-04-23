@@ -34,14 +34,14 @@ impl SwapManager {
         false
     }
 
-    pub fn draw_world(&self, graph: &Graph, font: &macroquad::text::Font) {
+    pub fn draw(&self, graph: &Graph, font: &macroquad::text::Font) {
         if let Some(swap) = &self.active_swap {
             let center = graph.vertices.get_edge(swap.edge).point.position;
-            self.draw_swapping_bubbles(graph, swap, center, font);
+            self.draw_bubbles(graph, swap, center, font);
         }
     }
 
-    fn draw_swapping_bubbles(
+    fn draw_bubbles(
         &self,
         graph: &Graph,
         swap: &ActiveSwap,
@@ -77,10 +77,7 @@ impl SwapManager {
         let morphed_bottom =
             geometry::tween_points(&rotated_bottom_start, &rotated_bottom_end, swap.progress);
 
-        bubble::draw_bubble_body(&swap.top_style, &morphed_top);
-        bubble::draw_bubble_body(&swap.bottom_style, &morphed_bottom);
-
-        // Draw Labels at rotated centroids
+        // Calculate rotated centroids
         let top_centroid = graph.bubbles[swap.top_bkey].centroid;
         let bottom_centroid = graph.bubbles[swap.bottom_bkey].centroid;
 
@@ -95,8 +92,14 @@ impl SwapManager {
             swap.progress * std::f32::consts::PI,
         )[0];
 
-        crate::graphics::ui::draw_bubble_label(&swap.top_style, rotated_top_centroid, font);
-        crate::graphics::ui::draw_bubble_label(&swap.bottom_style, rotated_bottom_centroid, font);
+        // Draw unified bubbles (body + label)
+        bubble::draw_bubble(&swap.top_style, &morphed_top, rotated_top_centroid, font);
+        bubble::draw_bubble(
+            &swap.bottom_style,
+            &morphed_bottom,
+            rotated_bottom_centroid,
+            font,
+        );
     }
 
     pub fn otter_swap(&mut self, graph: &mut Graph, point: Vec2) -> bool {
