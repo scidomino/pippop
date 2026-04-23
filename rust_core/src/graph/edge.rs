@@ -3,28 +3,83 @@ use super::point::Point;
 use super::vertex::VertexKey;
 use macroquad::math::Vec2;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[repr(u8)]
+pub enum Slot {
+    A = 0,
+    B = 1,
+    C = 2,
+}
+
+impl Slot {
+    pub fn all() -> [Self; 3] {
+        [Self::A, Self::B, Self::C]
+    }
+
+    pub fn next(self) -> Self {
+        match self {
+            Slot::A => Slot::B,
+            Slot::B => Slot::C,
+            Slot::C => Slot::A,
+        }
+    }
+
+    pub fn prev(self) -> Self {
+        match self {
+            Slot::A => Slot::C,
+            Slot::B => Slot::A,
+            Slot::C => Slot::B,
+        }
+    }
+}
+
+impl Default for Slot {
+    fn default() -> Self {
+        Slot::A
+    }
+}
+
+impl Slot {
+    pub const fn as_usize(self) -> usize {
+        self as usize
+    }
+}
+
+impl<T> std::ops::Index<Slot> for [T; 3] {
+    type Output = T;
+
+    fn index(&self, slot: Slot) -> &Self::Output {
+        &self[slot.as_usize()]
+    }
+}
+
+impl<T> std::ops::IndexMut<Slot> for [T; 3] {
+    fn index_mut(&mut self, slot: Slot) -> &mut Self::Output {
+        &mut self[slot.as_usize()]
+    }
+}
+
 /// A unique identifier for a directed half-edge in the graph.
 ///
 /// Instead of a global edge pool, edges are owned by their originating vertex.
-/// The key is a combination of the origin `VertexKey` and an `offset` (0, 1, or 2),
+/// The key is a combination of the origin `VertexKey` and a `Slot` (A, B, or C),
 /// representing which of the three outgoing slots this edge occupies.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct EdgeKey {
     pub vertex: VertexKey,
-    pub offset: u8, // 0, 1, or 2
+    pub slot: Slot,
 }
 
 impl EdgeKey {
-    pub fn new(vertex: VertexKey, offset: u8) -> Self {
-        assert!(offset < 3, "Offset must be 0, 1, or 2");
-        EdgeKey { vertex, offset }
+    pub fn new(vertex: VertexKey, slot: Slot) -> Self {
+        EdgeKey { vertex, slot }
     }
 
     // Returns the next edge key on the vertex in a clockwise direction
     pub fn next_on_vertex(&self) -> EdgeKey {
         EdgeKey {
             vertex: self.vertex,
-            offset: (self.offset + 1) % 3,
+            slot: self.slot.next(),
         }
     }
 
@@ -32,7 +87,7 @@ impl EdgeKey {
     pub fn prev_on_vertex(&self) -> EdgeKey {
         EdgeKey {
             vertex: self.vertex,
-            offset: (self.offset + 2) % 3,
+            slot: self.slot.prev(),
         }
     }
 }

@@ -4,7 +4,7 @@ pub mod point;
 pub mod vertex;
 
 use bubble::{Bubble, BubbleKey, BubbleSet, BubbleStyle};
-use edge::EdgeKey;
+use edge::{EdgeKey, Slot};
 use macroquad::math::Vec2;
 use vertex::{Vertex, VertexKey, VertexSet};
 
@@ -258,8 +258,8 @@ impl Graph {
         // 1. Update edges
         let vkeys: Vec<_> = vertices.inner.keys().collect();
         for vkey in vkeys {
-            for offset in 0..3 {
-                let ekey = EdgeKey::new(vkey, offset as u8);
+            for slot in Slot::all() {
+                let ekey = EdgeKey::new(vkey, slot);
                 let bezier = vertices.get_bezier(ekey);
                 let half_area = bezier.half_area_contribution();
                 let centroid_contribution = bezier.centroid_contribution();
@@ -327,10 +327,11 @@ impl Graph {
                 "  Vertex {:?}: pos={:?}, vel={:?}\n",
                 vkey, vertex.point.position, vertex.point.velocity
             ));
-            for (i, edge) in vertex.edges.iter().enumerate() {
+            for slot in Slot::all() {
+                let edge = &vertex.edges[slot];
                 dump.push_str(&format!(
-                    "    Edge {}: twin={:?}, bubble={:?}, ctrl_pos={:?}\n",
-                    i, edge.twin, edge.bubble, edge.point.position
+                    "    Edge {:?}: twin={:?}, bubble={:?}, ctrl_pos={:?}\n",
+                    slot, edge.twin, edge.bubble, edge.point.position
                 ));
             }
         }
@@ -606,10 +607,11 @@ mod tests {
         // Find an edge that separates two distinct standard bubbles
         let mut target_ekey = None;
         for (vkey, vertex) in &graph.vertices {
-            for (offset, edge) in vertex.edges.iter().enumerate() {
+            for slot in Slot::all() {
+                let edge = vertex.edge(vkey.slot(slot));
                 let twin_bubble = graph.vertices.get_edge(edge.twin).bubble;
                 if edge.bubble != oa_key && twin_bubble != oa_key && edge.bubble != twin_bubble {
-                    target_ekey = Some(vkey.edge_key(offset as u8));
+                    target_ekey = Some(vkey.slot(slot));
                     break;
                 }
             }

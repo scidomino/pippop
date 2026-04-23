@@ -1,4 +1,4 @@
-use super::edge::{Edge, EdgeKey};
+use super::edge::{Edge, EdgeKey, Slot};
 use super::point::Point;
 use slotmap::{new_key_type, SlotMap};
 use std::ops::{Deref, DerefMut};
@@ -8,13 +8,12 @@ new_key_type! {
 }
 
 impl VertexKey {
-    pub fn edge_key(self, offset: u8) -> EdgeKey {
-        assert!(offset < 3, "Offset must be 0, 1, or 2");
-        EdgeKey::new(self, offset)
+    pub fn slot(self, slot: super::edge::Slot) -> EdgeKey {
+        EdgeKey::new(self, slot)
     }
 
     pub fn edge_keys(self) -> [EdgeKey; 3] {
-        [self.edge_key(0), self.edge_key(1), self.edge_key(2)]
+        [self.slot(Slot::A), self.slot(Slot::B), self.slot(Slot::C)]
     }
 }
 
@@ -39,7 +38,7 @@ impl Vertex {
     }
 
     pub fn edge(&self, key: EdgeKey) -> Edge {
-        self.edges[key.offset as usize]
+        self.edges[key.slot]
     }
 }
 
@@ -55,16 +54,16 @@ impl VertexSet {
     }
 
     pub fn get_edge(&self, key: EdgeKey) -> &Edge {
-        &self.inner[key.vertex].edges[key.offset as usize]
+        &self.inner[key.vertex].edges[key.slot]
     }
 
     pub fn get_edge_mut(&mut self, key: EdgeKey) -> &mut Edge {
-        &mut self.inner[key.vertex].edges[key.offset as usize]
+        &mut self.inner[key.vertex].edges[key.slot]
     }
 
     pub fn get_edge_and_vertex(&self, key: EdgeKey) -> (&Edge, &Vertex) {
         let vertex = &self.inner[key.vertex];
-        (&vertex.edges[key.offset as usize], vertex)
+        (&vertex.edges[key.slot], vertex)
     }
 
     pub fn get_bezier(&self, ekey: EdgeKey) -> crate::graphics::geometry::Bezier {

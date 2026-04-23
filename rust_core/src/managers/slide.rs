@@ -1,4 +1,4 @@
-use crate::graph::edge::EdgeKey;
+use crate::graph::edge::{EdgeKey, Slot};
 use crate::graph::Graph;
 use std::collections::HashMap;
 
@@ -41,8 +41,9 @@ impl SlideManager {
 
     fn get_first_slidable(&self, graph: &Graph) -> Option<EdgeKey> {
         graph.vertices.iter().find_map(|(vkey, vertex)| {
-            vertex.edges.iter().enumerate().find_map(|(offset, edge)| {
-                let edge_key = vkey.edge_key(offset as u8);
+            Slot::all().into_iter().find_map(|slot| {
+                let edge_key = vkey.slot(slot);
+                let edge = vertex.edge(edge_key);
 
                 graph
                     .vertices

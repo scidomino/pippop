@@ -3,6 +3,7 @@ pub mod pressure;
 pub mod surface;
 pub mod vector;
 
+use crate::graph::edge::Slot;
 use crate::graph::point::Point;
 use crate::graph::vertex::VertexKey;
 use crate::graph::Graph;
@@ -76,8 +77,9 @@ fn solve_edge(
 fn accelerate(graph: &mut Graph, accels: &GraphVector) {
     for (key, vertex) in graph.vertices.iter_mut() {
         accelerate_point(&mut vertex.point, accels.get_vertex(key));
-        for (offset, edge) in vertex.edges.iter_mut().enumerate() {
-            let ekey = key.edge_key(offset as u8);
+        for slot in Slot::all() {
+            let ekey = key.slot(slot);
+            let edge = &mut vertex.edges[slot];
             accelerate_point(&mut edge.point, accels.get_edge(ekey));
         }
     }

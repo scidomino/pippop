@@ -30,7 +30,7 @@ impl GraphVector {
     pub fn get_edge(&self, key: EdgeKey) -> Vec2 {
         self.vertex_to_value
             .get(key.vertex)
-            .map_or(Vec2::ZERO, |p| p.edges[key.offset as usize])
+            .map_or(Vec2::ZERO, |p| p.edges[key.slot])
     }
 
     fn get_mut(&mut self, key: VertexKey) -> &mut Value {
@@ -42,7 +42,7 @@ impl GraphVector {
     }
 
     pub fn add_edge(&mut self, key: EdgeKey, value: Vec2) {
-        self.get_mut(key.vertex).edges[key.offset as usize] += value;
+        self.get_mut(key.vertex).edges[key.slot] += value;
     }
 
     pub fn clear(&mut self) {
@@ -53,6 +53,7 @@ impl GraphVector {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::graph::edge::Slot;
     use crate::graph::point::Point;
     use crate::graph::vertex::{Vertex, VertexKey};
     use slotmap::SlotMap;
@@ -79,7 +80,7 @@ mod tests {
     fn test_add_and_get_edge() {
         let mut sm: SlotMap<VertexKey, Vertex> = SlotMap::with_key();
         let v1 = sm.insert(Vertex::new(Point::default()));
-        let e1 = v1.edge_key(0);
+        let e1 = v1.slot(Slot::A);
         let mut gv = GraphVector::new();
         gv.add_edge(e1, Vec2::new(3.0, 4.0));
 
@@ -93,7 +94,7 @@ mod tests {
         let gv = GraphVector::new();
         let mut sm: SlotMap<VertexKey, Vertex> = SlotMap::with_key();
         let v1 = sm.insert(Vertex::new(Point::default()));
-        let e1 = v1.edge_key(0);
+        let e1 = v1.slot(Slot::A);
 
         let vertex_result = gv.get_vertex(v1);
 
@@ -108,7 +109,7 @@ mod tests {
         let mut gv = GraphVector::new();
         let mut sm: SlotMap<VertexKey, Vertex> = SlotMap::with_key();
         let v1 = sm.insert(Vertex::new(Point::default()));
-        let e1 = v1.edge_key(0);
+        let e1 = v1.slot(Slot::A);
 
         gv.add_vertex(v1, Vec2::new(1.0, 2.0));
         gv.add_vertex(v1, Vec2::new(1.5, 2.5));
@@ -130,7 +131,7 @@ mod tests {
         let mut gv = GraphVector::new();
         let mut sm: SlotMap<VertexKey, Vertex> = SlotMap::with_key();
         let v1 = sm.insert(Vertex::new(Point::default()));
-        let e1 = v1.edge_key(0);
+        let e1 = v1.slot(Slot::A);
 
         gv.add_vertex(v1, Vec2::new(1.0, 2.0));
         gv.add_edge(e1, Vec2::new(3.0, 4.0));

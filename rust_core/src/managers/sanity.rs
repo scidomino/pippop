@@ -1,4 +1,8 @@
-use crate::graph::{bubble::BubbleStyle, edge::EdgeKey, Graph};
+use crate::graph::{
+    bubble::BubbleStyle,
+    edge::{EdgeKey, Slot},
+    Graph,
+};
 use std::collections::HashSet;
 
 pub struct SanityManager;
@@ -100,8 +104,8 @@ impl SanityManager {
         if seen_edges.len() != total_half_edges {
             // Find which edges are missing
             for (vkey, _) in &graph.vertices {
-                for i in 0..3 {
-                    let ekey = EdgeKey::new(vkey, i as u8);
+                for slot in Slot::all() {
+                    let ekey = EdgeKey::new(vkey, slot);
                     if !seen_edges.contains(&ekey) {
                         return Err(format!("Edge {:?} is not owned by any bubble", ekey));
                     }
