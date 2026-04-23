@@ -9,16 +9,21 @@ pub fn get_bubble_points(graph: &Graph, bkey: crate::graph::bubble::BubbleKey) -
 }
 
 pub fn get_points_for_bubble(graph: &Graph, bubble: &Bubble) -> Vec<Vec2> {
-    let mut points = Vec::with_capacity(bubble.edges.len() * 12);
+    let mut total_points = 0;
+    for &ekey in &bubble.edges {
+        total_points += graph.vertices.get_edge(ekey).points.len();
+    }
+
+    let mut points = Vec::with_capacity(total_points);
 
     for &ekey in &bubble.edges {
-        push_edge_points(graph, ekey, &mut points);
+        points.extend_from_slice(&graph.vertices.get_edge(ekey).points);
     }
     points
 }
 
 pub fn push_edge_points(graph: &Graph, ekey: crate::graph::edge::EdgeKey, points: &mut Vec<Vec2>) {
-    graph.vertices.get_bezier(ekey).flatten(points);
+    points.extend_from_slice(&graph.vertices.get_edge(ekey).points);
 }
 
 pub fn draw_bubble(style: &BubbleStyle, points: &[Vec2], centroid: Vec2, font: &Font) {
@@ -38,7 +43,7 @@ pub fn draw_bubble(style: &BubbleStyle, points: &[Vec2], centroid: Vec2, font: &
 
     // Draw Fill (Ear Clipping Triangulation)
     // This perfectly handles concave shapes with zero overdraw, eliminating spikes.
-    for (p1, p2, p3) in geometry::triangulate(points) {
+    for &(p1, p2, p3) in geometry::triangulate(points).iter() {
         draw_triangle(p1, p2, p3, color);
     }
 

@@ -97,7 +97,7 @@ impl EdgeKey {
 /// In this half-edge data structure, every physical boundary between two
 /// vertices is represented by two directed `Edge`s (twins) pointing in opposite
 /// directions.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Edge {
     /// The physical control point used to curve the edge via Bezier interpolation.
     pub point: Point,
@@ -112,6 +112,8 @@ pub struct Edge {
     /// The cached partial centroid contribution of this directed edge's Bezier curve.
     /// Summed over all edges of a bubble and divided by total area to compute the true centroid.
     pub centroid_contribution: Vec2,
+    /// The flattened points of the Bezier curve (start-inclusive, end-exclusive).
+    pub points: Vec<Vec2>,
 }
 
 impl Edge {
@@ -122,6 +124,7 @@ impl Edge {
             bubble: BubbleKey::default(),
             half_area: 0.0,
             centroid_contribution: Vec2::ZERO,
+            points: Vec::new(),
         }
     }
 }

@@ -21,7 +21,7 @@ impl VertexKey {
 ///
 /// Following Plateau's Laws, the physics simulation drives the points
 /// to maintain 120-degree angles between the three outgoing half-edges.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Vertex {
     /// The physical location and velocity of this junction.
     pub point: Point,
@@ -33,12 +33,12 @@ impl Vertex {
     pub fn new(point: Point) -> Self {
         Vertex {
             point,
-            edges: [Edge::new(point); 3],
+            edges: [Edge::new(point), Edge::new(point), Edge::new(point)],
         }
     }
 
-    pub fn edge(&self, key: EdgeKey) -> Edge {
-        self.edges[key.slot]
+    pub fn edge(&self, key: EdgeKey) -> &Edge {
+        &self.edges[key.slot]
     }
 }
 
