@@ -2,7 +2,7 @@ pub mod bubble;
 pub mod colors;
 pub mod effects;
 pub mod geometry;
-mod ui;
+pub mod ui;
 
 use self::effects::EffectsManager;
 use crate::graph::Graph;
@@ -50,7 +50,7 @@ impl Renderer {
 
         // Delegate specialized rendering to managers
         controller.pop_manager.draw_world(graph);
-        controller.swap_manager.draw_world(graph);
+        controller.swap_manager.draw_world(graph, &self.font);
         controller.burst_manager.draw_world(graph);
         controller.highlight_manager.draw_world(graph);
 
