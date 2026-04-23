@@ -39,11 +39,10 @@ async fn main() {
     loop {
         let dt = get_frame_time();
 
-        // Set up camera to match Android's "Bubble Space" (Y-up)
         let aspect = screen_width() / screen_height();
         let camera = Camera2D {
             target: vec2(0.0, 0.0),
-            zoom: vec2(1.0 / 300.0, -aspect / 300.0),
+            zoom: vec2(1.0 / 300.0, aspect / 300.0),
             ..Default::default()
         };
 
@@ -95,6 +94,8 @@ async fn main() {
         // Rendering
         renderer.draw(&graph, &camera, &controller);
 
+        // Reset to default screen space for debug overlay
+        set_default_camera();
         draw_text(&format!("FPS: {:03}", get_fps()), 10.0, 30.0, 30.0, WHITE);
 
         next_frame().await

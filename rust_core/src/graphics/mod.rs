@@ -33,7 +33,7 @@ impl Renderer {
         camera: &Camera2D,
         controller: &crate::managers::game::GameController,
     ) {
-        // --- Pass 1: World Space (Bubbles & Managers) ---
+        // --- Pass 1: World Space (Bubbles, Managers, UI & Effects) ---
         set_camera(camera);
 
         for (bkey, bubble) in &graph.bubbles {
@@ -54,13 +54,10 @@ impl Renderer {
         controller.burst_manager.draw_world(graph);
         controller.highlight_manager.draw_world(graph);
 
-        // --- Pass 2: Screen Space (UI & Effects) ---
-        set_default_camera();
-
         for (_, bubble) in &graph.bubbles {
-            ui::draw_bubble_label(&bubble.style, bubble.centroid, camera, &self.font);
+            ui::draw_bubble_label(&bubble.style, bubble.centroid, &self.font);
         }
 
-        self.effects.draw(camera, &self.font);
+        self.effects.draw(&self.font);
     }
 }

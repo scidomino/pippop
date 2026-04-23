@@ -45,7 +45,7 @@ impl EffectsManager {
         });
     }
 
-    pub fn draw(&self, camera: &Camera2D, font: &Font) {
+    pub fn draw(&self, font: &Font) {
         for effect in &self.effects {
             match effect {
                 Effect::RisingPoints {
@@ -55,17 +55,12 @@ impl EffectsManager {
                     max_time,
                 } => {
                     let progress = 1.0 - (timer / max_time);
-
-                    // Project world position to screen pixels
-                    let screen_pos = camera.world_to_screen(*pos);
-                    let scale = screen_width() / 1200.0;
-                    let y_offset = progress * 100.0 * scale; // Rise by 100 world units
+                    let y_offset = progress * 50.0;
                     let alpha = *timer / max_time;
                     let color = Color::new(1.0, 1.0, 1.0, alpha);
 
-                    let target_pixel_size = 30.0 * scale;
-                    let font_size = 64; // High-res rasterization
-                    let font_scale = target_pixel_size / font_size as f32;
+                    let font_size = 64;
+                    let font_scale = 0.4;
 
                     let text_params = TextParams {
                         font: Some(font),
@@ -79,8 +74,8 @@ impl EffectsManager {
 
                     draw_text_ex(
                         text,
-                        screen_pos.x - text_dims.width / 2.0,
-                        screen_pos.y - y_offset,
+                        pos.x - text_dims.width / 2.0,
+                        pos.y - y_offset,
                         text_params,
                     );
                 }
