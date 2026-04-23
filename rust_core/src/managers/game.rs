@@ -1,4 +1,5 @@
 use crate::graph::Graph;
+use crate::managers::audio::AudioManager;
 use crate::managers::burst::BurstManager;
 use crate::managers::highlight::HighlightManager;
 use crate::managers::pop::PopManager;
@@ -25,10 +26,11 @@ pub struct GameController {
     pub pop_manager: PopManager,
     pub highlight_manager: HighlightManager,
     pub sanity_manager: SanityManager,
+    pub audio_manager: AudioManager,
 }
 
 impl GameController {
-    pub fn new(spawn_manager: SpawnManager) -> Self {
+    pub fn new(spawn_manager: SpawnManager, audio_manager: AudioManager) -> Self {
         Self {
             state: GameState::Normal,
             spawn_manager,
@@ -38,6 +40,7 @@ impl GameController {
             pop_manager: PopManager::new(),
             highlight_manager: HighlightManager::new(),
             sanity_manager: SanityManager::new(),
+            audio_manager,
         }
     }
 
@@ -73,7 +76,9 @@ impl GameController {
                     }
                 }
 
-                self.spawn_manager.possibly_spawn(graph);
+                if self.spawn_manager.possibly_spawn(graph) {
+                    self.audio_manager.play_spawn();
+                }
                 self.highlight_manager.update(dt);
 
                 if self.state == GameState::Normal && self.pop_manager.deflate_big_bubble(graph) {
@@ -81,7 +86,9 @@ impl GameController {
                 }
             }
             GameState::Popping => {
-                self.pop_manager.update(graph, dt);
+                if self.pop_manager.update(graph, dt) {
+                    self.audio_manager.play_pop();
+                }
                 if self.pop_manager.pending_pop.is_none() {
                     self.state = GameState::Normal;
                 }
@@ -101,6 +108,7 @@ impl GameController {
                         if graph.vertices.contains_key(ekey.vertex) {
                             let bkey = graph.vertices.get_edge(ekey).bubble;
                             self.burst_manager.burst(graph, ekey);
+                            self.audio_manager.play_burst();
                             if !self.burst_manager.find_and_set_next_burstable(graph, bkey) {
                                 self.burst_manager.active_edge = None;
                                 if self.burst_manager.find_and_set_burstable_edge(graph) {

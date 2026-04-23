@@ -42,11 +42,13 @@ impl SpawnManager {
         self.next_spawn_time -= dt;
     }
 
-    pub fn possibly_spawn(&mut self, graph: &mut Graph) {
+    pub fn possibly_spawn(&mut self, graph: &mut Graph) -> bool {
         if self.next_spawn_time < 0.0 {
             self.spawn(graph);
             self.next_spawn_time = self.get_next_spawn_time(graph.bubbles.len());
+            return true;
         }
+        false
     }
 
     fn spawn(&mut self, graph: &mut Graph) {

@@ -2,6 +2,7 @@ use macroquad::prelude::*;
 use rust_core::graph::Graph;
 use rust_core::graphics::colors;
 use rust_core::graphics::Renderer;
+use rust_core::managers::audio::AudioManager;
 use rust_core::managers::game::GameController;
 use rust_core::managers::spawn::{RatchetSpawnTimer, SpawnManager};
 use rust_core::physics;
@@ -32,7 +33,8 @@ async fn main() {
             doubling_time: 120.0,
         }),
     );
-    let mut controller = GameController::new(spawn_manager);
+    let audio_manager = AudioManager::new().await;
+    let mut controller = GameController::new(spawn_manager, audio_manager);
 
     loop {
         let dt = get_frame_time();

@@ -97,7 +97,7 @@ impl PopManager {
     }
 
     /// Updates timers for popping bubbles and handles transitions.
-    pub fn update(&mut self, graph: &mut Graph, dt: f32) {
+    pub fn update(&mut self, graph: &mut Graph, dt: f32) -> bool {
         if let Some(bkey) = self.pending_pop {
             if let Some(bubble) = graph.bubbles.get_mut(bkey) {
                 if let BubbleStyle::Popping { timer, .. } = &mut bubble.style {
@@ -105,12 +105,14 @@ impl PopManager {
                     if *timer <= 0.0 {
                         // "Pop" happened. Style target area is now 0.
                         self.pending_pop = None;
+                        return true;
                     }
                 }
             } else {
                 self.pending_pop = None;
             }
         }
+        false
     }
 
     /// Removes bubbles that have effectively deflated.
