@@ -24,14 +24,17 @@ pub struct SpawnManager {
     pub spawn_timer: Box<dyn SpawnTimer>,
     pub next_spawn_time: f32,
     pub total_play_time: f32,
+    pub next_color: Color,
 }
 impl SpawnManager {
     pub fn new(colors: Vec<Color>, spawn_timer: Box<dyn SpawnTimer>) -> Self {
+        let next_color = *colors.choose().expect("colors is non-empty");
         let mut manager = Self {
             colors,
             spawn_timer,
             next_spawn_time: 0.0,
             total_play_time: 0.0,
+            next_color,
         };
         manager.next_spawn_time = manager.get_next_spawn_time(3);
         manager
@@ -42,10 +45,21 @@ impl SpawnManager {
         self.next_spawn_time -= dt;
     }
 
+    pub fn draw(&self) {
+        let radius = 20.0 * 2.0f32.powf(-self.next_spawn_time);
+        if radius > 0.5 {
+            let x = macroquad::window::screen_width() - 30.0;
+            let y = 30.0;
+            macroquad::shapes::draw_circle(x, y, radius, self.next_color);
+            macroquad::shapes::draw_circle_lines(x, y, radius, 2.0, macroquad::prelude::WHITE);
+        }
+    }
+
     pub fn possibly_spawn(&mut self, graph: &mut Graph) -> bool {
         if self.next_spawn_time < 0.0 {
             self.spawn(graph);
             self.next_spawn_time = self.get_next_spawn_time(graph.bubbles.len());
+            self.next_color = *self.colors.choose().expect("colors is non-empty");
             return true;
         }
         false
@@ -58,34 +72,28 @@ impl SpawnManager {
             return;
         }
 
-        let vkey = *open_air_vertices.choose().unwrap();
-        let choices = self.get_distant_colors(graph, vkey);
+        let color = self.next_color;
 
-        let color = *choices
+        let vkey = *open_air_vertices
+            .iter()
+            .filter(|&&vkey| !self.vertex_borders_color(graph, vkey, color))
+            .copied()
+            .collect::<Vec<VertexKey>>()
             .choose()
-            .unwrap_or_else(|| self.colors.choose().unwrap());
+            .unwrap_or_else(|| open_air_vertices.choose().expect("open air has vertices"));
 
         graph.spawn(vkey, BubbleStyle::Standard { size: 1, color });
     }
 
-    fn get_distant_colors(&self, graph: &Graph, vkey: VertexKey) -> Vec<Color> {
-        let vertex = &graph.vertices[vkey];
-
-        let nearby_colors: Vec<_> = vertex
+    fn vertex_borders_color(&self, graph: &Graph, vkey: VertexKey, target_color: Color) -> bool {
+        (&graph.vertices[vkey])
             .edges
             .iter()
-            .flat_map(|e| [e.bubble, graph.vertices.get_edge(e.twin).bubble])
-            .filter_map(|bkey| match graph.bubbles.get(bkey)?.style {
-                BubbleStyle::Standard { color, .. } => Some(color),
-                _ => None,
+            .filter_map(|e| graph.bubbles.get(e.bubble))
+            .any(|bubble| match bubble.style {
+                BubbleStyle::Standard { color, .. } => color == target_color,
+                _ => false,
             })
-            .collect();
-
-        self.colors
-            .iter()
-            .filter(|c| !nearby_colors.contains(c))
-            .cloned()
-            .collect()
     }
 
     fn get_next_spawn_time(&self, bubble_count: usize) -> f32 {

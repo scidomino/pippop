@@ -54,5 +54,9 @@ impl Renderer {
         controller.highlight_manager.draw(graph);
 
         self.effects.draw(&self.font);
+
+        // --- Pass 2: Screen Space (UI) ---
+        set_default_camera();
+        controller.spawn_manager.draw();
     }
 }
