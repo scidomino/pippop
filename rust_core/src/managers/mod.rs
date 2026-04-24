@@ -5,5 +5,6 @@ pub mod highlight;
 pub mod pop;
 pub mod sanity;
 pub mod slide;
+pub mod smooth_swap;
 pub mod spawn;
 pub mod swap;

@@ -33,7 +33,7 @@ pub fn draw_bubble(style: &BubbleStyle, points: &[Vec2], centroid: Vec2, font: &
 
     let color = match style {
         BubbleStyle::Standard { color, .. } => *color,
-        BubbleStyle::Player => colors::TRANSPARENT_WHITE,
+        BubbleStyle::Player => colors::TRANSPARENT,
         BubbleStyle::Popping { color, timer, .. } => {
             let alpha = (*timer / 0.5).clamp(0.0, 1.0);
             Color::new(color.r, color.g, color.b, alpha)
@@ -58,7 +58,6 @@ pub fn draw_bubble(style: &BubbleStyle, points: &[Vec2], centroid: Vec2, font: &
     // Draw Label
     let label = match style {
         BubbleStyle::Standard { size, .. } => format!("{size}"),
-        BubbleStyle::Player => "P".to_string(),
         BubbleStyle::Popping { size, .. } => format!("{size}"),
         _ => return,
     };

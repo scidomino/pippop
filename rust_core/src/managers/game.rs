@@ -5,8 +5,8 @@ use crate::managers::highlight::HighlightManager;
 use crate::managers::pop::PopManager;
 use crate::managers::sanity::SanityManager;
 use crate::managers::slide::SlideManager;
+use crate::managers::smooth_swap::SmoothSwapManager;
 use crate::managers::spawn::SpawnManager;
-use crate::managers::swap::SwapManager;
 use macroquad::math::Vec2;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -22,7 +22,7 @@ pub struct GameController {
     pub spawn_manager: SpawnManager,
     pub slide_manager: SlideManager,
     pub burst_manager: BurstManager,
-    pub swap_manager: SwapManager,
+    pub swap_manager: SmoothSwapManager,
     pub pop_manager: PopManager,
     pub highlight_manager: HighlightManager,
     pub sanity_manager: SanityManager,
@@ -36,7 +36,7 @@ impl GameController {
             spawn_manager,
             slide_manager: SlideManager::new(),
             burst_manager: BurstManager::new(1),
-            swap_manager: SwapManager::new(),
+            swap_manager: SmoothSwapManager::new(),
             pop_manager: PopManager::new(),
             highlight_manager: HighlightManager::new(),
             sanity_manager: SanityManager::new(),

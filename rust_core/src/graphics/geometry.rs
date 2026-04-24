@@ -104,11 +104,15 @@ pub fn tween_points(a: &[Vec2], b: &[Vec2], progress: f32) -> Vec<Vec2> {
         (b, a, 1.0 - progress)
     };
 
-    let ratio = big.len() as f32 / small.len() as f32;
+    let ratio = (small.len() - 1) as f32 / (big.len() - 1) as f32;
     big.iter()
         .enumerate()
         .map(|(i, &p1)| {
-            let p2 = small[((i as f32 / ratio) as usize).min(small.len() - 1)];
+            let f = i as f32 * ratio;
+            let i_low = f.floor() as usize;
+            let i_high = (i_low + 1).min(small.len() - 1);
+            let t = f - i_low as f32;
+            let p2 = small[i_low].lerp(small[i_high], t);
             p1.lerp(p2, morph)
         })
         .collect()
