@@ -12,6 +12,11 @@ pub struct Renderer {
     pub effects: EffectsManager,
 }
 
+pub struct RenderContext<'a> {
+    pub graph: &'a Graph,
+    pub font: &'a Font,
+}
+
 impl Renderer {
     pub fn new() -> Self {
         let font_bytes = include_bytes!("../../assets/sniglet_extrabold.ttf");
@@ -32,6 +37,11 @@ impl Renderer {
         camera: &Camera2D,
         controller: &crate::managers::game::GameController,
     ) {
+        let ctx = RenderContext {
+            graph,
+            font: &self.font,
+        };
+
         // --- Pass 1: World Space (Bubbles, Managers, UI & Effects) ---
         set_camera(camera);
 
@@ -48,15 +58,15 @@ impl Renderer {
         }
 
         // Delegate specialized rendering to managers
-        controller.pop_manager.draw(graph, &self.font);
-        controller.swap_manager.draw(graph, &self.font);
-        controller.burst_manager.draw(graph);
-        controller.highlight_manager.draw(graph);
+        controller.pop_manager.draw(&ctx);
+        controller.swap_manager.draw(&ctx);
+        controller.burst_manager.draw(&ctx);
+        controller.highlight_manager.draw(&ctx);
 
-        self.effects.draw(&self.font);
+        self.effects.draw(&ctx);
 
         // --- Pass 2: Screen Space (UI) ---
         set_default_camera();
-        controller.spawn_manager.draw();
+        controller.spawn_manager.draw(&ctx);
     }
 }

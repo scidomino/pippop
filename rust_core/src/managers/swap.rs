@@ -34,22 +34,16 @@ impl SwapManager {
         false
     }
 
-    pub fn draw(&self, graph: &Graph, font: &macroquad::text::Font) {
+    pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
         if let Some(swap) = &self.active_swap {
-            let center = graph.vertices.get_edge(swap.edge).point.position;
-            self.draw_bubbles(graph, swap, center, font);
+            let center = ctx.graph.vertices.get_edge(swap.edge).point.position;
+            self.draw_bubbles(ctx, swap, center);
         }
     }
 
-    fn draw_bubbles(
-        &self,
-        graph: &Graph,
-        swap: &ActiveSwap,
-        center: Vec2,
-        font: &macroquad::text::Font,
-    ) {
-        let top_points = bubble::get_bubble_points(graph, swap.top_bkey);
-        let bottom_points = bubble::get_bubble_points(graph, swap.bottom_bkey);
+    fn draw_bubbles(&self, ctx: &crate::graphics::RenderContext, swap: &ActiveSwap, center: Vec2) {
+        let top_points = bubble::get_bubble_points(ctx.graph, swap.top_bkey);
+        let bottom_points = bubble::get_bubble_points(ctx.graph, swap.bottom_bkey);
 
         if top_points.is_empty() || bottom_points.is_empty() {
             return;
@@ -78,8 +72,8 @@ impl SwapManager {
             geometry::tween_points(&rotated_bottom_start, &rotated_bottom_end, swap.progress);
 
         // Calculate rotated centroids
-        let top_centroid = graph.bubbles[swap.top_bkey].centroid;
-        let bottom_centroid = graph.bubbles[swap.bottom_bkey].centroid;
+        let top_centroid = ctx.graph.bubbles[swap.top_bkey].centroid;
+        let bottom_centroid = ctx.graph.bubbles[swap.bottom_bkey].centroid;
 
         let rotated_top_centroid = geometry::rotate_points(
             &[top_centroid],
@@ -93,12 +87,17 @@ impl SwapManager {
         )[0];
 
         // Draw unified bubbles (body + label)
-        bubble::draw_bubble(&swap.top_style, &morphed_top, rotated_top_centroid, font);
+        bubble::draw_bubble(
+            &swap.top_style,
+            &morphed_top,
+            rotated_top_centroid,
+            ctx.font,
+        );
         bubble::draw_bubble(
             &swap.bottom_style,
             &morphed_bottom,
             rotated_bottom_centroid,
-            font,
+            ctx.font,
         );
     }
 

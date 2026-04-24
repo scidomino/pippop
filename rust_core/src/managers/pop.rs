@@ -21,10 +21,10 @@ impl PopManager {
         self.pending_pop == Some(bkey)
     }
 
-    pub fn draw(&self, graph: &Graph, font: &macroquad::text::Font) {
+    pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
         if let Some(bkey) = self.pending_pop {
-            let bubble = &graph.bubbles[bkey];
-            let points = crate::graphics::bubble::get_bubble_points(graph, bkey);
+            let bubble = &ctx.graph.bubbles[bkey];
+            let points = crate::graphics::bubble::get_bubble_points(ctx.graph, bkey);
             if points.is_empty() {
                 return;
             }
@@ -36,7 +36,7 @@ impl PopManager {
                     &bubble.style,
                     &morphed_points,
                     bubble.centroid,
-                    font,
+                    ctx.font,
                 );
             }
         }

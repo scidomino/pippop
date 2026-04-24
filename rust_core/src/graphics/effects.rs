@@ -45,7 +45,7 @@ impl EffectsManager {
         });
     }
 
-    pub fn draw(&self, font: &Font) {
+    pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
         for effect in &self.effects {
             match effect {
                 Effect::RisingPoints {
@@ -63,14 +63,14 @@ impl EffectsManager {
                     let font_scale = 0.4;
 
                     let text_params = TextParams {
-                        font: Some(font),
+                        font: Some(ctx.font),
                         font_size,
                         font_scale,
                         color,
                         ..Default::default()
                     };
 
-                    let text_dims = measure_text(text, Some(font), font_size, font_scale);
+                    let text_dims = measure_text(text, Some(ctx.font), font_size, font_scale);
 
                     draw_text_ex(
                         text,

@@ -27,10 +27,10 @@ impl HighlightManager {
         }
     }
 
-    pub fn draw(&self, graph: &Graph) {
-        let glow_requests = self.get_glow_requests(graph);
+    pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
+        let glow_requests = self.get_glow_requests(ctx.graph);
         for (bkey, intensity) in glow_requests {
-            let points = crate::graphics::bubble::get_bubble_points(graph, bkey);
+            let points = crate::graphics::bubble::get_bubble_points(ctx.graph, bkey);
             if !points.is_empty() {
                 let width = 20.0 * intensity;
                 let glow_mesh = geometry::generate_glow_mesh(&points, width, colors::WHITE, true);

@@ -25,12 +25,12 @@ impl BurstManager {
         }
     }
 
-    pub fn draw(&self, graph: &Graph) {
+    pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
         if let Some(ekey) = self.active_edge {
             let mut points = Vec::with_capacity(12);
-            bubble::push_edge_points(graph, ekey, &mut points);
-            let twin_key = graph.vertices.get_edge(ekey).twin;
-            points.push(graph.vertices[twin_key.vertex].point.position);
+            bubble::push_edge_points(ctx.graph, ekey, &mut points);
+            let twin_key = ctx.graph.vertices.get_edge(ekey).twin;
+            points.push(ctx.graph.vertices[twin_key.vertex].point.position);
 
             let progress = 1.0 - (self.timer / 0.5).clamp(0.0, 1.0);
             let width = 40.0 * progress;

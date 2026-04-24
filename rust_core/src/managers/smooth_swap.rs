@@ -33,37 +33,37 @@ impl SmoothSwapManager {
         false
     }
 
-    pub fn draw(&self, graph: &Graph, font: &macroquad::text::Font) {
+    pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
         if let Some(swap) = &self.active_swap {
-            self.draw_bubbles(graph, swap, font);
+            self.draw_bubbles(ctx, swap);
         }
     }
 
-    fn draw_bubbles(&self, graph: &Graph, swap: &ActiveSwap, font: &macroquad::text::Font) {
+    fn draw_bubbles(&self, ctx: &crate::graphics::RenderContext, swap: &ActiveSwap) {
         // 1. Get the shared edge points (wall) from the non-player's perspective
         // Since we rebubbled, the first edge in the bubble's edge list is the shared wall.
-        let mut e_points = graph.vertices.get_edge(swap.edge).points.clone();
-        e_points.push(graph.vertices[swap.twin.vertex].point.position);
+        let mut e_points = ctx.graph.vertices.get_edge(swap.edge).points.clone();
+        e_points.push(ctx.graph.vertices[swap.twin.vertex].point.position);
 
-        let mut t_points = graph.vertices.get_edge(swap.twin).points.clone();
-        t_points.push(graph.vertices[swap.edge.vertex].point.position);
+        let mut t_points = ctx.graph.vertices.get_edge(swap.twin).points.clone();
+        t_points.push(ctx.graph.vertices[swap.edge.vertex].point.position);
 
         // 2. Get full points for both
-        let mut np_points = graph.bubbles[swap.nonplayer_bkey]
+        let mut np_points = ctx.graph.bubbles[swap.nonplayer_bkey]
             .edges
             .iter()
             .skip(1)
-            .flat_map(|&ekey| graph.vertices.get_edge(ekey).points.clone())
+            .flat_map(|&ekey| ctx.graph.vertices.get_edge(ekey).points.clone())
             .collect::<Vec<Vec2>>();
-        np_points.push(graph.vertices[swap.edge.vertex].point.position);
+        np_points.push(ctx.graph.vertices[swap.edge.vertex].point.position);
 
-        let mut p_points = graph.bubbles[swap.player_bkey]
+        let mut p_points = ctx.graph.bubbles[swap.player_bkey]
             .edges
             .iter()
             .skip(1)
-            .flat_map(|&ekey| graph.vertices.get_edge(ekey).points.clone())
+            .flat_map(|&ekey| ctx.graph.vertices.get_edge(ekey).points.clone())
             .collect::<Vec<Vec2>>();
-        p_points.push(graph.vertices[swap.twin.vertex].point.position);
+        p_points.push(ctx.graph.vertices[swap.twin.vertex].point.position);
 
         if e_points.is_empty() || np_points.is_empty() || p_points.is_empty() {
             return;
@@ -80,35 +80,35 @@ impl SmoothSwapManager {
         combined_points.extend(part1);
 
         // 5. Calculate a centroid for the label (interpolation of centroids)
-        let np_centroid = graph.bubbles[swap.nonplayer_bkey].centroid;
-        let p_centroid = graph.bubbles[swap.player_bkey].centroid;
+        let np_centroid = ctx.graph.bubbles[swap.nonplayer_bkey].centroid;
+        let p_centroid = ctx.graph.bubbles[swap.player_bkey].centroid;
         let combined_centroid = np_centroid.lerp(p_centroid, swap.progress);
 
         bubble::draw_bubble(
             &BubbleStyle::Player,
             &crate::graphics::bubble::get_points_for_bubble(
-                graph,
-                &graph.bubbles[swap.player_bkey],
+                ctx.graph,
+                &ctx.graph.bubbles[swap.player_bkey],
             ),
-            graph.bubbles[swap.player_bkey].centroid,
-            font,
+            ctx.graph.bubbles[swap.player_bkey].centroid,
+            ctx.font,
         );
 
         bubble::draw_bubble(
             &BubbleStyle::Player,
             &crate::graphics::bubble::get_points_for_bubble(
-                graph,
-                &graph.bubbles[swap.nonplayer_bkey],
+                ctx.graph,
+                &ctx.graph.bubbles[swap.nonplayer_bkey],
             ),
-            graph.bubbles[swap.player_bkey].centroid,
-            font,
+            ctx.graph.bubbles[swap.player_bkey].centroid,
+            ctx.font,
         );
 
         bubble::draw_bubble(
             &swap.nonplayer_style,
             &combined_points,
             combined_centroid,
-            font,
+            ctx.font,
         );
     }
 
