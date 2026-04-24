@@ -44,8 +44,10 @@ impl HighlightManager {
     }
 
     pub fn set_point(&mut self, point: Option<Vec2>) {
-        self.point = point;
-        self.time = 0.0;
+        if point.is_some() || self.point.is_some() {
+            self.point = point;
+            self.time = 0.0;
+        }
     }
 
     pub fn get_glow_requests(&self, graph: &Graph) -> Vec<(crate::graph::bubble::BubbleKey, f32)> {
