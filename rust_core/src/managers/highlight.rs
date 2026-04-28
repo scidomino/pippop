@@ -44,9 +44,11 @@ impl HighlightManager {
     }
 
     pub fn set_point(&mut self, point: Option<Vec2>) {
-        if point.is_some() || self.point.is_some() {
+        if point.is_some() {
             self.point = point;
             self.time = 0.0;
+        } else {
+            self.point = None;
         }
     }
 

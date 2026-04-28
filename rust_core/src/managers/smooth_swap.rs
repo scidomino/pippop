@@ -112,7 +112,7 @@ impl SmoothSwapManager {
         );
     }
 
-    pub fn otter_swap(&mut self, graph: &mut Graph, point: Vec2) -> bool {
+    pub fn swap(&mut self, graph: &mut Graph, point: Vec2) -> bool {
         // Can't swap if already swapping
         if self.active_swap.is_some() {
             return false;

@@ -48,7 +48,7 @@ impl GameController {
         if self.state == GameState::Normal {
             if clicked {
                 if let Some(p) = point {
-                    if self.swap_manager.otter_swap(graph, p) {
+                    if self.swap_manager.swap(graph, p) {
                         self.state = GameState::Swapping;
                         self.highlight_manager.set_point(None);
                     }
