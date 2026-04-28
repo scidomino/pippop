@@ -332,8 +332,8 @@ impl Graph {
             for slot in Slot::all() {
                 let edge = &vertex.edges[slot];
                 dump.push_str(&format!(
-                    "    Edge {:?}: twin={:?}, bubble={:?}, ctrl_pos={:?}\n",
-                    slot, edge.twin, edge.bubble, edge.point.position
+                    "    Edge {:?}: twin={:?}, bubble={:?}, ctrl_pos={:?}, ctrl_vel={:?}\n",
+                    slot, edge.twin, edge.bubble, edge.point.position, edge.point.velocity
                 ));
             }
         }
