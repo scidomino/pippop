@@ -5,15 +5,14 @@ use crate::graphics::bubble;
 use crate::graphics::geometry;
 use macroquad::math::Vec2;
 
-const SWAP_TIME: f32 = 0.2; // 200ms in Android
+const SWAP_TIME: f32 = 0.2;
 
 pub struct ActiveSwap {
     pub edge: EdgeKey,
-    pub top_bkey: BubbleKey,
-    pub bottom_bkey: BubbleKey,
-    pub top_style: BubbleStyle,
-    pub bottom_style: BubbleStyle,
-    pub return_trip: bool,
+    pub twin: EdgeKey,
+    pub player_bkey: BubbleKey,
+    pub nonplayer_bkey: BubbleKey,
+    pub nonplayer_style: BubbleStyle,
     pub progress: f32, // 0.0 to 1.0
 }
 
@@ -29,79 +28,91 @@ impl SwapManager {
 
     pub fn is_handling(&self, bkey: BubbleKey) -> bool {
         if let Some(swap) = &self.active_swap {
-            return swap.top_bkey == bkey || swap.bottom_bkey == bkey;
+            return swap.player_bkey == bkey || swap.nonplayer_bkey == bkey;
         }
         false
     }
 
     pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
         if let Some(swap) = &self.active_swap {
-            let center = ctx.graph.vertices.get_edge(swap.edge).point.position;
-            self.draw_bubbles(ctx, swap, center);
+            self.draw_bubbles(ctx, swap);
         }
     }
 
-    fn draw_bubbles(&self, ctx: &crate::graphics::RenderContext, swap: &ActiveSwap, center: Vec2) {
-        let top_points = bubble::get_bubble_points(ctx.graph, swap.top_bkey);
-        let bottom_points = bubble::get_bubble_points(ctx.graph, swap.bottom_bkey);
+    fn draw_bubbles(&self, ctx: &crate::graphics::RenderContext, swap: &ActiveSwap) {
+        // 1. Get the shared edge points (wall) from the non-player's perspective
+        // Since we rebubbled, the first edge in the bubble's edge list is the shared wall.
+        let mut e_points = ctx.graph.vertices.get_edge(swap.edge).points.clone();
+        e_points.push(ctx.graph.vertices[swap.twin.vertex].point.position);
 
-        if top_points.is_empty() || bottom_points.is_empty() {
+        let mut t_points = ctx.graph.vertices.get_edge(swap.twin).points.clone();
+        t_points.push(ctx.graph.vertices[swap.edge.vertex].point.position);
+
+        // 2. Get full points for both
+        let mut np_points = ctx.graph.bubbles[swap.nonplayer_bkey]
+            .edges
+            .iter()
+            .skip(1)
+            .flat_map(|&ekey| ctx.graph.vertices.get_edge(ekey).points.clone())
+            .collect::<Vec<Vec2>>();
+        np_points.push(ctx.graph.vertices[swap.edge.vertex].point.position);
+
+        let mut p_points = ctx.graph.bubbles[swap.player_bkey]
+            .edges
+            .iter()
+            .skip(1)
+            .flat_map(|&ekey| ctx.graph.vertices.get_edge(ekey).points.clone())
+            .collect::<Vec<Vec2>>();
+        p_points.push(ctx.graph.vertices[swap.twin.vertex].point.position);
+
+        if e_points.is_empty() || np_points.is_empty() || p_points.is_empty() {
             return;
         }
 
-        // Top Bubble Animation
-        let rotated_top_start =
-            geometry::rotate_points(&top_points, center, swap.progress * std::f32::consts::PI);
-        let rotated_top_end = geometry::rotate_points(
-            &bottom_points,
-            center,
-            (swap.progress - 1.0) * std::f32::consts::PI,
-        );
-        let morphed_top =
-            geometry::tween_points(&rotated_top_start, &rotated_top_end, swap.progress);
+        // 3. Create the two parts of the tween
+        // Part 1: wall -> player
+        let part1 = geometry::tween_points(&e_points, &p_points, swap.progress);
+        // Part 2: nonplayer -> wall
+        let part2 = geometry::tween_points(&np_points, &t_points, swap.progress);
 
-        // Bottom Bubble Animation
-        let rotated_bottom_start =
-            geometry::rotate_points(&bottom_points, center, swap.progress * std::f32::consts::PI);
-        let rotated_bottom_end = geometry::rotate_points(
-            &top_points,
-            center,
-            (swap.progress - 1.0) * std::f32::consts::PI,
-        );
-        let morphed_bottom =
-            geometry::tween_points(&rotated_bottom_start, &rotated_bottom_end, swap.progress);
+        // 4. Combine into a single smooth polygon
+        let mut combined_points = part2;
+        combined_points.extend(part1);
 
-        // Calculate rotated centroids
-        let top_centroid = ctx.graph.bubbles[swap.top_bkey].centroid;
-        let bottom_centroid = ctx.graph.bubbles[swap.bottom_bkey].centroid;
+        // 5. Calculate a centroid for the label (interpolation of centroids)
+        let np_centroid = ctx.graph.bubbles[swap.nonplayer_bkey].centroid;
+        let p_centroid = ctx.graph.bubbles[swap.player_bkey].centroid;
+        let combined_centroid = np_centroid.lerp(p_centroid, swap.progress);
 
-        let rotated_top_centroid = geometry::rotate_points(
-            &[top_centroid],
-            center,
-            swap.progress * std::f32::consts::PI,
-        )[0];
-        let rotated_bottom_centroid = geometry::rotate_points(
-            &[bottom_centroid],
-            center,
-            swap.progress * std::f32::consts::PI,
-        )[0];
-
-        // Draw unified bubbles (body + label)
         bubble::draw_bubble(
-            &swap.top_style,
-            &morphed_top,
-            rotated_top_centroid,
+            &BubbleStyle::Player,
+            &crate::graphics::bubble::get_points_for_bubble(
+                ctx.graph,
+                &ctx.graph.bubbles[swap.player_bkey],
+            ),
+            ctx.graph.bubbles[swap.player_bkey].centroid,
             ctx.font,
         );
+
         bubble::draw_bubble(
-            &swap.bottom_style,
-            &morphed_bottom,
-            rotated_bottom_centroid,
+            &BubbleStyle::Player,
+            &crate::graphics::bubble::get_points_for_bubble(
+                ctx.graph,
+                &ctx.graph.bubbles[swap.nonplayer_bkey],
+            ),
+            ctx.graph.bubbles[swap.player_bkey].centroid,
+            ctx.font,
+        );
+
+        bubble::draw_bubble(
+            &swap.nonplayer_style,
+            &combined_points,
+            combined_centroid,
             ctx.font,
         );
     }
 
-    pub fn otter_swap(&mut self, graph: &mut Graph, point: Vec2) -> bool {
+    pub fn swap(&mut self, graph: &mut Graph, point: Vec2) -> bool {
         // Can't swap if already swapping
         if self.active_swap.is_some() {
             return false;
@@ -115,7 +126,7 @@ impl SwapManager {
         }
 
         if let Some(edge_key) = graph.get_closest_otter_swappable(point) {
-            self.start_swap(graph, edge_key, false);
+            self.start_swap(graph, edge_key);
             return true;
         }
 
@@ -126,29 +137,29 @@ impl SwapManager {
         if let Some(swap) = &mut self.active_swap {
             swap.progress += dt / SWAP_TIME;
 
-            let top_bkey = swap.top_bkey;
-            let bottom_bkey = swap.bottom_bkey;
+            let player_bkey = swap.player_bkey;
+            let nonplayer_bkey = swap.nonplayer_bkey;
 
             if swap.progress >= 1.0 {
                 // Perform the final style switch
-                graph.bubbles[top_bkey].style = swap.bottom_style;
-                graph.bubbles[bottom_bkey].style = swap.top_style;
+                graph.bubbles[player_bkey].style = swap.nonplayer_style;
+                graph.bubbles[nonplayer_bkey].style = BubbleStyle::Player;
 
                 self.active_swap = None;
                 return true;
             } else {
                 // Update the progress in the waiting styles for physics interpolation
-                let top_target_area = swap.top_style.get_target_area();
-                let bottom_target_area = swap.bottom_style.get_target_area();
+                let np_target_area = swap.nonplayer_style.get_target_area();
+                let p_target_area = BubbleStyle::Player.get_target_area();
 
-                graph.bubbles[top_bkey].style = BubbleStyle::Waiting {
-                    start_area: top_target_area,
-                    end_area: bottom_target_area,
+                graph.bubbles[nonplayer_bkey].style = BubbleStyle::Waiting {
+                    start_area: np_target_area,
+                    end_area: p_target_area,
                     progress: swap.progress,
                 };
-                graph.bubbles[bottom_bkey].style = BubbleStyle::Waiting {
-                    start_area: bottom_target_area,
-                    end_area: top_target_area,
+                graph.bubbles[player_bkey].style = BubbleStyle::Waiting {
+                    start_area: p_target_area,
+                    end_area: np_target_area,
                     progress: swap.progress,
                 };
             }
@@ -156,41 +167,38 @@ impl SwapManager {
         false
     }
 
-    fn start_swap(&mut self, graph: &mut Graph, edge_key: EdgeKey, return_trip: bool) {
+    fn start_swap(&mut self, graph: &mut Graph, edge_key: EdgeKey) {
         let twin_key = graph.vertices.get_edge(edge_key).twin;
 
-        let bottom_bkey = graph.vertices.get_edge(edge_key).bubble;
-        let top_bkey = graph.vertices.get_edge(twin_key).bubble;
+        let nonplayer_bkey = graph.vertices.get_edge(edge_key).bubble;
+        let player_bkey = graph.vertices.get_edge(twin_key).bubble;
 
         // Align bubble edge lists to start at the shared boundary for smooth tweening
-        graph.rebubble(bottom_bkey, edge_key);
-        graph.rebubble(top_bkey, twin_key);
+        graph.rebubble(nonplayer_bkey, edge_key);
+        graph.rebubble(player_bkey, twin_key);
 
-        let bottom_style = graph.bubbles[bottom_bkey].style;
-        let top_style = graph.bubbles[top_bkey].style;
+        let nonplayer_style = graph.bubbles[nonplayer_bkey].style;
+        let p_target_area = BubbleStyle::Player.get_target_area();
+        let np_target_area = nonplayer_style.get_target_area();
 
-        let top_target_area = top_style.get_target_area();
-        let bottom_target_area = bottom_style.get_target_area();
-
-        graph.bubbles[top_bkey].style = BubbleStyle::Waiting {
-            start_area: top_target_area,
-            end_area: bottom_target_area,
+        graph.bubbles[nonplayer_bkey].style = BubbleStyle::Waiting {
+            start_area: np_target_area,
+            end_area: p_target_area,
             progress: 0.0,
         };
 
-        graph.bubbles[bottom_bkey].style = BubbleStyle::Waiting {
-            start_area: bottom_target_area,
-            end_area: top_target_area,
+        graph.bubbles[player_bkey].style = BubbleStyle::Waiting {
+            start_area: p_target_area,
+            end_area: np_target_area,
             progress: 0.0,
         };
 
         self.active_swap = Some(ActiveSwap {
             edge: edge_key,
-            top_bkey,
-            bottom_bkey,
-            top_style,
-            bottom_style,
-            return_trip,
+            twin: twin_key,
+            player_bkey,
+            nonplayer_bkey,
+            nonplayer_style,
             progress: 0.0,
         });
     }
