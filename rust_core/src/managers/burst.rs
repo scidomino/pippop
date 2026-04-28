@@ -69,6 +69,13 @@ impl BurstManager {
             return;
         }
         graph.remove_edge(ekey);
+
+        // Every wall burst grants the player an extra swap
+        if let Some(player_bkey) = graph.bubbles.get_player_bubble() {
+            if let BubbleStyle::Player { swaps_left } = &mut graph.bubbles[player_bkey].style {
+                *swaps_left += 1;
+            }
+        }
     }
 
     /// Finds a bubble that has at least `threshold` burstable edges.
@@ -146,6 +153,48 @@ impl BurstManager {
                 c1 == c2
             }
             _ => false,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::graph::bubble::BubbleStyle;
+    use crate::graphics::colors;
+
+    #[test]
+    fn test_burst_increments_player_swaps() {
+        let mut graph = Graph::new();
+        graph.init(
+            BubbleStyle::Player { swaps_left: 5 },
+            BubbleStyle::Standard {
+                size: 1,
+                color: colors::TURQUOISE,
+            },
+        );
+
+        let vkey = graph.vertices.keys().next().unwrap();
+        graph.spawn(
+            vkey,
+            BubbleStyle::Standard {
+                size: 1,
+                color: colors::TURQUOISE,
+            },
+        );
+
+        let burst_manager = BurstManager::new(1);
+        let ekey = burst_manager
+            .find_burst_starter(&graph)
+            .expect("Should find a burstable edge");
+
+        burst_manager.burst(&mut graph, ekey);
+
+        let player_bkey = graph.bubbles.get_player_bubble().unwrap();
+        if let BubbleStyle::Player { swaps_left } = graph.bubbles[player_bkey].style {
+            assert_eq!(swaps_left, 6);
+        } else {
+            panic!("Expected Player style");
         }
     }
 }
