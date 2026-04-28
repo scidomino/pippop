@@ -7,12 +7,13 @@ use crate::graphics::geometry;
 use macroquad::prelude::*;
 use std::collections::HashSet;
 
+const FREEZE_DURATION: f32 = 0.5;
+
 pub struct BurstManager {
     threshold: usize,
     /// The edge currently being "frozen" for the burst animation.
     pub active_edge: Option<EdgeKey>,
     pub timer: f32,
-    freeze_duration: f32,
 }
 
 impl BurstManager {
@@ -21,7 +22,6 @@ impl BurstManager {
             threshold,
             active_edge: None,
             timer: 0.0,
-            freeze_duration: 0.5, // 500ms
         }
     }
 
@@ -32,7 +32,7 @@ impl BurstManager {
             let twin_key = ctx.graph.vertices.get_edge(ekey).twin;
             points.push(ctx.graph.vertices[twin_key.vertex].point.position);
 
-            let progress = 1.0 - (self.timer / 0.5).clamp(0.0, 1.0);
+            let progress = 1.0 - (self.timer / FREEZE_DURATION).clamp(0.0, 1.0);
             let width = 40.0 * progress;
             let glow_mesh = geometry::generate_glow_mesh(&points, width, colors::WHITE, false);
             draw_mesh(&glow_mesh);
@@ -89,7 +89,7 @@ impl BurstManager {
     pub fn find_and_set_burstable_edge(&mut self, graph: &Graph) -> bool {
         if let Some(ekey) = self.find_burst_starter(graph) {
             self.active_edge = Some(ekey);
-            self.timer = self.freeze_duration;
+            self.timer = FREEZE_DURATION;
             return true;
         }
         false
@@ -99,7 +99,7 @@ impl BurstManager {
     pub fn find_and_set_next_burstable(&mut self, graph: &Graph, bkey: BubbleKey) -> bool {
         if let Some(ekey) = self.find_burstable_edge_in_bubble(graph, bkey) {
             self.active_edge = Some(ekey);
-            self.timer = self.freeze_duration;
+            self.timer = FREEZE_DURATION;
             return true;
         }
         false
