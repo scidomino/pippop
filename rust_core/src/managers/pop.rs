@@ -1,6 +1,5 @@
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::Graph;
-use crate::managers::burst::BurstManager;
 use macroquad::math::{vec2, Vec2};
 
 const POPPING_TIME: f32 = 0.5;
@@ -121,7 +120,7 @@ impl PopManager {
     }
 
     /// Removes bubbles that have effectively deflated.
-    pub fn remove_deflated(&mut self, graph: &mut Graph, burst_manager: &BurstManager) {
+    pub fn remove_deflated(&mut self, graph: &mut Graph) {
         let mut to_remove = Vec::new();
 
         // Identify bubbles that should be removed
@@ -147,7 +146,7 @@ impl PopManager {
             }
 
             if let Some(ekey) = touches_open_air {
-                to_remove.push((ekey, false));
+                to_remove.push(ekey);
             } else {
                 // If not touching open air, check if it's tiny
                 let area = bubble.area;
@@ -170,19 +169,16 @@ impl PopManager {
                             .cloned();
 
                         if let Some(ekey) = edge_to_neighbor {
-                            to_remove.push((graph.vertices.get_edge(ekey).twin, true));
+                            to_remove.push(graph.vertices.get_edge(ekey).twin);
                         }
                     }
                 }
             }
         }
 
-        for (ekey, trigger_burst) in to_remove {
+        for ekey in to_remove {
             if graph.vertices.contains_key(ekey.vertex) {
                 graph.remove_edge(ekey);
-                if trigger_burst {
-                    burst_manager.burst_all(graph);
-                }
             }
         }
     }

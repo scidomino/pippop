@@ -67,7 +67,12 @@ impl GameController {
 
         match self.state {
             GameState::Normal => {
-                self.pop_manager.remove_deflated(graph, &self.burst_manager);
+                self.pop_manager.remove_deflated(graph);
+
+                // Check if any deflations caused a new match
+                if self.burst_manager.find_and_set_burstable_edge(graph) {
+                    self.state = GameState::Burst;
+                }
 
                 if self.slide_manager.slide_slidable_edges(graph, dt) {
                     // Sliding can create new matches
