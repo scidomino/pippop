@@ -456,7 +456,7 @@ mod tests {
 
         // Set first bubble to Player
         let bkey = graph.bubbles.keys().next().unwrap();
-        graph.bubbles[bkey].style = BubbleStyle::Player;
+        graph.bubbles[bkey].style = BubbleStyle::Player { swaps_left: 5 };
 
         assert_eq!(graph.bubbles.get_player_bubble(), Some(bkey));
     }
@@ -465,7 +465,7 @@ mod tests {
     fn test_get_closest_otter_swappable() {
         let mut graph = Graph::new();
         graph.init(
-            BubbleStyle::Player,
+            BubbleStyle::Player { swaps_left: 5 },
             BubbleStyle::Standard {
                 size: 1,
                 color: crate::graphics::colors::TURQUOISE,
@@ -490,7 +490,7 @@ mod tests {
     fn test_rebubble_reorders_edges() {
         let mut graph = Graph::new();
         graph.init(
-            BubbleStyle::Player,
+            BubbleStyle::Player { swaps_left: 5 },
             BubbleStyle::Standard {
                 size: 1,
                 color: crate::graphics::colors::TURQUOISE,

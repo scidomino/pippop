@@ -10,7 +10,9 @@ pub enum BubbleStyle {
         size: i32,
         color: Color,
     },
-    Player,
+    Player {
+        swaps_left: i32,
+    },
     OpenAir,
     Waiting {
         start_area: f32,
@@ -48,7 +50,7 @@ impl BubbleStyle {
     pub fn get_target_area(&self) -> f32 {
         match self {
             BubbleStyle::Standard { size, .. } => 3000.0 * (*size as f32).sqrt(),
-            BubbleStyle::Player => 3000.0,
+            BubbleStyle::Player { .. } => 3000.0,
             BubbleStyle::OpenAir => 0.0,
             BubbleStyle::Waiting {
                 start_area,
@@ -145,7 +147,7 @@ impl BubbleSet {
     pub fn get_player_bubble(&self) -> Option<BubbleKey> {
         self.inner
             .iter()
-            .find_map(|(k, b)| matches!(b.style, BubbleStyle::Player).then_some(k))
+            .find_map(|(k, b)| matches!(b.style, BubbleStyle::Player { .. }).then_some(k))
     }
 
     pub fn get_open_air(&self) -> BubbleKey {

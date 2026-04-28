@@ -48,7 +48,7 @@ impl GameController {
     pub fn new(resources: &Resources) -> Self {
         let mut graph = Graph::new();
         graph.init(
-            BubbleStyle::Player,
+            BubbleStyle::Player { swaps_left: 5 },
             BubbleStyle::Standard {
                 size: 1,
                 color: colors::TURQUOISE,

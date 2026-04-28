@@ -13,6 +13,8 @@ pub struct ActiveSwap {
     pub player_bkey: BubbleKey,
     pub nonplayer_bkey: BubbleKey,
     pub nonplayer_style: BubbleStyle,
+    pub player_style: BubbleStyle,
+    pub new_player_style: BubbleStyle,
     pub progress: f32, // 0.0 to 1.0
 }
 
@@ -85,7 +87,7 @@ impl SwapManager {
         let combined_centroid = np_centroid.lerp(p_centroid, swap.progress);
 
         bubble::draw_bubble(
-            &BubbleStyle::Player,
+            &swap.player_style,
             &crate::graphics::bubble::get_points_for_bubble(
                 ctx.graph,
                 &ctx.graph.bubbles[swap.player_bkey],
@@ -95,12 +97,12 @@ impl SwapManager {
         );
 
         bubble::draw_bubble(
-            &BubbleStyle::Player,
+            &swap.new_player_style,
             &crate::graphics::bubble::get_points_for_bubble(
                 ctx.graph,
                 &ctx.graph.bubbles[swap.nonplayer_bkey],
             ),
-            ctx.graph.bubbles[swap.player_bkey].centroid,
+            ctx.graph.bubbles[swap.nonplayer_bkey].centroid,
             ctx.font,
         );
 
@@ -141,16 +143,15 @@ impl SwapManager {
             let nonplayer_bkey = swap.nonplayer_bkey;
 
             if swap.progress >= 1.0 {
-                // Perform the final style switch
                 graph.bubbles[player_bkey].style = swap.nonplayer_style;
-                graph.bubbles[nonplayer_bkey].style = BubbleStyle::Player;
+                graph.bubbles[nonplayer_bkey].style = swap.new_player_style;
 
                 self.active_swap = None;
                 return true;
             } else {
                 // Update the progress in the waiting styles for physics interpolation
                 let np_target_area = swap.nonplayer_style.get_target_area();
-                let p_target_area = BubbleStyle::Player.get_target_area();
+                let p_target_area = swap.player_style.get_target_area();
 
                 graph.bubbles[nonplayer_bkey].style = BubbleStyle::Waiting {
                     start_area: np_target_area,
@@ -178,7 +179,15 @@ impl SwapManager {
         graph.rebubble(player_bkey, twin_key);
 
         let nonplayer_style = graph.bubbles[nonplayer_bkey].style;
-        let p_target_area = BubbleStyle::Player.get_target_area();
+        let player_style = graph.bubbles[player_bkey].style;
+        let new_player_style = match player_style {
+            BubbleStyle::Player { swaps_left } => BubbleStyle::Player {
+                swaps_left: (swaps_left - 1).max(0),
+            },
+            other => other,
+        };
+
+        let p_target_area = player_style.get_target_area();
         let np_target_area = nonplayer_style.get_target_area();
 
         graph.bubbles[nonplayer_bkey].style = BubbleStyle::Waiting {
@@ -199,6 +208,8 @@ impl SwapManager {
             player_bkey,
             nonplayer_bkey,
             nonplayer_style,
+            player_style,
+            new_player_style,
             progress: 0.0,
         });
     }
