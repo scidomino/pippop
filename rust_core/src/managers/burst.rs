@@ -128,8 +128,7 @@ mod tests {
 
     #[test]
     fn test_burst_increments_player_swaps() {
-        let mut graph = Graph::new();
-        graph.init(
+        let mut graph = Graph::new(
             BubbleStyle::Player { swaps_left: 5 },
             BubbleStyle::Standard {
                 size: 1,

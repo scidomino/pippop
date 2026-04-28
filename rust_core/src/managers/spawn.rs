@@ -143,8 +143,7 @@ mod tests {
 
     #[test]
     fn test_spawn_integration() {
-        let mut graph = Graph::new();
-        graph.init(
+        let mut graph = Graph::new(
             BubbleStyle::Standard {
                 size: 1,
                 color: colors::TURQUOISE,

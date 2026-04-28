@@ -24,38 +24,29 @@ pub struct Graph {
     pub bubbles: BubbleSet,
 }
 
-impl Default for Graph {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl Graph {
-    pub fn new() -> Self {
-        Graph {
+    pub fn new(s1: BubbleStyle, s2: BubbleStyle) -> Self {
+        let mut graph = Graph {
             vertices: VertexSet::new(),
             bubbles: BubbleSet::new(),
-        }
-    }
+        };
 
-    pub fn init(&mut self, s1: BubbleStyle, s2: BubbleStyle) {
-        self.vertices.clear();
-        self.bubbles.clear();
-
-        let v1 = self.vertices.insert(Vertex::new(Point::new(0.0, -50.0)));
-        let v2 = self.vertices.insert(Vertex::new(Point::new(0.0, 50.0)));
+        let v1 = graph.vertices.insert(Vertex::new(Point::new(0.0, -50.0)));
+        let v2 = graph.vertices.insert(Vertex::new(Point::new(0.0, 50.0)));
         let e1 = v1.edge_keys();
         let e2 = v2.edge_keys();
 
-        self.link_twins(e1[0], e2[0]);
-        self.link_twins(e1[1], e2[2]);
-        self.link_twins(e1[2], e2[1]);
+        graph.link_twins(e1[0], e2[0]);
+        graph.link_twins(e1[1], e2[2]);
+        graph.link_twins(e1[2], e2[1]);
 
         for (s, e) in [(s1, e1[0]), (s2, e1[1]), (BubbleStyle::OpenAir, e1[2])] {
-            let b = self.bubbles.insert(Bubble::new(s));
-            self.rebubble(b, e);
+            let b = graph.bubbles.insert(Bubble::new(s));
+            graph.rebubble(b, e);
         }
-        self.update_cache();
+        graph.update_cache();
+
+        graph
     }
 
     /// Removes an edge and its twin by removing their vertices and merging the two bubbles they separate.
@@ -439,8 +430,7 @@ mod tests {
 
     #[test]
     fn test_get_player_bubble() {
-        let mut graph = Graph::new();
-        graph.init(
+        let mut graph = Graph::new(
             BubbleStyle::Standard {
                 size: 1,
                 color: crate::graphics::colors::TURQUOISE,
@@ -463,8 +453,7 @@ mod tests {
 
     #[test]
     fn test_get_closest_otter_swappable() {
-        let mut graph = Graph::new();
-        graph.init(
+        let graph = Graph::new(
             BubbleStyle::Player { swaps_left: 5 },
             BubbleStyle::Standard {
                 size: 1,
@@ -488,8 +477,7 @@ mod tests {
 
     #[test]
     fn test_rebubble_reorders_edges() {
-        let mut graph = Graph::new();
-        graph.init(
+        let mut graph = Graph::new(
             BubbleStyle::Player { swaps_left: 5 },
             BubbleStyle::Standard {
                 size: 1,
@@ -517,8 +505,7 @@ mod tests {
 
     #[test]
     fn test_remove_edge_with_duplicate_neighbors() {
-        let mut graph = Graph::new();
-        graph.init(
+        let mut graph = Graph::new(
             BubbleStyle::Standard {
                 size: 1,
                 color: crate::graphics::colors::TURQUOISE,
@@ -581,9 +568,8 @@ mod tests {
 
     #[test]
     fn test_bridge_creation_and_resolution() {
-        let mut graph = Graph::new();
         // Create a large enough graph by spawning a few times
-        graph.init(
+        let mut graph = Graph::new(
             BubbleStyle::Standard {
                 size: 1,
                 color: crate::graphics::colors::TURQUOISE,

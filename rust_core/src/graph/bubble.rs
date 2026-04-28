@@ -197,8 +197,7 @@ mod tests {
 
     #[test]
     fn test_bubble_contains() {
-        let mut graph = Graph::new();
-        graph.init(
+        let mut graph = Graph::new(
             BubbleStyle::Standard {
                 size: 1,
                 color: crate::graphics::colors::TURQUOISE,

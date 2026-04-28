@@ -47,8 +47,7 @@ pub struct GameController {
 
 impl GameController {
     pub fn new(resources: &Resources) -> Self {
-        let mut graph = Graph::new();
-        graph.init(
+        let graph = Graph::new(
             BubbleStyle::Player { swaps_left: 5 },
             BubbleStyle::Standard {
                 size: 1,

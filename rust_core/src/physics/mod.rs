@@ -96,8 +96,7 @@ mod tests {
 
     #[test]
     fn test_advance_frame() {
-        let mut graph = Graph::new();
-        graph.init(
+        let mut graph = Graph::new(
             crate::graph::bubble::BubbleStyle::Standard {
                 size: 1,
                 color: crate::graphics::colors::TURQUOISE,
