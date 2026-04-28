@@ -1,6 +1,6 @@
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
-use crate::graphics::{colors, Renderer};
+use crate::graphics::{bubble, colors, RenderContext};
 use crate::managers::audio::AudioManager;
 use crate::managers::burst::BurstManager;
 use crate::managers::highlight::HighlightManager;
@@ -12,7 +12,7 @@ use crate::managers::spawn::{RatchetSpawnTimer, SpawnManager};
 use crate::managers::swap::SwapManager;
 use crate::resources::Resources;
 use macroquad::math::Vec2;
-use macroquad::prelude::Camera2D;
+use macroquad::prelude::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GameState {
@@ -30,7 +30,7 @@ pub struct Interaction {
 
 pub struct GameController {
     pub graph: Graph,
-    pub renderer: Renderer,
+    pub font: Font,
     pub state: GameState,
     pub physics_accumulator: f32,
     pub spawn_manager: SpawnManager,
@@ -57,7 +57,7 @@ impl GameController {
 
         Self {
             graph,
-            renderer: Renderer::new(resources),
+            font: resources.font.clone(),
             state: GameState::Normal,
             physics_accumulator: 0.0,
             spawn_manager: SpawnManager::new(
@@ -180,6 +180,41 @@ impl GameController {
     }
 
     pub fn draw(&self, camera: &Camera2D) {
-        self.renderer.draw(&self.graph, camera, self);
+        let ctx = RenderContext {
+            graph: &self.graph,
+            font: &self.font,
+        };
+
+        // --- Pass 1: World Space (Bubbles, Managers, UI) ---
+        set_camera(camera);
+
+        for (bkey, bubble) in &self.graph.bubbles {
+            if self.pop_manager.is_handling(bkey) {
+                continue;
+            }
+            if self.swap_manager.is_handling(bkey) {
+                continue;
+            }
+
+            let points = bubble::get_bubble_points(&self.graph, bkey);
+            bubble::draw_bubble(&bubble.style, &points, bubble.centroid, &self.font);
+        }
+
+        // Delegate specialized rendering to managers
+        self.pop_manager.draw(&ctx);
+        self.swap_manager.draw(&ctx);
+        self.burst_manager.draw(&ctx);
+        self.highlight_manager.draw(&ctx);
+
+        // --- Pass 2: Screen Space (UI) ---
+        set_default_camera();
+        self.spawn_manager.draw(&ctx);
+        draw_text(
+            &format!("FPS: {:03}", get_fps()),
+            10.0,
+            30.0,
+            30.0,
+            colors::WHITE,
+        );
     }
 }

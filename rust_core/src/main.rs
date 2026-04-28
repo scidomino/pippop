@@ -46,14 +46,8 @@ async fn main() {
         // Game Logic Update (includes physics and animation)
         controller.update(dt);
 
-        clear_background(BLACK);
-
         // Rendering
         controller.draw(&camera);
-
-        // Reset to default screen space for debug overlay
-        set_default_camera();
-        draw_text(&format!("FPS: {:03}", get_fps()), 10.0, 30.0, 30.0, WHITE);
 
         next_frame().await
     }
