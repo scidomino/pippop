@@ -17,6 +17,12 @@ pub enum GameState {
     Burst,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct Interaction {
+    pub position: Vec2,
+    pub is_clicked: bool,
+}
+
 pub struct GameController {
     pub state: GameState,
     pub spawn_manager: SpawnManager,
@@ -44,21 +50,20 @@ impl GameController {
         }
     }
 
-    pub fn handle_input(&mut self, graph: &mut Graph, point: Option<Vec2>, clicked: bool) {
+    pub fn handle_input(&mut self, graph: &mut Graph, interaction: Option<Interaction>) {
+        let mut new_highlight = None;
         if self.state == GameState::Normal {
-            if clicked {
-                if let Some(p) = point {
-                    if self.swap_manager.swap(graph, p) {
+            if let Some(i) = interaction {
+                if i.is_clicked {
+                    if self.swap_manager.swap(graph, i.position) {
                         self.state = GameState::Swapping;
-                        self.highlight_manager.set_point(None);
                     }
+                } else {
+                    new_highlight = Some(i.position);
                 }
-            } else {
-                self.highlight_manager.set_point(point);
             }
-        } else {
-            self.highlight_manager.set_point(None);
         }
+        self.highlight_manager.set_point(new_highlight);
     }
 
     pub fn update(&mut self, graph: &mut Graph, dt: f32) {

@@ -3,7 +3,7 @@ use rust_core::graph::Graph;
 use rust_core::graphics::colors;
 use rust_core::graphics::Renderer;
 use rust_core::managers::audio::AudioManager;
-use rust_core::managers::game::GameController;
+use rust_core::managers::game::{GameController, Interaction};
 use rust_core::managers::spawn::{RatchetSpawnTimer, SpawnManager};
 use rust_core::physics;
 
@@ -47,19 +47,8 @@ async fn main() {
         };
 
         // Input handling
-        let mut point = None;
-        let mut clicked = false;
-
-        if is_mouse_button_down(MouseButton::Left) {
-            let mouse_pos = mouse_position();
-            point = Some(camera.screen_to_world(vec2(mouse_pos.0, mouse_pos.1)));
-        } else if is_mouse_button_released(MouseButton::Left) {
-            let mouse_pos = mouse_position();
-            point = Some(camera.screen_to_world(vec2(mouse_pos.0, mouse_pos.1)));
-            clicked = true;
-        }
-
-        controller.handle_input(&mut graph, point, clicked);
+        let interaction = get_interaction(&camera);
+        controller.handle_input(&mut graph, interaction);
 
         if is_key_pressed(KeyCode::D) {
             let dump = graph.dump_state();
@@ -99,5 +88,23 @@ async fn main() {
         draw_text(&format!("FPS: {:03}", get_fps()), 10.0, 30.0, 30.0, WHITE);
 
         next_frame().await
+    }
+}
+
+fn get_interaction(camera: &Camera2D) -> Option<Interaction> {
+    if is_mouse_button_down(MouseButton::Left) {
+        let (x, y) = mouse_position();
+        Some(Interaction {
+            position: camera.screen_to_world(vec2(x, y)),
+            is_clicked: false,
+        })
+    } else if is_mouse_button_released(MouseButton::Left) {
+        let (x, y) = mouse_position();
+        Some(Interaction {
+            position: camera.screen_to_world(vec2(x, y)),
+            is_clicked: true,
+        })
+    } else {
+        None
     }
 }
