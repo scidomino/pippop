@@ -3,6 +3,7 @@ use crate::managers::audio::AudioManager;
 use crate::managers::burst::BurstManager;
 use crate::managers::highlight::HighlightManager;
 use crate::managers::pop::PopManager;
+use crate::managers::reap::ReapManager;
 use crate::managers::sanity::SanityManager;
 use crate::managers::slide::SlideManager;
 use crate::managers::spawn::SpawnManager;
@@ -30,6 +31,7 @@ pub struct GameController {
     pub burst_manager: BurstManager,
     pub swap_manager: SwapManager,
     pub pop_manager: PopManager,
+    pub reap_manager: ReapManager,
     pub highlight_manager: HighlightManager,
     pub sanity_manager: SanityManager,
     pub audio_manager: AudioManager,
@@ -44,6 +46,7 @@ impl GameController {
             burst_manager: BurstManager::new(1),
             swap_manager: SwapManager::new(),
             pop_manager: PopManager::new(),
+            reap_manager: ReapManager::new(),
             highlight_manager: HighlightManager::new(),
             sanity_manager: SanityManager::new(),
             audio_manager,
@@ -72,9 +75,9 @@ impl GameController {
 
         match self.state {
             GameState::Normal => {
-                self.pop_manager.remove_deflated(graph);
+                self.reap_manager.reap_popped(graph);
 
-                // Check if any deflations caused a new match
+                // Check if any reaped bubbles caused a new match
                 if self.burst_manager.find_and_set_burstable_edge(graph) {
                     self.state = GameState::Burst;
                 }
@@ -91,7 +94,7 @@ impl GameController {
                 }
                 self.highlight_manager.update(dt);
 
-                if self.state == GameState::Normal && self.pop_manager.deflate_big_bubble(graph) {
+                if self.state == GameState::Normal && self.pop_manager.start_pop_if_ready(graph) {
                     self.state = GameState::Popping;
                 }
             }

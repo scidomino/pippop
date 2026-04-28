@@ -3,6 +3,7 @@ pub mod burst;
 pub mod game;
 pub mod highlight;
 pub mod pop;
+pub mod reap;
 pub mod sanity;
 pub mod slide;
 pub mod spawn;

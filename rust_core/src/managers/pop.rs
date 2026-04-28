@@ -3,7 +3,6 @@ use crate::graph::Graph;
 use macroquad::math::{vec2, Vec2};
 
 const POPPING_TIME: f32 = 0.5;
-const UNNOTICEABLE_AREA: f32 = 100.0; // Slightly larger than Android to be safe with physics
 
 #[derive(Default)]
 pub struct PopManager {
@@ -70,7 +69,7 @@ impl PopManager {
     }
 
     /// Checks if any bubble is ready to pop and transitions it to the Popping state.
-    pub fn deflate_big_bubble(&mut self, graph: &mut Graph) -> bool {
+    pub fn start_pop_if_ready(&mut self, graph: &mut Graph) -> bool {
         if self.pending_pop.is_some() {
             return false;
         }
@@ -117,69 +116,5 @@ impl PopManager {
             }
         }
         false
-    }
-
-    /// Removes bubbles that have effectively deflated.
-    pub fn remove_deflated(&mut self, graph: &mut Graph) {
-        let mut to_remove = Vec::new();
-
-        // Identify bubbles that should be removed
-        for (_, bubble) in graph.bubbles.iter() {
-            if !matches!(bubble.style, BubbleStyle::Popping { timer, .. } if timer <= 0.0) {
-                continue;
-            }
-
-            // Check if it's small enough or touching OpenAir
-            let mut touches_open_air = None;
-            let mut adjacent_count = std::collections::HashMap::new();
-
-            for &ekey in &bubble.edges {
-                let twin_ekey = graph.vertices.get_edge(ekey).twin;
-                let twin_bubble_key = graph.vertices.get_edge(twin_ekey).bubble;
-                let twin_bubble = &graph.bubbles[twin_bubble_key];
-
-                if matches!(twin_bubble.style, BubbleStyle::OpenAir) {
-                    touches_open_air = Some(twin_ekey);
-                    break;
-                }
-                *adjacent_count.entry(twin_bubble_key).or_insert(0) += 1;
-            }
-
-            if let Some(ekey) = touches_open_air {
-                to_remove.push(ekey);
-            } else {
-                // If not touching open air, check if it's tiny
-                let area = bubble.area;
-                if area < UNNOTICEABLE_AREA {
-                    // Find a neighbor that shares exactly one edge to merge into
-                    if let Some((&neighbor_key, _)) =
-                        adjacent_count.iter().find(|&(_, &count)| count == 1)
-                    {
-                        // Find the edge that connects to this neighbor
-                        let edge_to_neighbor = bubble
-                            .edges
-                            .iter()
-                            .find(|&&e| {
-                                graph
-                                    .vertices
-                                    .get_edge(graph.vertices.get_edge(e).twin)
-                                    .bubble
-                                    == neighbor_key
-                            })
-                            .cloned();
-
-                        if let Some(ekey) = edge_to_neighbor {
-                            to_remove.push(graph.vertices.get_edge(ekey).twin);
-                        }
-                    }
-                }
-            }
-        }
-
-        for ekey in to_remove {
-            if graph.vertices.contains_key(ekey.vertex) {
-                graph.remove_edge(ekey);
-            }
-        }
     }
 }
