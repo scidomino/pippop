@@ -1,4 +1,5 @@
 use crate::graph::Graph;
+use crate::graphics::colors;
 use crate::managers::audio::AudioManager;
 use crate::managers::burst::BurstManager;
 use crate::managers::highlight::HighlightManager;
@@ -6,8 +7,9 @@ use crate::managers::pop::PopManager;
 use crate::managers::reap::ReapManager;
 use crate::managers::sanity::SanityManager;
 use crate::managers::slide::SlideManager;
-use crate::managers::spawn::SpawnManager;
+use crate::managers::spawn::{RatchetSpawnTimer, SpawnManager};
 use crate::managers::swap::SwapManager;
+use crate::resources::Resources;
 use macroquad::math::Vec2;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -38,10 +40,16 @@ pub struct GameController {
 }
 
 impl GameController {
-    pub fn new(spawn_manager: SpawnManager, audio_manager: AudioManager) -> Self {
+    pub fn new(resources: &Resources) -> Self {
         Self {
             state: GameState::Normal,
-            spawn_manager,
+            spawn_manager: SpawnManager::new(
+                colors::get_group(6),
+                Box::new(RatchetSpawnTimer {
+                    starting_wait: 2.0,
+                    doubling_time: 120.0,
+                }),
+            ),
             slide_manager: SlideManager::new(),
             burst_manager: BurstManager::new(1),
             swap_manager: SwapManager::new(),
@@ -49,7 +57,7 @@ impl GameController {
             reap_manager: ReapManager::new(),
             highlight_manager: HighlightManager::new(),
             sanity_manager: SanityManager::new(),
-            audio_manager,
+            audio_manager: AudioManager::new(resources),
         }
     }
 

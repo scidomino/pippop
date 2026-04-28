@@ -5,6 +5,7 @@ pub mod geometry;
 
 use self::effects::EffectsManager;
 use crate::graph::Graph;
+use crate::resources::Resources;
 use macroquad::prelude::*;
 
 pub struct Renderer {
@@ -18,11 +19,9 @@ pub struct RenderContext<'a> {
 }
 
 impl Renderer {
-    pub fn new() -> Self {
-        let font_bytes = include_bytes!("../../assets/sniglet_extrabold.ttf");
-        let font = load_ttf_font_from_bytes(font_bytes).unwrap();
+    pub fn new(resources: &Resources) -> Self {
         Self {
-            font,
+            font: resources.font.clone(),
             effects: EffectsManager::new(),
         }
     }

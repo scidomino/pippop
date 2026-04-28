@@ -1,4 +1,5 @@
-use macroquad::audio::{load_sound_from_bytes, play_sound_once, Sound};
+use crate::resources::Resources;
+use macroquad::audio::{play_sound_once, Sound};
 
 pub struct AudioManager {
     pop_sound: Sound,
@@ -7,22 +8,11 @@ pub struct AudioManager {
 }
 
 impl AudioManager {
-    pub async fn new() -> Self {
-        // Load sounds from the assets directory
-        let pop_sound = load_sound_from_bytes(include_bytes!("../../assets/pop.wav"))
-            .await
-            .unwrap();
-        let spawn_sound = load_sound_from_bytes(include_bytes!("../../assets/spawn.wav"))
-            .await
-            .unwrap();
-        let burst_sound = load_sound_from_bytes(include_bytes!("../../assets/burst.wav"))
-            .await
-            .unwrap();
-
+    pub fn new(resources: &Resources) -> Self {
         Self {
-            pop_sound,
-            spawn_sound,
-            burst_sound,
+            pop_sound: resources.pop_sound.clone(),
+            spawn_sound: resources.spawn_sound.clone(),
+            burst_sound: resources.burst_sound.clone(),
         }
     }
 

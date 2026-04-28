@@ -2,10 +2,9 @@ use macroquad::prelude::*;
 use rust_core::graph::Graph;
 use rust_core::graphics::colors;
 use rust_core::graphics::Renderer;
-use rust_core::managers::audio::AudioManager;
 use rust_core::managers::game::{GameController, Interaction};
-use rust_core::managers::spawn::{RatchetSpawnTimer, SpawnManager};
 use rust_core::physics;
+use rust_core::resources::Resources;
 
 #[macroquad::main("PipPop")]
 async fn main() {
@@ -13,6 +12,8 @@ async fn main() {
 
     // Seed the random number generator using the current system time
     rand::srand(miniquad::date::now() as u64);
+
+    let resources = Resources::load().await;
 
     let mut graph = Graph::new();
     graph.init(
@@ -23,18 +24,10 @@ async fn main() {
         },
     );
 
-    let mut renderer = Renderer::new();
+    let mut renderer = Renderer::new(&resources);
     let mut last_physics_time = get_time();
 
-    let spawn_manager = SpawnManager::new(
-        colors::get_group(6),
-        Box::new(RatchetSpawnTimer {
-            starting_wait: 2.0,
-            doubling_time: 120.0,
-        }),
-    );
-    let audio_manager = AudioManager::new().await;
-    let mut controller = GameController::new(spawn_manager, audio_manager);
+    let mut controller = GameController::new(&resources);
 
     loop {
         let dt = get_frame_time();
