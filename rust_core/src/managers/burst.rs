@@ -5,24 +5,27 @@ use crate::graphics::bubble;
 use crate::graphics::colors;
 use crate::graphics::geometry;
 use macroquad::prelude::*;
-use std::collections::HashSet;
 
 const FREEZE_DURATION: f32 = 0.5;
 
 pub struct BurstManager {
-    threshold: usize,
     /// The edge currently being "frozen" for the burst animation.
     pub active_edge: Option<EdgeKey>,
     pub timer: f32,
+    pub focus_bubble: Option<BubbleKey>,
 }
 
 impl BurstManager {
-    pub fn new(threshold: usize) -> Self {
+    pub fn new(_threshold: usize) -> Self {
         Self {
-            threshold,
             active_edge: None,
             timer: 0.0,
+            focus_bubble: None,
         }
+    }
+
+    pub fn set_focus_bubble(&mut self, bkey: BubbleKey) {
+        self.focus_bubble = Some(bkey);
     }
 
     pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
@@ -49,25 +52,22 @@ impl BurstManager {
         false
     }
 
-    /// Recursively bursts all matching bubbles in the graph immediately.
-    pub fn burst_all(&self, graph: &mut Graph) {
-        while let Some(ekey) = self.find_burst_starter(graph) {
-            let bkey = graph.vertices.get_edge(ekey).bubble;
-            self.burst(graph, ekey);
-
-            // After one burst, the bubble that "won" might have new burstable neighbors.
-            // We find a neighbor of the merged bubble and keep going.
-            while let Some(next_ekey) = self.find_burstable_edge_in_bubble(graph, bkey) {
-                self.burst(graph, next_ekey);
-            }
-        }
-    }
-
     /// Performs the topological merge of two bubbles across a shared edge.
-    pub fn burst(&self, graph: &mut Graph, ekey: EdgeKey) {
+    /// Ensures that the focus bubble survives the merge.
+    pub fn burst(&mut self, graph: &mut Graph, mut ekey: EdgeKey) {
         if !self.is_burstable(graph, ekey) {
             return;
         }
+
+        // In graph.remove_edge(ekey), ekey.bubble survives (b_top).
+        // If our focus bubble is the twin, we must swap to ensure it survives.
+        if let Some(focus) = self.focus_bubble {
+            let twin_key = graph.vertices.get_edge(ekey).twin;
+            if graph.vertices.get_edge(twin_key).bubble == focus {
+                ekey = twin_key;
+            }
+        }
+
         graph.remove_edge(ekey);
 
         // Every wall burst grants the player an extra swap
@@ -78,36 +78,14 @@ impl BurstManager {
         }
     }
 
-    /// Finds a bubble that has at least `threshold` burstable edges.
-    pub fn find_burst_starter(&self, graph: &Graph) -> Option<EdgeKey> {
-        if graph.bubbles.len() <= 3 {
-            return None;
-        }
-
-        graph.bubbles.keys().find_map(|bkey| {
-            let burstable = self.find_all_burstable_in_bubble(graph, bkey);
-            (burstable.len() >= self.threshold)
-                .then(|| burstable.into_iter().next())
-                .flatten()
-        })
-    }
-
-    /// Sets up the manager to process a burst with a freeze delay.
-    pub fn find_and_set_burstable_edge(&mut self, graph: &Graph) -> bool {
-        if let Some(ekey) = self.find_burst_starter(graph) {
-            self.active_edge = Some(ekey);
-            self.timer = FREEZE_DURATION;
-            return true;
-        }
-        false
-    }
-
-    /// Continues the burst sequence for a specific bubble.
-    pub fn find_and_set_next_burstable(&mut self, graph: &Graph, bkey: BubbleKey) -> bool {
-        if let Some(ekey) = self.find_burstable_edge_in_bubble(graph, bkey) {
-            self.active_edge = Some(ekey);
-            self.timer = FREEZE_DURATION;
-            return true;
+    /// Sets up the manager to process a burst with a freeze delay using the focus bubble.
+    pub fn find_and_set_next_burstable(&mut self, graph: &Graph) -> bool {
+        if let Some(bkey) = self.focus_bubble {
+            if let Some(ekey) = self.find_burstable_edge_in_bubble(graph, bkey) {
+                self.active_edge = Some(ekey);
+                self.timer = FREEZE_DURATION;
+                return true;
+            }
         }
         false
     }
@@ -120,21 +98,6 @@ impl BurstManager {
             }
         }
         None
-    }
-
-    fn find_all_burstable_in_bubble(&self, graph: &Graph, bkey: BubbleKey) -> HashSet<EdgeKey> {
-        graph
-            .bubbles
-            .get(bkey)
-            .map(|bubble| {
-                bubble
-                    .edges
-                    .iter()
-                    .filter(|&&ekey| self.is_burstable(graph, ekey))
-                    .copied()
-                    .collect()
-            })
-            .unwrap_or_default()
     }
 
     pub fn is_burstable(&self, graph: &Graph, ekey: EdgeKey) -> bool {
@@ -183,11 +146,22 @@ mod tests {
             },
         );
 
-        let burst_manager = BurstManager::new(1);
-        let ekey = burst_manager
-            .find_burst_starter(&graph)
-            .expect("Should find a burstable edge");
+        let mut burst_manager = BurstManager::new(1);
+        // Find the standard bubble that isn't the player
+        let bkey = graph
+            .bubbles
+            .iter()
+            .find(|(_, b)| matches!(b.style, BubbleStyle::Standard { .. }))
+            .map(|(k, _)| k)
+            .expect("Should have a standard bubble");
 
+        burst_manager.set_focus_bubble(bkey);
+        assert!(
+            burst_manager.find_and_set_next_burstable(&graph),
+            "Should find a burstable edge in focus bubble"
+        );
+
+        let ekey = burst_manager.active_edge.unwrap();
         burst_manager.burst(&mut graph, ekey);
 
         let player_bkey = graph.bubbles.get_player_bubble().unwrap();

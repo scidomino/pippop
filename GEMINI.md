@@ -37,3 +37,4 @@ Macroquad uses `miniquad` to handle Android lifecycle. Refer to Macroquad's docu
 
 ## Constraints
 - Prioritize `rust_core` stability and performance.
+- Never launch the game or any graphical application (e.g. `cargo run`), as the agent cannot see or interact with them.

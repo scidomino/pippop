@@ -108,18 +108,7 @@ impl GameController {
         match self.state {
             GameState::Normal => {
                 self.reap_manager.reap_popped(&mut self.graph);
-
-                // Check if any reaped bubbles caused a new match
-                if self.burst_manager.find_and_set_burstable_edge(&self.graph) {
-                    self.state = GameState::Burst;
-                }
-
-                if self.slide_manager.slide_slidable_edges(&mut self.graph, dt) {
-                    // Sliding can create new matches
-                    if self.burst_manager.find_and_set_burstable_edge(&self.graph) {
-                        self.state = GameState::Burst;
-                    }
-                }
+                self.slide_manager.slide_slidable_edges(&mut self.graph, dt);
 
                 if self.spawn_manager.possibly_spawn(&mut self.graph) {
                     self.audio_manager.play_spawn();
@@ -141,10 +130,12 @@ impl GameController {
                 }
             }
             GameState::Swapping => {
-                if self.swap_manager.update(&mut self.graph, dt) {
-                    if self.burst_manager.find_and_set_burstable_edge(&self.graph) {
+                if let Some(bkey) = self.swap_manager.update(&mut self.graph, dt) {
+                    self.burst_manager.set_focus_bubble(bkey);
+                    if self.burst_manager.find_and_set_next_burstable(&self.graph) {
                         self.state = GameState::Burst;
                     } else {
+                        self.burst_manager.focus_bubble = None;
                         self.state = GameState::Normal;
                     }
                 }
@@ -153,24 +144,18 @@ impl GameController {
                 if self.burst_manager.update(dt) {
                     if let Some(ekey) = self.burst_manager.active_edge {
                         if self.graph.vertices.contains_key(ekey.vertex) {
-                            let bkey = self.graph.vertices.get_edge(ekey).bubble;
                             self.burst_manager.burst(&mut self.graph, ekey);
                             self.audio_manager.play_burst();
-                            if !self
-                                .burst_manager
-                                .find_and_set_next_burstable(&self.graph, bkey)
-                            {
+                            if !self.burst_manager.find_and_set_next_burstable(&self.graph) {
                                 self.burst_manager.active_edge = None;
-                                if self.burst_manager.find_and_set_burstable_edge(&self.graph) {
-                                    self.state = GameState::Burst;
-                                } else {
-                                    self.state = GameState::Normal;
-                                }
+                                self.burst_manager.focus_bubble = None;
+                                self.state = GameState::Normal;
                             } else {
                                 self.state = GameState::Burst;
                             }
                         } else {
                             self.burst_manager.active_edge = None;
+                            self.burst_manager.focus_bubble = None;
                             self.state = GameState::Normal;
                         }
                     } else {
