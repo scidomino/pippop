@@ -1,9 +1,5 @@
 use macroquad::prelude::*;
-use rust_core::graph::Graph;
-use rust_core::graphics::colors;
-use rust_core::graphics::Renderer;
 use rust_core::managers::game::{GameController, Interaction};
-use rust_core::physics;
 use rust_core::resources::Resources;
 
 #[macroquad::main("PipPop")]
@@ -14,18 +10,6 @@ async fn main() {
     rand::srand(miniquad::date::now() as u64);
 
     let resources = Resources::load().await;
-
-    let mut graph = Graph::new();
-    graph.init(
-        rust_core::graph::bubble::BubbleStyle::Player,
-        rust_core::graph::bubble::BubbleStyle::Standard {
-            size: 1,
-            color: colors::TURQUOISE,
-        },
-    );
-
-    let mut renderer = Renderer::new(&resources);
-    let mut last_physics_time = get_time();
 
     let mut controller = GameController::new(&resources);
 
@@ -41,10 +25,10 @@ async fn main() {
 
         // Input handling
         let interaction = get_interaction(&camera);
-        controller.handle_input(&mut graph, interaction);
+        controller.handle_input(interaction);
 
         if is_key_pressed(KeyCode::D) {
-            let dump = graph.dump_state();
+            let dump = controller.graph.dump_state();
             #[cfg(not(target_arch = "wasm32"))]
             {
                 use std::io::Write;
@@ -59,22 +43,13 @@ async fn main() {
             }
         }
 
-        // Physics update (fixed timestep approx 60fps)
-        if get_time() - last_physics_time > 0.016 {
-            physics::advance_frame(&mut graph);
-            last_physics_time = get_time();
-        }
-
-        // Game Logic Update
-        controller.update(&mut graph, dt);
-
-        // Animation update
-        renderer.update(dt);
+        // Game Logic Update (includes physics and animation)
+        controller.update(dt);
 
         clear_background(BLACK);
 
         // Rendering
-        renderer.draw(&graph, &camera, &controller);
+        controller.draw(&camera);
 
         // Reset to default screen space for debug overlay
         set_default_camera();

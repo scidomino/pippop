@@ -1,16 +1,13 @@
 pub mod bubble;
 pub mod colors;
-pub mod effects;
 pub mod geometry;
 
-use self::effects::EffectsManager;
 use crate::graph::Graph;
 use crate::resources::Resources;
 use macroquad::prelude::*;
 
 pub struct Renderer {
     pub font: Font,
-    pub effects: EffectsManager,
 }
 
 pub struct RenderContext<'a> {
@@ -22,12 +19,7 @@ impl Renderer {
     pub fn new(resources: &Resources) -> Self {
         Self {
             font: resources.font.clone(),
-            effects: EffectsManager::new(),
         }
-    }
-
-    pub fn update(&mut self, dt: f32) {
-        self.effects.update(dt);
     }
 
     pub fn draw(
@@ -41,7 +33,7 @@ impl Renderer {
             font: &self.font,
         };
 
-        // --- Pass 1: World Space (Bubbles, Managers, UI & Effects) ---
+        // --- Pass 1: World Space (Bubbles, Managers, UI) ---
         set_camera(camera);
 
         for (bkey, bubble) in &graph.bubbles {
@@ -61,8 +53,6 @@ impl Renderer {
         controller.swap_manager.draw(&ctx);
         controller.burst_manager.draw(&ctx);
         controller.highlight_manager.draw(&ctx);
-
-        self.effects.draw(&ctx);
 
         // --- Pass 2: Screen Space (UI) ---
         set_default_camera();
