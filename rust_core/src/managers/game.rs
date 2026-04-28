@@ -1,6 +1,6 @@
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
-use crate::graphics::{bubble, colors, RenderContext};
+use crate::graphics::{colors, RenderContext};
 use crate::managers::audio::AudioManager;
 use crate::managers::burst::BurstManager;
 use crate::managers::highlight::HighlightManager;
@@ -10,6 +10,7 @@ use crate::managers::sanity::SanityManager;
 use crate::managers::slide::SlideManager;
 use crate::managers::spawn::{RatchetSpawnTimer, SpawnManager};
 use crate::managers::swap::SwapManager;
+use crate::managers::world::WorldManager;
 use crate::resources::Resources;
 use macroquad::math::Vec2;
 use macroquad::prelude::*;
@@ -32,7 +33,7 @@ pub struct GameController {
     pub graph: Graph,
     pub font: Font,
     pub state: GameState,
-    pub physics_accumulator: f32,
+    pub world_manager: WorldManager,
     pub spawn_manager: SpawnManager,
     pub slide_manager: SlideManager,
     pub burst_manager: BurstManager,
@@ -59,7 +60,7 @@ impl GameController {
             graph,
             font: resources.font.clone(),
             state: GameState::Normal,
-            physics_accumulator: 0.0,
+            world_manager: WorldManager::new(),
             spawn_manager: SpawnManager::new(
                 colors::get_group(6),
                 Box::new(RatchetSpawnTimer {
@@ -95,14 +96,7 @@ impl GameController {
     }
 
     pub fn update(&mut self, dt: f32) {
-        // Physics update (fixed timestep)
-        self.physics_accumulator += dt;
-        while self.physics_accumulator >= 0.016 {
-            crate::physics::advance_frame(&mut self.graph);
-            self.physics_accumulator -= 0.016;
-        }
-
-        // Unconditional updates
+        self.world_manager.update(&mut self.graph, dt);
         self.spawn_manager.update(dt);
 
         match self.state {
@@ -188,19 +182,7 @@ impl GameController {
         // --- Pass 1: World Space (Bubbles, Managers, UI) ---
         set_camera(camera);
 
-        for (bkey, bubble) in &self.graph.bubbles {
-            if self.pop_manager.is_handling(bkey) {
-                continue;
-            }
-            if self.swap_manager.is_handling(bkey) {
-                continue;
-            }
-
-            let points = bubble::get_bubble_points(&self.graph, bkey);
-            bubble::draw_bubble(&bubble.style, &points, bubble.centroid, &self.font);
-        }
-
-        // Delegate specialized rendering to managers
+        self.world_manager.draw(&self.graph, &ctx);
         self.pop_manager.draw(&ctx);
         self.swap_manager.draw(&ctx);
         self.burst_manager.draw(&ctx);
