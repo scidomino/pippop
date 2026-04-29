@@ -112,8 +112,7 @@ impl GameController {
                 }
                 self.highlight_manager.update(dt);
 
-                if self.state == GameState::Normal
-                    && self.pop_manager.start_pop_if_ready(&mut self.graph)
+                if self.pop_manager.start_pop_if_ready(&mut self.graph)
                 {
                     self.state = GameState::Popping;
                 }
@@ -139,23 +138,18 @@ impl GameController {
             }
             GameState::Burst => {
                 if self.burst_manager.update(dt) {
+                    let mut chain_continues = false;
                     if let Some(ekey) = self.burst_manager.active_edge {
                         if self.graph.vertices.contains_key(ekey.vertex) {
                             self.burst_manager.burst(&mut self.graph, ekey);
                             play_sound_once(&resources.burst_sound);
-                            if !self.burst_manager.find_and_set_next_burstable(&self.graph) {
-                                self.burst_manager.active_edge = None;
-                                self.burst_manager.focus_bubble = None;
-                                self.state = GameState::Normal;
-                            } else {
-                                self.state = GameState::Burst;
-                            }
-                        } else {
-                            self.burst_manager.active_edge = None;
-                            self.burst_manager.focus_bubble = None;
-                            self.state = GameState::Normal;
+                            chain_continues = self.burst_manager.find_and_set_next_burstable(&self.graph);
                         }
-                    } else {
+                    }
+
+                    if !chain_continues {
+                        self.burst_manager.active_edge = None;
+                        self.burst_manager.focus_bubble = None;
                         self.state = GameState::Normal;
                     }
                 }
