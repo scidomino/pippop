@@ -3,7 +3,7 @@ use crate::graph::Graph;
 use crate::graphics::{colors, RenderContext};
 use crate::managers::game::{Interaction, InteractionState};
 use crate::managers::slide::SlideManager;
-use crate::managers::spawn::{RatchetSpawnTimer, SpawnManager};
+use crate::managers::spawn::{SpawnManager, SpawnTimer};
 use crate::managers::world::WorldManager;
 use crate::resources::Resources;
 use macroquad::prelude::*;
@@ -36,10 +36,10 @@ impl TitleController {
             world_manager: WorldManager::new(),
             spawn_manager: SpawnManager::new(
                 colors::get_group(6),
-                Box::new(RatchetSpawnTimer {
+                SpawnTimer {
                     starting_wait: 3.0,
                     doubling_time: 120.0,
-                }),
+                },
             ),
             slide_manager: SlideManager::new(),
             timer: 0.0,

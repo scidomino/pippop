@@ -7,7 +7,7 @@ use crate::managers::pop::PopManager;
 use crate::managers::reap::ReapManager;
 use crate::managers::sanity::SanityManager;
 use crate::managers::slide::SlideManager;
-use crate::managers::spawn::{RatchetSpawnTimer, SpawnManager};
+use crate::managers::spawn::{SpawnManager, SpawnTimer};
 use crate::managers::swap::SwapManager;
 use crate::managers::world::WorldManager;
 use crate::resources::Resources;
@@ -68,10 +68,10 @@ impl GameController {
             world_manager: WorldManager::new(),
             spawn_manager: SpawnManager::new(
                 colors::get_group(6),
-                Box::new(RatchetSpawnTimer {
+                SpawnTimer {
                     starting_wait: 2.0,
                     doubling_time: 120.0,
-                }),
+                },
             ),
             slide_manager: SlideManager::new(),
             burst_manager: BurstManager::new(1),
