@@ -18,7 +18,7 @@ impl Screen {
                     next_screen = Some(Screen::Game(GameController::new(resources)));
                 }
             }
-            Screen::Game(c) => c.interact(interaction),
+            Screen::Game(c) => c.interact(resources, interaction),
         }
         if let Some(new_screen) = next_screen {
             *self = new_screen;

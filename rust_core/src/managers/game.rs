@@ -83,7 +83,7 @@ impl GameController {
         }
     }
 
-    pub fn interact(&mut self, interaction: Interaction) {
+    pub fn interact(&mut self, resources: &Resources, interaction: Interaction) {
         if self.state == GameState::Normal {
             if matches!(interaction.state, InteractionState::Released) {
                 if self
@@ -91,6 +91,10 @@ impl GameController {
                     .interact(&mut self.graph, interaction.position)
                 {
                     self.state = GameState::Swaping;
+                    if !resources.splash_sounds.is_empty() {
+                        let idx = macroquad::rand::gen_range(0, resources.splash_sounds.len());
+                        play_sound_once(&resources.splash_sounds[idx]);
+                    }
                 }
             } else {
                 self.highlight_manager.interact(interaction);
