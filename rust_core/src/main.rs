@@ -1,7 +1,13 @@
 use macroquad::prelude::*;
 use rust_core::graph::Graph;
 use rust_core::managers::game::{GameController, Interaction};
+use rust_core::managers::title::TitleController;
 use rust_core::resources::Resources;
+
+enum Screen {
+    Title(TitleController),
+    Game(GameController),
+}
 
 #[macroquad::main("PipPop")]
 async fn main() {
@@ -12,15 +18,29 @@ async fn main() {
 
     let resources = Resources::load().await;
 
-    let mut controller = GameController::new(&resources);
+    let mut screen = Screen::Title(TitleController::new(&resources));
 
     loop {
         let camera = get_camera();
-        controller.handle_input(get_interaction(&camera));
-        controller.update(get_frame_time());
-        controller.draw(&camera);
-        if is_key_pressed(KeyCode::D) {
-            dump_graph(&controller.graph);
+
+        match &mut screen {
+            Screen::Title(controller) => {
+                if controller.update(get_frame_time()) {
+                    screen = Screen::Game(GameController::new(&resources));
+                }
+            }
+            Screen::Game(controller) => {
+                controller.handle_input(get_interaction(&camera));
+                controller.update(get_frame_time());
+                if is_key_pressed(KeyCode::D) {
+                    dump_graph(&controller.graph);
+                }
+            }
+        }
+
+        match &screen {
+            Screen::Title(controller) => controller.draw(&camera),
+            Screen::Game(controller) => controller.draw(&camera),
         }
 
         next_frame().await
