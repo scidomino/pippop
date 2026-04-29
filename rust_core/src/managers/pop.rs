@@ -1,6 +1,7 @@
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::Graph;
 use macroquad::math::{vec2, Vec2};
+use macroquad::prelude::Color;
 
 const POPPING_TIME: f32 = 0.5;
 
@@ -27,11 +28,16 @@ impl PopManager {
                 return;
             }
 
-            if let BubbleStyle::Popping { size, timer, .. } = bubble.style {
+            if let BubbleStyle::Popping { size, color, timer } = bubble.style {
                 let progress = (timer / 0.5).clamp(0.0, 1.0);
                 let morphed_points = self.apply_pop_morph(&points, bubble.centroid, size, progress);
+
+                // Create a temporary Standard style with the faded color to use for rendering
                 crate::graphics::bubble::draw_bubble(
-                    &bubble.style,
+                    &BubbleStyle::Standard {
+                        size,
+                        color: Color::new(color.r, color.g, color.b, progress),
+                    },
                     &morphed_points,
                     bubble.centroid,
                     ctx.font,
