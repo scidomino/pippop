@@ -8,6 +8,15 @@ use macroquad::prelude::*;
 
 const FREEZE_DURATION: f32 = 0.5;
 
+pub enum BurstResult {
+    /// Still playing the burst freeze animation
+    Waiting,
+    /// The timer finished and a burst occurred
+    DidBurst,
+    /// The active burst sequence is completely finished
+    Finished,
+}
+
 pub struct BurstManager {
     /// The edge currently being "frozen" for the burst animation.
     pub active_edge: Option<EdgeKey>,
@@ -42,14 +51,24 @@ impl BurstManager {
         }
     }
 
-    pub fn update(&mut self, dt: f32) -> bool {
-        if self.active_edge.is_some() {
+    pub fn update(&mut self, graph: &mut Graph, dt: f32) -> BurstResult {
+        if let Some(ekey) = self.active_edge {
             self.timer -= dt;
             if self.timer <= 0.0 {
-                return true; // Signal that the active edge is ready to be burst
+                self.burst(graph, ekey);
+
+                if self.find_and_set_next_burstable(graph) {
+                    return BurstResult::DidBurst;
+                }
+
+                // If vertex wasn't found, or no next burstable edge
+                self.active_edge = None;
+                self.focus_bubble = None;
+                return BurstResult::Finished;
             }
+            return BurstResult::Waiting;
         }
-        false
+        BurstResult::Finished
     }
 
     /// Performs the topological merge of two bubbles across a shared edge.

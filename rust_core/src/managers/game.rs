@@ -1,7 +1,7 @@
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
 use crate::graphics::{colors, RenderContext};
-use crate::managers::burst::BurstManager;
+use crate::managers::burst::{BurstManager, BurstResult};
 use crate::managers::highlight::HighlightManager;
 use crate::managers::pop::PopManager;
 use crate::managers::reap::ReapManager;
@@ -19,8 +19,8 @@ use macroquad::prelude::*;
 pub enum GameState {
     Normal,
     Popping,
-    Swapping,
-    Burst,
+    Swaping,
+    Bursting,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -90,7 +90,7 @@ impl GameController {
                     .swap_manager
                     .interact(&mut self.graph, interaction.position)
                 {
-                    self.state = GameState::Swapping;
+                    self.state = GameState::Swaping;
                 }
             } else {
                 self.highlight_manager.interact(interaction);
@@ -112,8 +112,7 @@ impl GameController {
                 }
                 self.highlight_manager.update(dt);
 
-                if self.pop_manager.start_pop_if_ready(&mut self.graph)
-                {
+                if self.pop_manager.start_pop_if_ready(&mut self.graph) {
                     self.state = GameState::Popping;
                 }
             }
@@ -125,35 +124,27 @@ impl GameController {
                     self.state = GameState::Normal;
                 }
             }
-            GameState::Swapping => {
+            GameState::Swaping => {
                 if let Some(bkey) = self.swap_manager.update(&mut self.graph, dt) {
                     self.burst_manager.set_focus_bubble(bkey);
                     if self.burst_manager.find_and_set_next_burstable(&self.graph) {
-                        self.state = GameState::Burst;
+                        self.state = GameState::Bursting;
                     } else {
                         self.burst_manager.focus_bubble = None;
                         self.state = GameState::Normal;
                     }
                 }
             }
-            GameState::Burst => {
-                if self.burst_manager.update(dt) {
-                    let mut chain_continues = false;
-                    if let Some(ekey) = self.burst_manager.active_edge {
-                        if self.graph.vertices.contains_key(ekey.vertex) {
-                            self.burst_manager.burst(&mut self.graph, ekey);
-                            play_sound_once(&resources.burst_sound);
-                            chain_continues = self.burst_manager.find_and_set_next_burstable(&self.graph);
-                        }
-                    }
-
-                    if !chain_continues {
-                        self.burst_manager.active_edge = None;
-                        self.burst_manager.focus_bubble = None;
-                        self.state = GameState::Normal;
-                    }
+            GameState::Bursting => match self.burst_manager.update(&mut self.graph, dt) {
+                BurstResult::Waiting => {}
+                BurstResult::DidBurst => {
+                    play_sound_once(&resources.burst_sound);
                 }
-            }
+                BurstResult::Finished => {
+                    play_sound_once(&resources.burst_sound);
+                    self.state = GameState::Normal;
+                }
+            },
         }
 
         if let Err(e) = self.sanity_manager.check(&self.graph) {
