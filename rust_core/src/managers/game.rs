@@ -24,9 +24,16 @@ pub enum GameState {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub enum InteractionState {
+    Hover,
+    Pressed,
+    Released,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct Interaction {
     pub position: Vec2,
-    pub is_clicked: bool,
+    pub state: InteractionState,
 }
 
 pub struct GameController {
@@ -78,20 +85,19 @@ impl GameController {
         }
     }
 
-    pub fn handle_input(&mut self, interaction: Option<Interaction>) {
-        let mut new_highlight = None;
+    pub fn handle_input(&mut self, interaction: Interaction) {
         if self.state == GameState::Normal {
-            if let Some(i) = interaction {
-                if i.is_clicked {
-                    if self.swap_manager.swap(&mut self.graph, i.position) {
-                        self.state = GameState::Swapping;
-                    }
-                } else {
-                    new_highlight = Some(i.position);
+            if matches!(interaction.state, InteractionState::Released) {
+                if self
+                    .swap_manager
+                    .swap(&mut self.graph, interaction.position)
+                {
+                    self.state = GameState::Swapping;
                 }
+            } else {
+                self.highlight_manager.set_point(interaction);
             }
         }
-        self.highlight_manager.set_point(new_highlight);
     }
 
     pub fn update(&mut self, dt: f32) {

@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 use rust_core::graph::Graph;
-use rust_core::managers::game::{GameController, Interaction};
+use rust_core::managers::game::{GameController, Interaction, InteractionState};
 use rust_core::managers::title::TitleController;
 use rust_core::resources::Resources;
 
@@ -10,7 +10,7 @@ enum Screen {
 }
 
 impl Screen {
-    fn handle_input(&mut self, resources: &Resources, interaction: Option<Interaction>) {
+    fn handle_input(&mut self, resources: &Resources, interaction: Interaction) {
         let mut next_screen = None;
         match self {
             Screen::Title(c) => {
@@ -81,18 +81,20 @@ fn dump_graph(graph: &Graph) {
     }
 }
 
-fn get_interaction(camera: &Camera2D) -> Option<Interaction> {
+fn get_interaction(camera: &Camera2D) -> Interaction {
     let is_down = is_mouse_button_down(MouseButton::Left);
     let is_released = is_mouse_button_released(MouseButton::Left);
+    let (x, y) = mouse_position();
 
-    if is_down || is_released {
-        let (x, y) = mouse_position();
-        Some(Interaction {
-            position: camera.screen_to_world(vec2(x, y)),
-            is_clicked: is_released,
-        })
-    } else {
-        None
+    Interaction {
+        position: camera.screen_to_world(vec2(x, y)),
+        state: if is_released {
+            InteractionState::Released
+        } else if is_down {
+            InteractionState::Pressed
+        } else {
+            InteractionState::Hover
+        },
     }
 }
 

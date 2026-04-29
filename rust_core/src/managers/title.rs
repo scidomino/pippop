@@ -1,7 +1,7 @@
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
 use crate::graphics::{colors, RenderContext};
-use crate::managers::game::Interaction;
+use crate::managers::game::{Interaction, InteractionState};
 use crate::managers::slide::SlideManager;
 use crate::managers::spawn::{RatchetSpawnTimer, SpawnManager};
 use crate::managers::world::WorldManager;
@@ -46,14 +46,8 @@ impl TitleController {
         }
     }
 
-    pub fn handle_input(&mut self, interaction: Option<Interaction>) -> bool {
-        matches!(
-            interaction,
-            Some(Interaction {
-                is_clicked: true,
-                ..
-            })
-        )
+    pub fn handle_input(&mut self, interaction: Interaction) -> bool {
+        matches!(interaction.state, InteractionState::Pressed)
     }
 
     pub fn update(&mut self, dt: f32) {

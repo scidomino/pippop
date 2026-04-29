@@ -2,6 +2,8 @@ use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
 use crate::graphics::colors;
 use crate::graphics::geometry;
+use crate::managers::game::Interaction;
+use crate::managers::game::InteractionState;
 use macroquad::math::Vec2;
 use macroquad::prelude::*;
 
@@ -43,9 +45,9 @@ impl HighlightManager {
         self.time += dt;
     }
 
-    pub fn set_point(&mut self, point: Option<Vec2>) {
-        if point.is_some() {
-            self.point = point;
+    pub fn set_point(&mut self, interaction: Interaction) {
+        if matches!(interaction.state, InteractionState::Pressed) {
+            self.point = Some(interaction.position);
             self.time = 0.0;
         } else {
             self.point = None;
