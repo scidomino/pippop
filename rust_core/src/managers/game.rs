@@ -104,7 +104,7 @@ impl GameController {
 
     pub fn update(&mut self, resources: &Resources, dt: f32) {
         self.world_manager.update(&mut self.graph, dt);
-        self.spawn_manager.update(dt);
+        self.spawn_manager.update(&self.graph, dt);
 
         match self.state {
             GameState::Normal => {

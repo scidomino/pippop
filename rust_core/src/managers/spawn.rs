@@ -3,6 +3,7 @@ use crate::graph::vertex::VertexKey;
 use crate::graph::Graph;
 use macroquad::prelude::Color;
 use macroquad::rand::{gen_range, ChooseRandom};
+use std::collections::HashMap;
 
 pub struct SpawnTimer {
     pub starting_wait: f32,
@@ -36,19 +37,20 @@ impl SpawnManager {
         manager
     }
 
-    pub fn update(&mut self, dt: f32) {
+    pub fn update(&mut self, graph: &Graph, dt: f32) {
+        let has_pairs = self.has_two_color_pairs(graph);
+        let multiplier = if has_pairs { 1.0 } else { 10.0 };
+
         self.total_play_time += dt;
-        self.next_spawn_time -= dt;
+        self.next_spawn_time -= dt * multiplier;
     }
 
     pub fn draw(&self, _ctx: &crate::graphics::RenderContext) {
-        let radius = 20.0 * 2.0f32.powf(-self.next_spawn_time);
-        if radius > 0.5 {
-            let x = macroquad::window::screen_width() - 30.0;
-            let y = 30.0;
-            macroquad::shapes::draw_circle(x, y, radius, self.next_color);
-            macroquad::shapes::draw_circle_lines(x, y, radius, 2.0, macroquad::prelude::WHITE);
-        }
+        let radius = 20.0 * 2.0f32.powf(-self.next_spawn_time.max(0.0));
+        let x = macroquad::window::screen_width() - 30.0;
+        let y = 30.0;
+        macroquad::shapes::draw_circle(x, y, radius, self.next_color);
+        macroquad::shapes::draw_circle_lines(x, y, radius, 2.0, macroquad::prelude::WHITE);
     }
 
     pub fn possibly_spawn(&mut self, graph: &mut Graph) -> bool {
@@ -59,6 +61,17 @@ impl SpawnManager {
             return true;
         }
         false
+    }
+
+    fn has_two_color_pairs(&self, graph: &Graph) -> bool {
+        let mut color_counts = HashMap::new();
+        for bubble in graph.bubbles.values() {
+            if let BubbleStyle::Standard { color, .. } = bubble.style {
+                let key: [u8; 4] = color.into();
+                *color_counts.entry(key).or_insert(0) += 1;
+            }
+        }
+        color_counts.values().filter(|&&count| count >= 2).count() >= 2
     }
 
     fn spawn(&mut self, graph: &mut Graph) {
@@ -127,12 +140,23 @@ mod tests {
             doubling_time: 100.0,
         };
         let mut manager = SpawnManager::new(colors::get_group(3), timer);
+        let graph = Graph::new(
+            BubbleStyle::Standard {
+                size: 1,
+                color: colors::TURQUOISE,
+            },
+            BubbleStyle::Standard {
+                size: 1,
+                color: colors::ROSE,
+            },
+        );
 
         let initial_time = manager.next_spawn_time;
-        manager.update(1.0);
+        manager.update(&graph, 1.0);
 
         assert_eq!(manager.total_play_time, 1.0);
-        assert_eq!(manager.next_spawn_time, initial_time - 1.0);
+        // Standard initial graph has Turquoise and Rose (no pairs), so multiplier should be 10.0
+        assert_eq!(manager.next_spawn_time, initial_time - 10.0);
     }
 
     #[test]

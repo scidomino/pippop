@@ -53,7 +53,7 @@ impl TitleController {
     pub fn update(&mut self, dt: f32) {
         self.timer += dt;
         self.world_manager.update(&mut self.graph, dt);
-        self.spawn_manager.update(dt);
+        self.spawn_manager.update(&self.graph, dt);
         self.slide_manager.update(&mut self.graph, dt);
         self.spawn_manager.possibly_spawn(&mut self.graph);
     }
