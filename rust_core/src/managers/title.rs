@@ -114,8 +114,8 @@ impl TitleController {
             },
         );
 
-        // Draw "Giochi!" text with pulsing animation
-        let play_text = "Giochi!";
+        // Draw "Gioca!" text with pulsing animation
+        let play_text = "Gioca!";
         let play_base_size = 60;
         let pulse = (self.timer * 3.0).sin() * 0.1 + 1.0; // 0.9 to 1.1 pulse
         let play_size = (play_base_size as f32 * pulse) as u16;
