@@ -9,12 +9,44 @@ enum Screen {
     Game(GameController),
 }
 
+impl Screen {
+    fn handle_input(&mut self, interaction: Option<Interaction>) {
+        match self {
+            Screen::Title(_) => (),
+            Screen::Game(c) => c.handle_input(interaction),
+        }
+    }
+
+    fn update(&mut self, resources: &Resources, dt: f32) {
+        let mut next_screen = None;
+
+        match self {
+            Screen::Title(c) => {
+                if c.update(dt) {
+                    next_screen = Some(Screen::Game(GameController::new(resources)));
+                }
+            }
+            Screen::Game(c) => {
+                c.update(dt);
+            }
+        }
+
+        if let Some(new_screen) = next_screen {
+            *self = new_screen;
+        }
+    }
+
+    fn draw(&self, camera: &Camera2D) {
+        match self {
+            Screen::Title(c) => c.draw(camera),
+            Screen::Game(c) => c.draw(camera),
+        }
+    }
+}
+
 #[macroquad::main("PipPop")]
 async fn main() {
     env_logger::init();
-
-    // Seed the random number generator using the current system time
-    rand::srand(miniquad::date::now() as u64);
 
     let resources = Resources::load().await;
 
@@ -23,24 +55,14 @@ async fn main() {
     loop {
         let camera = get_camera();
 
-        match &mut screen {
-            Screen::Title(controller) => {
-                if controller.update(get_frame_time()) {
-                    screen = Screen::Game(GameController::new(&resources));
-                }
-            }
-            Screen::Game(controller) => {
-                controller.handle_input(get_interaction(&camera));
-                controller.update(get_frame_time());
-                if is_key_pressed(KeyCode::D) {
-                    dump_graph(&controller.graph);
-                }
-            }
-        }
+        screen.handle_input(get_interaction(&camera));
+        screen.update(&resources, get_frame_time());
+        screen.draw(&camera);
 
-        match &screen {
-            Screen::Title(controller) => controller.draw(&camera),
-            Screen::Game(controller) => controller.draw(&camera),
+        if is_key_pressed(KeyCode::D) {
+            if let Screen::Game(c) = &screen {
+                dump_graph(&c.graph);
+            }
         }
 
         next_frame().await
