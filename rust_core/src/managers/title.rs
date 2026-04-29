@@ -1,6 +1,7 @@
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
 use crate::graphics::{colors, RenderContext};
+use crate::managers::game::Interaction;
 use crate::managers::slide::SlideManager;
 use crate::managers::spawn::{RatchetSpawnTimer, SpawnManager};
 use crate::managers::world::WorldManager;
@@ -45,15 +46,22 @@ impl TitleController {
         }
     }
 
-    pub fn update(&mut self, dt: f32) -> bool {
+    pub fn handle_input(&mut self, interaction: Option<Interaction>) -> bool {
+        matches!(
+            interaction,
+            Some(Interaction {
+                is_clicked: true,
+                ..
+            })
+        )
+    }
+
+    pub fn update(&mut self, dt: f32) {
         self.timer += dt;
         self.world_manager.update(&mut self.graph, dt);
         self.spawn_manager.update(dt);
         self.slide_manager.slide_slidable_edges(&mut self.graph, dt);
         self.spawn_manager.possibly_spawn(&mut self.graph);
-
-        // Transition to game on mouse click
-        is_mouse_button_released(MouseButton::Left)
     }
 
     pub fn draw(&self, camera: &Camera2D) {

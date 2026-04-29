@@ -10,29 +10,25 @@ enum Screen {
 }
 
 impl Screen {
-    fn handle_input(&mut self, interaction: Option<Interaction>) {
-        match self {
-            Screen::Title(_) => (),
-            Screen::Game(c) => c.handle_input(interaction),
-        }
-    }
-
-    fn update(&mut self, resources: &Resources, dt: f32) {
+    fn handle_input(&mut self, resources: &Resources, interaction: Option<Interaction>) {
         let mut next_screen = None;
-
         match self {
             Screen::Title(c) => {
-                if c.update(dt) {
+                if c.handle_input(interaction) {
                     next_screen = Some(Screen::Game(GameController::new(resources)));
                 }
             }
-            Screen::Game(c) => {
-                c.update(dt);
-            }
+            Screen::Game(c) => c.handle_input(interaction),
         }
-
         if let Some(new_screen) = next_screen {
             *self = new_screen;
+        }
+    }
+
+    fn update(&mut self, dt: f32) {
+        match self {
+            Screen::Title(c) => c.update(dt),
+            Screen::Game(c) => c.update(dt),
         }
     }
 
@@ -55,8 +51,8 @@ async fn main() {
     loop {
         let camera = get_camera();
 
-        screen.handle_input(get_interaction(&camera));
-        screen.update(&resources, get_frame_time());
+        screen.handle_input(&resources, get_interaction(&camera));
+        screen.update(get_frame_time());
         screen.draw(&camera);
 
         if is_key_pressed(KeyCode::D) {
@@ -86,17 +82,14 @@ fn dump_graph(graph: &Graph) {
 }
 
 fn get_interaction(camera: &Camera2D) -> Option<Interaction> {
-    if is_mouse_button_down(MouseButton::Left) {
+    let is_down = is_mouse_button_down(MouseButton::Left);
+    let is_released = is_mouse_button_released(MouseButton::Left);
+
+    if is_down || is_released {
         let (x, y) = mouse_position();
         Some(Interaction {
             position: camera.screen_to_world(vec2(x, y)),
-            is_clicked: false,
-        })
-    } else if is_mouse_button_released(MouseButton::Left) {
-        let (x, y) = mouse_position();
-        Some(Interaction {
-            position: camera.screen_to_world(vec2(x, y)),
-            is_clicked: true,
+            is_clicked: is_released,
         })
     } else {
         None
