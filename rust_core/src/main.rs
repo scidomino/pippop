@@ -10,15 +10,15 @@ enum Screen {
 }
 
 impl Screen {
-    fn handle_input(&mut self, resources: &Resources, interaction: Interaction) {
+    fn interact(&mut self, resources: &Resources, interaction: Interaction) {
         let mut next_screen = None;
         match self {
             Screen::Title(c) => {
-                if c.handle_input(interaction) {
+                if c.interact(interaction) {
                     next_screen = Some(Screen::Game(GameController::new(resources)));
                 }
             }
-            Screen::Game(c) => c.handle_input(interaction),
+            Screen::Game(c) => c.interact(interaction),
         }
         if let Some(new_screen) = next_screen {
             *self = new_screen;
@@ -51,7 +51,7 @@ async fn main() {
     loop {
         let camera = get_camera();
 
-        screen.handle_input(&resources, get_interaction(&camera));
+        screen.interact(&resources, get_interaction(&camera));
         screen.update(get_frame_time());
         screen.draw(&camera);
 

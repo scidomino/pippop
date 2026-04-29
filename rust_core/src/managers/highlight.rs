@@ -45,7 +45,7 @@ impl HighlightManager {
         self.time += dt;
     }
 
-    pub fn set_point(&mut self, interaction: Interaction) {
+    pub fn interact(&mut self, interaction: Interaction) {
         if matches!(interaction.state, InteractionState::Pressed) {
             self.point = Some(interaction.position);
             self.time = 0.0;

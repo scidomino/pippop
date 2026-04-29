@@ -22,7 +22,7 @@ impl SlideManager {
         }
     }
 
-    pub fn slide_slidable_edges(&mut self, graph: &mut Graph, dt: f32) -> bool {
+    pub fn update(&mut self, graph: &mut Graph, dt: f32) -> bool {
         self.prune(dt);
         if let Some(edge_key) = self.get_first_slidable(graph) {
             graph.slide(edge_key);

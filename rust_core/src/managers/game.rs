@@ -85,17 +85,17 @@ impl GameController {
         }
     }
 
-    pub fn handle_input(&mut self, interaction: Interaction) {
+    pub fn interact(&mut self, interaction: Interaction) {
         if self.state == GameState::Normal {
             if matches!(interaction.state, InteractionState::Released) {
                 if self
                     .swap_manager
-                    .swap(&mut self.graph, interaction.position)
+                    .interact(&mut self.graph, interaction.position)
                 {
                     self.state = GameState::Swapping;
                 }
             } else {
-                self.highlight_manager.set_point(interaction);
+                self.highlight_manager.interact(interaction);
             }
         }
     }
@@ -106,8 +106,8 @@ impl GameController {
 
         match self.state {
             GameState::Normal => {
-                self.reap_manager.reap_popped(&mut self.graph);
-                self.slide_manager.slide_slidable_edges(&mut self.graph, dt);
+                self.reap_manager.update(&mut self.graph);
+                self.slide_manager.update(&mut self.graph, dt);
 
                 if self.spawn_manager.possibly_spawn(&mut self.graph) {
                     self.audio_manager.play_spawn();
@@ -164,7 +164,7 @@ impl GameController {
             }
         }
 
-        if let Err(e) = self.sanity_manager.check_invariants(&self.graph) {
+        if let Err(e) = self.sanity_manager.check(&self.graph) {
             let dump = self.graph.dump_state();
             #[cfg(not(target_arch = "wasm32"))]
             {

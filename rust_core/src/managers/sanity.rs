@@ -18,7 +18,7 @@ impl SanityManager {
         Self
     }
 
-    pub fn check_invariants(&self, graph: &Graph) -> Result<(), String> {
+    pub fn check(&self, graph: &Graph) -> Result<(), String> {
         let mut seen_edges = HashSet::new();
         let mut open_air_count = 0;
 

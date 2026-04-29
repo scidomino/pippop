@@ -46,7 +46,7 @@ impl TitleController {
         }
     }
 
-    pub fn handle_input(&mut self, interaction: Interaction) -> bool {
+    pub fn interact(&mut self, interaction: Interaction) -> bool {
         matches!(interaction.state, InteractionState::Pressed)
     }
 
@@ -54,7 +54,7 @@ impl TitleController {
         self.timer += dt;
         self.world_manager.update(&mut self.graph, dt);
         self.spawn_manager.update(dt);
-        self.slide_manager.slide_slidable_edges(&mut self.graph, dt);
+        self.slide_manager.update(&mut self.graph, dt);
         self.spawn_manager.possibly_spawn(&mut self.graph);
     }
 
