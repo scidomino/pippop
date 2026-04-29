@@ -74,7 +74,6 @@ impl Graph {
         if b_top == b_bottom {
             // Can't remove edge with same bubble on both sides
             // as this would create a disconnected graph.
-            log::info!("remove_edge: skipped (same bubble on both sides)");
             return;
         }
 
@@ -90,7 +89,6 @@ impl Graph {
         if b_top == b_left || b_top == b_right || b_bottom == b_left || b_bottom == b_right {
             // Can't remove edge with same bubble on both sides
             // as this would create a disconnected graph.
-            log::info!("remove_edge: skipped (would disconnect graph)");
             return;
         }
 
@@ -101,7 +99,6 @@ impl Graph {
 
         if ekey_next == ekey_prev_twin || tkey_next == tkey_prev_twin {
             // the left or right bubble only has one edge.
-            log::info!("remove_edge: left or right bubble only has one edge");
             return;
         }
 
@@ -112,7 +109,6 @@ impl Graph {
 
         if ekey_next == tkey_prev_twin {
             // the top bubble only has two edges so b_left == b_right.
-            log::info!("remove_edge: top bubble only has two edges");
 
             self.link_twins(ekey_prev_twin, tkey_next_twin);
             self.average_control_points(ekey_prev_twin, ekey_next);
@@ -122,7 +118,6 @@ impl Graph {
             self.rebubble(b_right, ekey_prev_twin);
         } else if ekey_prev == tkey_next_twin {
             // the bottom bubble only has two edges so b_left == b_right.
-            log::info!("remove_edge: bottom bubble only has two edges");
 
             self.link_twins(ekey_next_twin, tkey_prev_twin);
             self.average_control_points(ekey_next_twin, ekey_prev);
@@ -131,7 +126,6 @@ impl Graph {
             self.rebubble(b_top, tkey_prev_twin);
             self.rebubble(b_right, ekey_next_twin);
         } else {
-            log::info!("remove_edge: standard merge");
             self.link_twins(ekey_next_twin, ekey_prev_twin);
             self.link_twins(tkey_next_twin, tkey_prev_twin);
 
@@ -150,7 +144,6 @@ impl Graph {
         self.vertices.remove(tkey.vertex);
 
         for degenerate in self.get_degenerate_edges(b_top) {
-            log::info!("remove_edge: found degenerate edge {:?}", degenerate);
             self.slide(degenerate);
         }
         self.update_cache();

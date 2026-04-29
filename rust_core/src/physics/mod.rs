@@ -89,26 +89,3 @@ fn accelerate_point(point: &mut Point, accel: Vec2) {
     point.velocity = point.velocity * FRICTION + accel;
     point.position += point.velocity;
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_advance_frame() {
-        let mut graph = Graph::new(
-            crate::graph::bubble::BubbleStyle::Standard {
-                size: 1,
-                color: crate::graphics::colors::TURQUOISE,
-            },
-            crate::graph::bubble::BubbleStyle::Standard {
-                size: 1,
-                color: crate::graphics::colors::ROSE,
-            },
-        );
-        for _ in 0..5 {
-            advance_frame(&mut graph);
-            println!("{}", graph.dump_state());
-        }
-    }
-}
