@@ -18,15 +18,15 @@ use macroquad::prelude::*;
 pub struct GameController {
     pub state: GameState,
     pub font: Font,
-    pub world_manager: WorldManager,
-    pub spawn_manager: SpawnManager,
-    pub slide_manager: SlideManager,
-    pub burst_manager: BurstManager,
-    pub swap_manager: SwapManager,
-    pub pop_manager: PopManager,
-    pub reap_manager: ReapManager,
-    pub highlight_manager: HighlightManager,
-    pub sanity_manager: SanityManager,
+    pub world: WorldManager,
+    pub spawn: SpawnManager,
+    pub slide: SlideManager,
+    pub burst: BurstManager,
+    pub swap: SwapManager,
+    pub pop: PopManager,
+    pub reap: ReapManager,
+    pub highlight: HighlightManager,
+    pub sanity: SanityManager,
 }
 
 impl GameController {
@@ -37,39 +37,38 @@ impl GameController {
                 BubbleStyle::colored(colors::TURQUOISE),
             )),
             font: resources.font.clone(),
-            world_manager: WorldManager::new(),
-            spawn_manager: SpawnManager::new(
+            world: WorldManager::new(),
+            spawn: SpawnManager::new(
                 colors::get_group(6),
                 SpawnTimer {
                     starting_wait: 2.0,
                     doubling_time: 120.0,
                 },
             ),
-            slide_manager: SlideManager::new(),
-            burst_manager: BurstManager::new(1),
-            swap_manager: SwapManager::new(),
-            pop_manager: PopManager::new(),
-            reap_manager: ReapManager::new(),
-            highlight_manager: HighlightManager::new(),
-            sanity_manager: SanityManager::new(),
+            slide: SlideManager::new(),
+            burst: BurstManager::new(1),
+            swap: SwapManager::new(),
+            pop: PopManager::new(),
+            reap: ReapManager::new(),
+            highlight: HighlightManager::new(),
+            sanity: SanityManager::new(),
         }
     }
 
     pub fn interact(&mut self, _resources: &Resources, interaction: Interaction) {
-        self.swap_manager.interact(&mut self.state, interaction);
-        self.highlight_manager
-            .interact(&mut self.state, interaction);
+        self.swap.interact(&mut self.state, interaction);
+        self.highlight.interact(&mut self.state, interaction);
     }
 
     pub fn update(&mut self, resources: &Resources, dt: f32) {
-        self.world_manager.update(&mut self.state, dt);
-        self.spawn_manager.update(&mut self.state, dt);
-        self.reap_manager.update(&mut self.state, dt);
-        self.slide_manager.update(&mut self.state, dt);
-        self.highlight_manager.update(&mut self.state, dt);
-        self.pop_manager.update(&mut self.state, dt);
-        self.swap_manager.update(&mut self.state, dt);
-        self.burst_manager.update(&mut self.state, dt);
+        self.world.update(&mut self.state, dt);
+        self.spawn.update(&mut self.state, dt);
+        self.reap.update(&mut self.state, dt);
+        self.slide.update(&mut self.state, dt);
+        self.highlight.update(&mut self.state, dt);
+        self.pop.update(&mut self.state, dt);
+        self.swap.update(&mut self.state, dt);
+        self.burst.update(&mut self.state, dt);
 
         // Handle events (sounds, etc.)
         for event in self.state.events.drain(..) {
@@ -86,7 +85,7 @@ impl GameController {
             }
         }
 
-        if let Err(e) = self.sanity_manager.check(&self.state) {
+        if let Err(e) = self.sanity.check(&self.state) {
             let dump = self.state.graph.dump_state();
             #[cfg(not(target_arch = "wasm32"))]
             {
@@ -109,15 +108,15 @@ impl GameController {
         // --- Pass 1: World Space (Bubbles, Managers, UI) ---
         set_camera(camera);
 
-        self.world_manager.draw(&self.state.graph, &ctx);
-        self.pop_manager.draw(&ctx);
-        self.swap_manager.draw(&ctx);
-        self.burst_manager.draw(&ctx);
-        self.highlight_manager.draw(&ctx);
+        self.world.draw(&self.state.graph, &ctx);
+        self.pop.draw(&ctx);
+        self.swap.draw(&ctx);
+        self.burst.draw(&ctx);
+        self.highlight.draw(&ctx);
 
         // --- Pass 2: Screen Space (UI) ---
         set_default_camera();
-        self.spawn_manager.draw(&ctx);
+        self.spawn.draw(&ctx);
         draw_text(
             &format!("FPS: {:03}", get_fps()),
             10.0,
