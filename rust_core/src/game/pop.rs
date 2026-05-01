@@ -5,10 +5,16 @@ use macroquad::prelude::Color;
 
 const POPPING_TIME: f32 = 0.5;
 
+pub struct PendingPop {
+    pub bkey: BubbleKey,
+    pub style: BubbleStyle,
+    pub timer: f32,
+}
+
 #[derive(Default)]
 pub struct PopManager {
-    /// Bubbles currently in the timed "frozen" popping state.
-    pub pending_pop: Option<BubbleKey>,
+    /// Bubble currently in the timed "frozen" popping state.
+    pub pending_pop: Option<PendingPop>,
 }
 
 impl PopManager {
@@ -17,19 +23,19 @@ impl PopManager {
     }
 
     pub fn is_handling(&self, bkey: BubbleKey) -> bool {
-        self.pending_pop == Some(bkey)
+        matches!(&self.pending_pop, Some(p) if p.bkey == bkey)
     }
 
     pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
-        if let Some(bkey) = self.pending_pop {
-            let bubble = &ctx.graph.bubbles[bkey];
-            let points = crate::graphics::bubble::get_bubble_points(ctx.graph, bkey);
+        if let Some(pending) = &self.pending_pop {
+            let bubble = &ctx.graph.bubbles[pending.bkey];
+            let points = crate::graphics::bubble::get_points_for_bubble(ctx.graph, bubble);
             if points.is_empty() {
                 return;
             }
 
-            if let BubbleStyle::Popping { size, color, timer } = bubble.style {
-                let progress = (timer / 0.5).clamp(0.0, 1.0);
+            if let BubbleStyle::Standard { size, color } = pending.style {
+                let progress = (pending.timer / POPPING_TIME).clamp(0.0, 1.0);
                 let morphed_points = self.apply_pop_morph(&points, bubble.centroid, size, progress);
 
                 // Create a temporary Standard style with the faded color to use for rendering
@@ -92,13 +98,14 @@ impl PopManager {
             )
         {
             let style = graph.bubbles[bkey].style;
-            if let BubbleStyle::Standard { size, color } = style {
-                graph.bubbles[bkey].style = BubbleStyle::Popping {
-                    size,
-                    color,
+            if let BubbleStyle::Standard { .. } = style {
+                let target_area = style.get_target_area();
+                graph.bubbles[bkey].style = BubbleStyle::Invisible { area: target_area };
+                self.pending_pop = Some(PendingPop {
+                    bkey,
+                    style,
                     timer: POPPING_TIME,
-                };
-                self.pending_pop = Some(bkey);
+                });
                 return true;
             }
         }
@@ -107,15 +114,14 @@ impl PopManager {
 
     /// Updates timers for popping bubbles and handles transitions.
     pub fn update(&mut self, graph: &mut Graph, dt: f32) -> bool {
-        if let Some(bkey) = self.pending_pop {
-            if let Some(bubble) = graph.bubbles.get_mut(bkey) {
-                if let BubbleStyle::Popping { timer, .. } = &mut bubble.style {
-                    *timer -= dt;
-                    if *timer <= 0.0 {
-                        // "Pop" happened. Style target area is now 0.
-                        self.pending_pop = None;
-                        return true;
-                    }
+        if let Some(pending) = &mut self.pending_pop {
+            if let Some(bubble) = graph.bubbles.get_mut(pending.bkey) {
+                pending.timer -= dt;
+                if pending.timer <= 0.0 {
+                    // "Pop" happened. Style target area is now 0.
+                    bubble.style = BubbleStyle::Invisible { area: 0.0 };
+                    self.pending_pop = None;
+                    return true;
                 }
             } else {
                 self.pending_pop = None;

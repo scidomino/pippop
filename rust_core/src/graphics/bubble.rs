@@ -34,7 +34,7 @@ pub fn draw_bubble(style: &BubbleStyle, points: &[Vec2], centroid: Vec2, font: &
     let color = match style {
         BubbleStyle::Standard { color, .. } => *color,
         BubbleStyle::Player { .. } => colors::TRANSPARENT,
-        BubbleStyle::Popping { .. } | BubbleStyle::OpenAir | BubbleStyle::Waiting { .. } => return,
+        BubbleStyle::OpenAir | BubbleStyle::Invisible { .. } => return,
     };
 
     // Draw Fill (Ear Clipping Triangulation)

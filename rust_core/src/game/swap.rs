@@ -149,20 +149,18 @@ impl SwapManager {
                 self.active_swap = None;
                 return Some(player_bkey);
             } else {
-                // Update the progress in the waiting styles for physics interpolation
+                // Update the area in the invisible styles for physics interpolation
                 let np_target_area = swap.nonplayer_style.get_target_area();
                 let p_target_area = swap.player_style.get_target_area();
 
-                graph.bubbles[nonplayer_bkey].style = BubbleStyle::Waiting {
-                    start_area: np_target_area,
-                    end_area: p_target_area,
-                    progress: swap.progress,
-                };
-                graph.bubbles[player_bkey].style = BubbleStyle::Waiting {
-                    start_area: p_target_area,
-                    end_area: np_target_area,
-                    progress: swap.progress,
-                };
+                let progress = swap.progress.clamp(0.0, 1.0);
+
+                if let BubbleStyle::Invisible { area } = &mut graph.bubbles[nonplayer_bkey].style {
+                    *area = np_target_area + (p_target_area - np_target_area) * progress;
+                }
+                if let BubbleStyle::Invisible { area } = &mut graph.bubbles[player_bkey].style {
+                    *area = p_target_area + (np_target_area - p_target_area) * progress;
+                }
             }
         }
 
@@ -191,16 +189,12 @@ impl SwapManager {
         let p_target_area = player_style.get_target_area();
         let np_target_area = nonplayer_style.get_target_area();
 
-        graph.bubbles[nonplayer_bkey].style = BubbleStyle::Waiting {
-            start_area: np_target_area,
-            end_area: p_target_area,
-            progress: 0.0,
+        graph.bubbles[nonplayer_bkey].style = BubbleStyle::Invisible {
+            area: np_target_area,
         };
 
-        graph.bubbles[player_bkey].style = BubbleStyle::Waiting {
-            start_area: p_target_area,
-            end_area: np_target_area,
-            progress: 0.0,
+        graph.bubbles[player_bkey].style = BubbleStyle::Invisible {
+            area: p_target_area,
         };
 
         self.active_swap = Some(ActiveSwap {

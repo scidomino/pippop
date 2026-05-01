@@ -6,24 +6,10 @@ use std::ops::{Deref, DerefMut};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BubbleStyle {
-    Standard {
-        size: i32,
-        color: Color,
-    },
-    Player {
-        swaps_left: i32,
-    },
+    Standard { size: i32, color: Color },
+    Player { swaps_left: i32 },
     OpenAir,
-    Waiting {
-        start_area: f32,
-        end_area: f32,
-        progress: f32,
-    },
-    Popping {
-        size: i32,
-        color: Color,
-        timer: f32,
-    },
+    Invisible { area: f32 },
 }
 
 impl BubbleStyle {
@@ -52,19 +38,7 @@ impl BubbleStyle {
             BubbleStyle::Standard { size, .. } => 3000.0 * (*size as f32).sqrt(),
             BubbleStyle::Player { .. } => 3000.0,
             BubbleStyle::OpenAir => 0.0,
-            BubbleStyle::Waiting {
-                start_area,
-                end_area,
-                progress,
-            } => start_area + (end_area - start_area) * progress,
-            BubbleStyle::Popping { size, timer, .. } => {
-                let target = 3000.0 * (*size as f32).sqrt();
-                if *timer <= 0.0 {
-                    0.0
-                } else {
-                    target
-                }
-            }
+            BubbleStyle::Invisible { area } => *area,
         }
     }
 }
