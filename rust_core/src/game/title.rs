@@ -1,7 +1,6 @@
-use crate::game::game::{Interaction, InteractionState};
 use crate::game::slide::SlideManager;
 use crate::game::spawn::{SpawnManager, SpawnTimer};
-use crate::game::state::GameState;
+use crate::game::state::{GameState, Interaction, InteractionState};
 use crate::game::world::WorldManager;
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;

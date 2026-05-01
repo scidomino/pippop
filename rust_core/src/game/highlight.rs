@@ -1,6 +1,4 @@
-use crate::game::game::Interaction;
-use crate::game::game::InteractionState;
-use crate::game::state::GameState;
+use crate::game::state::{GameState, Interaction, InteractionState};
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
 use crate::graphics::colors;

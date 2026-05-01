@@ -5,6 +5,7 @@ use crate::game::reap::ReapManager;
 use crate::game::sanity::SanityManager;
 use crate::game::slide::SlideManager;
 use crate::game::spawn::{SpawnManager, SpawnTimer};
+use crate::game::state::{GameEvent, GamePhase, GameState, Interaction, InteractionState};
 use crate::game::swap::SwapManager;
 use crate::game::world::WorldManager;
 use crate::graph::bubble::BubbleStyle;
@@ -12,23 +13,7 @@ use crate::graph::Graph;
 use crate::graphics::{colors, RenderContext};
 use crate::resources::Resources;
 use macroquad::audio::play_sound_once;
-use macroquad::math::Vec2;
 use macroquad::prelude::*;
-
-use crate::game::state::{GameEvent, GamePhase, GameState};
-
-#[derive(Debug, Clone, Copy)]
-pub enum InteractionState {
-    Hover,
-    Pressed,
-    Released,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct Interaction {
-    pub position: Vec2,
-    pub state: InteractionState,
-}
 
 pub struct GameController {
     pub state: GameState,

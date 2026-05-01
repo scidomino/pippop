@@ -35,3 +35,16 @@ impl GameState {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum InteractionState {
+    Hover,
+    Pressed,
+    Released,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Interaction {
+    pub position: macroquad::math::Vec2,
+    pub state: InteractionState,
+}
