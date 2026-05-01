@@ -16,6 +16,8 @@ pub struct ActiveSwap {
     pub standard_style: BubbleStyle,
 
     pub progress: f32, // 0.0 to 1.0
+    pub start_area: f32,
+    pub target_area: f32,
 }
 
 #[derive(Default)]
@@ -122,9 +124,23 @@ impl SwapManager {
             swap.progress += dt / SWAP_TIME;
 
             let swappable_bkey = swap.swappable_bkey;
+            let standard_bkey = swap.standard_bkey;
+
+            let p = swap.progress.clamp(0.0, 1.0);
+            if let BubbleStyle::Swappable { area, .. } = &mut graph.bubbles[standard_bkey].style {
+                *area = swap.start_area + (swap.target_area - swap.start_area) * p;
+            }
+            if let BubbleStyle::Swappable { area, .. } = &mut graph.bubbles[swappable_bkey].style {
+                *area = swap.target_area + (swap.start_area - swap.target_area) * p;
+            }
 
             if swap.progress >= 1.0 {
                 graph.bubbles[swappable_bkey].style = swap.standard_style;
+                // Ensure the final swappable bubble has the exact target area
+                if let BubbleStyle::Swappable { area, .. } = &mut graph.bubbles[standard_bkey].style
+                {
+                    *area = swap.target_area;
+                }
                 self.active_swap = None;
                 return Some(swappable_bkey);
             }
@@ -144,12 +160,18 @@ impl SwapManager {
         graph.rebubble(swappable_bkey, twin_key);
 
         let standard_style = graph.bubbles[standard_bkey].style;
+        let start_area = standard_style.get_target_area();
+        let target_area = 3000.0;
+
         let BubbleStyle::Swappable { swaps_left, .. } = graph.bubbles[swappable_bkey].style else {
             panic!()
         };
 
-        // Immediately apply new swappable style to the standard bubble
-        graph.bubbles[standard_bkey].style = BubbleStyle::swappable((swaps_left - 1).max(0));
+        // Immediately apply new swappable style to the standard bubble, starting with standard's area
+        graph.bubbles[standard_bkey].style = BubbleStyle::Swappable {
+            swaps_left: (swaps_left - 1).max(0),
+            area: start_area,
+        };
 
         self.active_swap = Some(ActiveSwap {
             edge: edge_key,
@@ -157,6 +179,8 @@ impl SwapManager {
             standard_bkey,
             standard_style,
             progress: 0.0,
+            start_area,
+            target_area,
         });
     }
 }
