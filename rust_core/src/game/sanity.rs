@@ -18,6 +18,21 @@ impl SanityManager {
         Self
     }
 
+    pub fn update(&self, state: &GameState, _dt: f32) {
+        if let Err(e) = self.check(state) {
+            let dump = state.graph.dump_state();
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                use std::io::Write;
+                if let Ok(mut file) = std::fs::File::create("sanity_fail_dump.txt") {
+                    let _ = file.write_all(dump.as_bytes());
+                }
+            }
+            log::error!("Graph State Dumped to sanity_fail_dump.txt");
+            panic!("Graph Invariant Failure: {}", e);
+        }
+    }
+
     pub fn check(&self, state: &GameState) -> Result<(), String> {
         let graph = &state.graph;
         let mut seen_edges = HashSet::new();

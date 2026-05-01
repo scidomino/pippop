@@ -68,6 +68,7 @@ impl GameController {
         self.pop.update(&mut self.state, dt);
         self.swap.update(&mut self.state, dt);
         self.burst.update(&mut self.state, dt);
+        self.sanity.update(&self.state, dt);
 
         // Handle events (sounds, etc.)
         for event in self.state.events.drain(..) {
@@ -77,19 +78,6 @@ impl GameController {
                 GameEvent::Burst => resources.play_burst(),
                 GameEvent::Swap => resources.play_swap(),
             }
-        }
-
-        if let Err(e) = self.sanity.check(&self.state) {
-            let dump = self.state.graph.dump_state();
-            #[cfg(not(target_arch = "wasm32"))]
-            {
-                use std::io::Write;
-                if let Ok(mut file) = std::fs::File::create("sanity_fail_dump.txt") {
-                    let _ = file.write_all(dump.as_bytes());
-                }
-            }
-            log::error!("Graph State Dumped to sanity_fail_dump.txt");
-            panic!("Graph Invariant Failure: {}", e);
         }
     }
 
