@@ -1,4 +1,4 @@
-use macroquad::audio::{load_sound_from_bytes, Sound};
+use macroquad::audio::{load_sound_from_bytes, play_sound_once, Sound};
 use macroquad::prelude::*;
 
 pub struct Resources {
@@ -43,6 +43,25 @@ impl Resources {
                     .await
                     .unwrap(),
             ],
+        }
+    }
+
+    pub fn play_pop(&self) {
+        play_sound_once(&self.pop_sound);
+    }
+
+    pub fn play_spawn(&self) {
+        play_sound_once(&self.spawn_sound);
+    }
+
+    pub fn play_burst(&self) {
+        play_sound_once(&self.burst_sound);
+    }
+
+    pub fn play_swap(&self) {
+        if !self.splash_sounds.is_empty() {
+            let idx = macroquad::rand::gen_range(0, self.splash_sounds.len());
+            play_sound_once(&self.splash_sounds[idx]);
         }
     }
 }

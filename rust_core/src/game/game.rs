@@ -12,7 +12,6 @@ use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
 use crate::graphics::{colors, RenderContext};
 use crate::resources::Resources;
-use macroquad::audio::play_sound_once;
 use macroquad::prelude::*;
 
 pub struct GameController {
@@ -73,15 +72,10 @@ impl GameController {
         // Handle events (sounds, etc.)
         for event in self.state.events.drain(..) {
             match event {
-                GameEvent::Pop => play_sound_once(&resources.pop_sound),
-                GameEvent::Spawn => play_sound_once(&resources.spawn_sound),
-                GameEvent::Burst => play_sound_once(&resources.burst_sound),
-                GameEvent::Swap => {
-                    if !resources.splash_sounds.is_empty() {
-                        let idx = macroquad::rand::gen_range(0, resources.splash_sounds.len());
-                        play_sound_once(&resources.splash_sounds[idx]);
-                    }
-                }
+                GameEvent::Pop => resources.play_pop(),
+                GameEvent::Spawn => resources.play_spawn(),
+                GameEvent::Burst => resources.play_burst(),
+                GameEvent::Swap => resources.play_swap(),
             }
         }
 
