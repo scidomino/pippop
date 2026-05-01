@@ -58,7 +58,7 @@ impl HighlightManager {
         let mut requests = Vec::new();
 
         if let Some(p) = self.point {
-            if let Some(ekey) = graph.get_closest_swappable(p) {
+            if let Some(ekey) = graph.get_closest_swap_candidate(p) {
                 let bkey = graph.vertices.get_edge(ekey).bubble;
                 requests.push((bkey, 1.0));
             }

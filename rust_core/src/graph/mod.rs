@@ -282,7 +282,7 @@ impl Graph {
         }
     }
 
-    pub fn get_closest_swappable(&self, point: Vec2) -> Option<EdgeKey> {
+    pub fn get_closest_swap_candidate(&self, point: Vec2) -> Option<EdgeKey> {
         let swappable_bkey = self.bubbles.get_swappable()?;
 
         self.bubbles[swappable_bkey]
@@ -445,7 +445,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_closest_otter_swappable() {
+    fn test_get_closest_swap_candidate() {
         let graph = Graph::new(
             BubbleStyle::Swappable { swaps_left: 5 },
             BubbleStyle::Standard {
@@ -460,11 +460,11 @@ mod tests {
         // Find a point near b2
         let centroid2 = graph.bubbles[b2].centroid;
 
-        let closest = graph.get_closest_swappable(centroid2);
+        let closest = graph.get_closest_swap_candidate(centroid2);
         assert!(closest.is_some());
 
         let ekey = closest.unwrap();
-        // The edge should belong to b2, since it is the swappable twin of the swappable's edge
+        // The edge should belong to b2, since it is the candidate twin of the swappable's edge
         assert_eq!(graph.vertices.get_edge(ekey).bubble, b2);
     }
 

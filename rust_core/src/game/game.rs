@@ -19,7 +19,7 @@ use macroquad::prelude::*;
 pub enum GameState {
     Normal,
     Popping,
-    Swaping,
+    Swapping,
     Bursting,
 }
 
@@ -90,7 +90,7 @@ impl GameController {
                     .swap_manager
                     .interact(&mut self.graph, interaction.position)
                 {
-                    self.state = GameState::Swaping;
+                    self.state = GameState::Swapping;
                     if !resources.splash_sounds.is_empty() {
                         let idx = macroquad::rand::gen_range(0, resources.splash_sounds.len());
                         play_sound_once(&resources.splash_sounds[idx]);
@@ -128,7 +128,7 @@ impl GameController {
                     self.state = GameState::Normal;
                 }
             }
-            GameState::Swaping => {
+            GameState::Swapping => {
                 if let Some(bkey) = self.swap_manager.update(&mut self.graph, dt) {
                     self.burst_manager.set_focus_bubble(bkey);
                     if self.burst_manager.find_and_set_next_burstable(&self.graph) {

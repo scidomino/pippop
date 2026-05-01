@@ -109,7 +109,7 @@ impl SwapManager {
             }
         }
 
-        if let Some(edge_key) = graph.get_closest_swappable(point) {
+        if let Some(edge_key) = graph.get_closest_swap_candidate(point) {
             self.start_swap(graph, edge_key);
             return true;
         }
