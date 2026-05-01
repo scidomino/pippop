@@ -439,7 +439,7 @@ mod tests {
 
         // Set first bubble to Swappable
         let bkey = graph.bubbles.keys().next().unwrap();
-        graph.bubbles[bkey].style = BubbleStyle::Swappable { swaps_left: 5 };
+        graph.bubbles[bkey].style = BubbleStyle::swappable(5);
 
         assert_eq!(graph.bubbles.get_swappable(), Some(bkey));
     }
@@ -447,7 +447,7 @@ mod tests {
     #[test]
     fn test_get_closest_swap_candidate() {
         let graph = Graph::new(
-            BubbleStyle::Swappable { swaps_left: 5 },
+            BubbleStyle::swappable(5),
             BubbleStyle::Standard {
                 size: 1,
                 color: crate::graphics::colors::TURQUOISE,
@@ -471,7 +471,7 @@ mod tests {
     #[test]
     fn test_rebubble_reorders_edges() {
         let mut graph = Graph::new(
-            BubbleStyle::Swappable { swaps_left: 5 },
+            BubbleStyle::swappable(5),
             BubbleStyle::Standard {
                 size: 1,
                 color: crate::graphics::colors::TURQUOISE,

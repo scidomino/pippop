@@ -54,7 +54,7 @@ pub struct GameController {
 impl GameController {
     pub fn new(resources: &Resources) -> Self {
         let graph = Graph::new(
-            BubbleStyle::Swappable { swaps_left: 5 },
+            BubbleStyle::swappable(5),
             BubbleStyle::Standard {
                 size: 1,
                 color: colors::TURQUOISE,

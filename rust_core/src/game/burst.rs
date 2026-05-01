@@ -91,7 +91,8 @@ impl BurstManager {
 
         // Every wall burst grants the player an extra swap
         if let Some(swappable_bkey) = graph.bubbles.get_swappable() {
-            if let BubbleStyle::Swappable { swaps_left } = &mut graph.bubbles[swappable_bkey].style
+            if let BubbleStyle::Swappable { swaps_left, .. } =
+                &mut graph.bubbles[swappable_bkey].style
             {
                 *swaps_left += 1;
             }
@@ -149,7 +150,7 @@ mod tests {
     #[test]
     fn test_burst_increments_swaps() {
         let mut graph = Graph::new(
-            BubbleStyle::Swappable { swaps_left: 5 },
+            BubbleStyle::swappable(5),
             BubbleStyle::Standard {
                 size: 1,
                 color: colors::TURQUOISE,
@@ -184,7 +185,7 @@ mod tests {
         burst_manager.burst(&mut graph, ekey);
 
         let swappable_bkey = graph.bubbles.get_swappable().unwrap();
-        if let BubbleStyle::Swappable { swaps_left } = graph.bubbles[swappable_bkey].style {
+        if let BubbleStyle::Swappable { swaps_left, .. } = graph.bubbles[swappable_bkey].style {
             assert_eq!(swaps_left, 6);
         } else {
             panic!("Expected Swappable style");

@@ -7,12 +7,19 @@ use std::ops::{Deref, DerefMut};
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BubbleStyle {
     Standard { size: i32, color: Color },
-    Swappable { swaps_left: i32 },
+    Swappable { swaps_left: i32, area: f32 },
     OpenAir,
     Invisible { size: i32 },
 }
 
 impl BubbleStyle {
+    pub fn swappable(swaps_left: i32) -> Self {
+        BubbleStyle::Swappable {
+            swaps_left,
+            area: 3000.0,
+        }
+    }
+
     pub fn is_poppable(&self) -> bool {
         match self {
             BubbleStyle::Standard { size, .. } => *size >= 5,
@@ -38,7 +45,7 @@ impl BubbleStyle {
             BubbleStyle::Standard { size, .. } | BubbleStyle::Invisible { size } => {
                 3000.0 * (*size as f32).sqrt()
             }
-            BubbleStyle::Swappable { .. } => 3000.0,
+            BubbleStyle::Swappable { area, .. } => *area,
             BubbleStyle::OpenAir => 0.0,
         }
     }

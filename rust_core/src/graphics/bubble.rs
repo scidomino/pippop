@@ -53,7 +53,7 @@ pub fn draw_bubble(style: &BubbleStyle, points: &[Vec2], centroid: Vec2, font: &
 
     // Draw Label
     let label = match style {
-        BubbleStyle::Swappable { swaps_left } => format!("{swaps_left}"),
+        BubbleStyle::Swappable { swaps_left, .. } => format!("{swaps_left}"),
         _ => return,
     };
 

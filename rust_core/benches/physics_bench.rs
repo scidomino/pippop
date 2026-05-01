@@ -7,7 +7,7 @@ use std::hint::black_box;
 
 fn bench_physics(c: &mut Criterion) {
     let mut graph = Graph::new(
-        BubbleStyle::Swappable { swaps_left: 5 },
+        BubbleStyle::swappable(5),
         BubbleStyle::Standard {
             size: 1,
             color: colors::TURQUOISE,

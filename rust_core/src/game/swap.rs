@@ -144,14 +144,12 @@ impl SwapManager {
         graph.rebubble(swappable_bkey, twin_key);
 
         let standard_style = graph.bubbles[standard_bkey].style;
-        let BubbleStyle::Swappable { swaps_left } = graph.bubbles[swappable_bkey].style else {
+        let BubbleStyle::Swappable { swaps_left, .. } = graph.bubbles[swappable_bkey].style else {
             panic!()
         };
 
         // Immediately apply new swappable style to the standard bubble
-        graph.bubbles[standard_bkey].style = BubbleStyle::Swappable {
-            swaps_left: (swaps_left - 1).max(0),
-        };
+        graph.bubbles[standard_bkey].style = BubbleStyle::swappable((swaps_left - 1).max(0));
 
         self.active_swap = Some(ActiveSwap {
             edge: edge_key,
