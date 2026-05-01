@@ -69,9 +69,9 @@ impl HighlightManager {
                     .sin()
                     .powi(2);
 
-                if let Some(player_bkey) = graph.bubbles.get_player_bubble() {
-                    let player_bubble = &graph.bubbles[player_bkey];
-                    for &ekey in &player_bubble.edges {
+                if let Some(swappable_bkey) = graph.bubbles.get_swappable() {
+                    let swappable_bubble = &graph.bubbles[swappable_bkey];
+                    for &ekey in &swappable_bubble.edges {
                         let twin_bkey = graph
                             .vertices
                             .get_edge(graph.vertices.get_edge(ekey).twin)

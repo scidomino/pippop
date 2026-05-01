@@ -90,8 +90,9 @@ impl BurstManager {
         graph.remove_edge(ekey);
 
         // Every wall burst grants the player an extra swap
-        if let Some(player_bkey) = graph.bubbles.get_player_bubble() {
-            if let BubbleStyle::Player { swaps_left } = &mut graph.bubbles[player_bkey].style {
+        if let Some(swappable_bkey) = graph.bubbles.get_swappable() {
+            if let BubbleStyle::Swappable { swaps_left } = &mut graph.bubbles[swappable_bkey].style
+            {
                 *swaps_left += 1;
             }
         }
@@ -146,9 +147,9 @@ mod tests {
     use crate::graphics::colors;
 
     #[test]
-    fn test_burst_increments_player_swaps() {
+    fn test_burst_increments_swaps() {
         let mut graph = Graph::new(
-            BubbleStyle::Player { swaps_left: 5 },
+            BubbleStyle::Swappable { swaps_left: 5 },
             BubbleStyle::Standard {
                 size: 1,
                 color: colors::TURQUOISE,
@@ -165,7 +166,7 @@ mod tests {
         );
 
         let mut burst_manager = BurstManager::new(1);
-        // Find the standard bubble that isn't the player
+        // Find the standard bubble that isn't the swappable
         let bkey = graph
             .bubbles
             .iter()
@@ -182,11 +183,11 @@ mod tests {
         let ekey = burst_manager.active_edge.unwrap();
         burst_manager.burst(&mut graph, ekey);
 
-        let player_bkey = graph.bubbles.get_player_bubble().unwrap();
-        if let BubbleStyle::Player { swaps_left } = graph.bubbles[player_bkey].style {
+        let swappable_bkey = graph.bubbles.get_swappable().unwrap();
+        if let BubbleStyle::Swappable { swaps_left } = graph.bubbles[swappable_bkey].style {
             assert_eq!(swaps_left, 6);
         } else {
-            panic!("Expected Player style");
+            panic!("Expected Swappable style");
         }
     }
 }

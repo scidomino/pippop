@@ -283,9 +283,9 @@ impl Graph {
     }
 
     pub fn get_closest_swappable(&self, point: Vec2) -> Option<EdgeKey> {
-        let player_bkey = self.bubbles.get_player_bubble()?;
+        let swappable_bkey = self.bubbles.get_swappable()?;
 
-        self.bubbles[player_bkey]
+        self.bubbles[swappable_bkey]
             .edges
             .iter()
             .filter_map(|&ekey| {
@@ -422,7 +422,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_get_player_bubble() {
+    fn test_get_swappable_bubble() {
         let mut graph = Graph::new(
             BubbleStyle::Standard {
                 size: 1,
@@ -434,27 +434,27 @@ mod tests {
             },
         );
 
-        // Initially no player bubble in init()
-        assert_eq!(graph.bubbles.get_player_bubble(), None);
+        // Initially no swappable bubble in init()
+        assert_eq!(graph.bubbles.get_swappable(), None);
 
-        // Set first bubble to Player
+        // Set first bubble to Swappable
         let bkey = graph.bubbles.keys().next().unwrap();
-        graph.bubbles[bkey].style = BubbleStyle::Player { swaps_left: 5 };
+        graph.bubbles[bkey].style = BubbleStyle::Swappable { swaps_left: 5 };
 
-        assert_eq!(graph.bubbles.get_player_bubble(), Some(bkey));
+        assert_eq!(graph.bubbles.get_swappable(), Some(bkey));
     }
 
     #[test]
     fn test_get_closest_otter_swappable() {
         let graph = Graph::new(
-            BubbleStyle::Player { swaps_left: 5 },
+            BubbleStyle::Swappable { swaps_left: 5 },
             BubbleStyle::Standard {
                 size: 1,
                 color: crate::graphics::colors::TURQUOISE,
             },
         );
 
-        // Assign b1 as player and b2 as a standard bubble.
+        // Assign b1 as swappable and b2 as a standard bubble.
         let b2 = graph.bubbles.keys().nth(1).unwrap();
 
         // Find a point near b2
@@ -464,14 +464,14 @@ mod tests {
         assert!(closest.is_some());
 
         let ekey = closest.unwrap();
-        // The edge should belong to b2, since it is the swappable twin of the player's edge
+        // The edge should belong to b2, since it is the swappable twin of the swappable's edge
         assert_eq!(graph.vertices.get_edge(ekey).bubble, b2);
     }
 
     #[test]
     fn test_rebubble_reorders_edges() {
         let mut graph = Graph::new(
-            BubbleStyle::Player { swaps_left: 5 },
+            BubbleStyle::Swappable { swaps_left: 5 },
             BubbleStyle::Standard {
                 size: 1,
                 color: crate::graphics::colors::TURQUOISE,
