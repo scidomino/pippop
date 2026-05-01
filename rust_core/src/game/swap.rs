@@ -9,12 +9,10 @@ const SWAP_TIME: f32 = 0.2;
 
 pub struct ActiveSwap {
     pub edge: EdgeKey,
-    pub twin: EdgeKey,
     pub player_bkey: BubbleKey,
     pub nonplayer_bkey: BubbleKey,
     pub nonplayer_style: BubbleStyle,
     pub player_style: BubbleStyle,
-    pub new_player_style: BubbleStyle,
     pub progress: f32, // 0.0 to 1.0
 }
 
@@ -42,12 +40,14 @@ impl SwapManager {
     }
 
     fn draw_bubbles(&self, ctx: &crate::graphics::RenderContext, swap: &ActiveSwap) {
+        let twin = ctx.graph.vertices.get_edge(swap.edge).twin;
+
         // 1. Get the shared edge points (wall) from the non-player's perspective
         // Since we rebubbled, the first edge in the bubble's edge list is the shared wall.
         let mut e_points = ctx.graph.vertices.get_edge(swap.edge).points.clone();
-        e_points.push(ctx.graph.vertices[swap.twin.vertex].point.position);
+        e_points.push(ctx.graph.vertices[twin.vertex].point.position);
 
-        let mut t_points = ctx.graph.vertices.get_edge(swap.twin).points.clone();
+        let mut t_points = ctx.graph.vertices.get_edge(twin).points.clone();
         t_points.push(ctx.graph.vertices[swap.edge.vertex].point.position);
 
         // 2. Get full points for both
@@ -65,7 +65,7 @@ impl SwapManager {
             .skip(1)
             .flat_map(|&ekey| ctx.graph.vertices.get_edge(ekey).points.clone())
             .collect::<Vec<Vec2>>();
-        p_points.push(ctx.graph.vertices[swap.twin.vertex].point.position);
+        p_points.push(ctx.graph.vertices[twin.vertex].point.position);
 
         if e_points.is_empty() || np_points.is_empty() || p_points.is_empty() {
             return;
@@ -85,26 +85,6 @@ impl SwapManager {
         let np_centroid = ctx.graph.bubbles[swap.nonplayer_bkey].centroid;
         let p_centroid = ctx.graph.bubbles[swap.player_bkey].centroid;
         let combined_centroid = np_centroid.lerp(p_centroid, swap.progress);
-
-        bubble::draw_bubble(
-            &swap.player_style,
-            &crate::graphics::bubble::get_points_for_bubble(
-                ctx.graph,
-                &ctx.graph.bubbles[swap.player_bkey],
-            ),
-            ctx.graph.bubbles[swap.player_bkey].centroid,
-            ctx.font,
-        );
-
-        bubble::draw_bubble(
-            &swap.new_player_style,
-            &crate::graphics::bubble::get_points_for_bubble(
-                ctx.graph,
-                &ctx.graph.bubbles[swap.nonplayer_bkey],
-            ),
-            ctx.graph.bubbles[swap.nonplayer_bkey].centroid,
-            ctx.font,
-        );
 
         bubble::draw_bubble(
             &swap.nonplayer_style,
@@ -140,27 +120,11 @@ impl SwapManager {
             swap.progress += dt / SWAP_TIME;
 
             let player_bkey = swap.player_bkey;
-            let nonplayer_bkey = swap.nonplayer_bkey;
 
             if swap.progress >= 1.0 {
                 graph.bubbles[player_bkey].style = swap.nonplayer_style;
-                graph.bubbles[nonplayer_bkey].style = swap.new_player_style;
-
                 self.active_swap = None;
                 return Some(player_bkey);
-            } else {
-                // Update the area in the invisible styles for physics interpolation
-                let np_target_area = swap.nonplayer_style.get_target_area();
-                let p_target_area = swap.player_style.get_target_area();
-
-                let progress = swap.progress.clamp(0.0, 1.0);
-
-                if let BubbleStyle::Invisible { area } = &mut graph.bubbles[nonplayer_bkey].style {
-                    *area = np_target_area + (p_target_area - np_target_area) * progress;
-                }
-                if let BubbleStyle::Invisible { area } = &mut graph.bubbles[player_bkey].style {
-                    *area = p_target_area + (np_target_area - p_target_area) * progress;
-                }
             }
         }
 
@@ -186,25 +150,15 @@ impl SwapManager {
             other => other,
         };
 
-        let p_target_area = player_style.get_target_area();
-        let np_target_area = nonplayer_style.get_target_area();
-
-        graph.bubbles[nonplayer_bkey].style = BubbleStyle::Invisible {
-            area: np_target_area,
-        };
-
-        graph.bubbles[player_bkey].style = BubbleStyle::Invisible {
-            area: p_target_area,
-        };
+        // Immediately apply new player style to the nonplayer bubble
+        graph.bubbles[nonplayer_bkey].style = new_player_style;
 
         self.active_swap = Some(ActiveSwap {
             edge: edge_key,
-            twin: twin_key,
             player_bkey,
             nonplayer_bkey,
             nonplayer_style,
             player_style,
-            new_player_style,
             progress: 0.0,
         });
     }
