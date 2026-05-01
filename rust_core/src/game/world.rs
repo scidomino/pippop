@@ -1,3 +1,4 @@
+use crate::game::state::GameState;
 use crate::graph::Graph;
 use crate::graphics::{bubble, RenderContext};
 use crate::physics;
@@ -14,10 +15,10 @@ impl WorldManager {
     }
 
     /// Advances the physics simulation using a fixed timestep.
-    pub fn update(&mut self, graph: &mut Graph, dt: f32) {
+    pub fn update(&mut self, state: &mut GameState, dt: f32) {
         self.physics_accumulator += dt;
         while self.physics_accumulator >= 0.016 {
-            physics::advance_frame(graph);
+            physics::advance_frame(&mut state.graph);
             self.physics_accumulator -= 0.016;
         }
     }

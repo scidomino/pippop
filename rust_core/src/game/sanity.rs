@@ -1,7 +1,7 @@
+use crate::game::state::GameState;
 use crate::graph::{
     bubble::BubbleStyle,
     edge::{EdgeKey, Slot},
-    Graph,
 };
 use std::collections::HashSet;
 
@@ -18,7 +18,8 @@ impl SanityManager {
         Self
     }
 
-    pub fn check(&self, graph: &Graph) -> Result<(), String> {
+    pub fn check(&self, state: &GameState) -> Result<(), String> {
+        let graph = &state.graph;
         let mut seen_edges = HashSet::new();
         let mut open_air_count = 0;
 

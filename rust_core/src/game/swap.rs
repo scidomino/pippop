@@ -1,3 +1,4 @@
+use crate::game::state::{GamePhase, GameState};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
@@ -119,7 +120,11 @@ impl SwapManager {
         false
     }
 
-    pub fn update(&mut self, graph: &mut Graph, dt: f32) -> Option<BubbleKey> {
+    pub fn update(&mut self, state: &mut GameState, dt: f32) {
+        if state.phase != GamePhase::Swapping {
+            return;
+        }
+
         if let Some(swap) = &mut self.active_swap {
             swap.progress += dt / SWAP_TIME;
 
@@ -127,26 +132,31 @@ impl SwapManager {
             let colored_bkey = swap.colored_bkey;
 
             let p = swap.progress.clamp(0.0, 1.0);
-            if let BubbleStyle::Swappable { area, .. } = &mut graph.bubbles[colored_bkey].style {
+            if let BubbleStyle::Swappable { area, .. } =
+                &mut state.graph.bubbles[colored_bkey].style
+            {
                 *area = swap.start_area + (swap.target_area - swap.start_area) * p;
             }
-            if let BubbleStyle::Swappable { area, .. } = &mut graph.bubbles[swappable_bkey].style {
+            if let BubbleStyle::Swappable { area, .. } =
+                &mut state.graph.bubbles[swappable_bkey].style
+            {
                 *area = swap.target_area + (swap.start_area - swap.target_area) * p;
             }
 
             if swap.progress >= 1.0 {
-                graph.bubbles[swappable_bkey].style = swap.colored_style;
+                state.graph.bubbles[swappable_bkey].style = swap.colored_style;
                 // Ensure the final swappable bubble has the exact target area
-                if let BubbleStyle::Swappable { area, .. } = &mut graph.bubbles[colored_bkey].style
+                if let BubbleStyle::Swappable { area, .. } =
+                    &mut state.graph.bubbles[colored_bkey].style
                 {
                     *area = swap.target_area;
                 }
+
+                state.focus_bubble = Some(swappable_bkey);
+                state.phase = GamePhase::Bursting;
                 self.active_swap = None;
-                return Some(swappable_bkey);
             }
         }
-
-        None
     }
 
     fn start_swap(&mut self, graph: &mut Graph, edge_key: EdgeKey) {

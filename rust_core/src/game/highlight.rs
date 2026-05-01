@@ -1,5 +1,6 @@
 use crate::game::game::Interaction;
 use crate::game::game::InteractionState;
+use crate::game::state::GameState;
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
 use crate::graphics::colors;
@@ -41,7 +42,7 @@ impl HighlightManager {
         }
     }
 
-    pub fn update(&mut self, dt: f32) {
+    pub fn update(&mut self, _state: &mut GameState, dt: f32) {
         self.time += dt;
     }
 

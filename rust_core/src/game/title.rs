@@ -1,6 +1,7 @@
 use crate::game::game::{Interaction, InteractionState};
 use crate::game::slide::SlideManager;
 use crate::game::spawn::{SpawnManager, SpawnTimer};
+use crate::game::state::GameState;
 use crate::game::world::WorldManager;
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
@@ -9,7 +10,7 @@ use crate::resources::Resources;
 use macroquad::prelude::*;
 
 pub struct TitleController {
-    pub graph: Graph,
+    pub state: GameState,
     pub font: Font,
     pub world_manager: WorldManager,
     pub spawn_manager: SpawnManager,
@@ -25,7 +26,7 @@ impl TitleController {
         );
 
         Self {
-            graph,
+            state: GameState::new(graph),
             font: resources.font.clone(),
             world_manager: WorldManager::new(),
             spawn_manager: SpawnManager::new(
@@ -46,21 +47,23 @@ impl TitleController {
 
     pub fn update(&mut self, dt: f32) {
         self.timer += dt;
-        self.world_manager.update(&mut self.graph, dt);
-        self.spawn_manager.update(&self.graph, dt);
-        self.slide_manager.update(&mut self.graph, dt);
-        self.spawn_manager.possibly_spawn(&mut self.graph);
+        self.world_manager.update(&mut self.state, dt);
+        self.spawn_manager.update(&mut self.state, dt);
+        self.slide_manager.update(&mut self.state, dt);
+
+        // Drain events so they don't accumulate
+        self.state.events.clear();
     }
 
     pub fn draw(&self, camera: &Camera2D) {
         let ctx = RenderContext {
-            graph: &self.graph,
+            graph: &self.state.graph,
             font: &self.font,
         };
 
         // --- Pass 1: World Space (Background Bubbles) ---
         set_camera(camera);
-        self.world_manager.draw(&self.graph, &ctx);
+        self.world_manager.draw(&self.state.graph, &ctx);
 
         // --- Pass 2: Screen Space (UI) ---
         set_default_camera();

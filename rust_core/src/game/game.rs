@@ -1,4 +1,4 @@
-use crate::game::burst::{BurstManager, BurstResult};
+use crate::game::burst::BurstManager;
 use crate::game::highlight::HighlightManager;
 use crate::game::pop::PopManager;
 use crate::game::reap::ReapManager;
@@ -15,13 +15,7 @@ use macroquad::audio::play_sound_once;
 use macroquad::math::Vec2;
 use macroquad::prelude::*;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum GameState {
-    Normal,
-    Popping,
-    Swapping,
-    Bursting,
-}
+use crate::game::state::{GameEvent, GamePhase, GameState};
 
 #[derive(Debug, Clone, Copy)]
 pub enum InteractionState {
@@ -37,9 +31,8 @@ pub struct Interaction {
 }
 
 pub struct GameController {
-    pub graph: Graph,
-    pub font: Font,
     pub state: GameState,
+    pub font: Font,
     pub world_manager: WorldManager,
     pub spawn_manager: SpawnManager,
     pub slide_manager: SlideManager,
@@ -53,15 +46,12 @@ pub struct GameController {
 
 impl GameController {
     pub fn new(resources: &Resources) -> Self {
-        let graph = Graph::new(
-            BubbleStyle::swappable(5),
-            BubbleStyle::colored(colors::TURQUOISE),
-        );
-
         Self {
-            graph,
+            state: GameState::new(Graph::new(
+                BubbleStyle::swappable(5),
+                BubbleStyle::colored(colors::TURQUOISE),
+            )),
             font: resources.font.clone(),
-            state: GameState::Normal,
             world_manager: WorldManager::new(),
             spawn_manager: SpawnManager::new(
                 colors::get_group(6),
@@ -81,13 +71,13 @@ impl GameController {
     }
 
     pub fn interact(&mut self, resources: &Resources, interaction: Interaction) {
-        if self.state == GameState::Normal {
+        if self.state.phase == GamePhase::Normal {
             if matches!(interaction.state, InteractionState::Released) {
                 if self
                     .swap_manager
-                    .interact(&mut self.graph, interaction.position)
+                    .interact(&mut self.state.graph, interaction.position)
                 {
-                    self.state = GameState::Swapping;
+                    self.state.phase = GamePhase::Swapping;
                     if !resources.splash_sounds.is_empty() {
                         let idx = macroquad::rand::gen_range(0, resources.splash_sounds.len());
                         play_sound_once(&resources.splash_sounds[idx]);
@@ -100,56 +90,27 @@ impl GameController {
     }
 
     pub fn update(&mut self, resources: &Resources, dt: f32) {
-        self.world_manager.update(&mut self.graph, dt);
-        self.spawn_manager.update(&self.graph, dt);
+        self.world_manager.update(&mut self.state, dt);
+        self.spawn_manager.update(&mut self.state, dt);
+        self.reap_manager.update(&mut self.state, dt);
+        self.slide_manager.update(&mut self.state, dt);
+        self.highlight_manager.update(&mut self.state, dt);
+        self.pop_manager.update(&mut self.state, dt);
+        self.swap_manager.update(&mut self.state, dt);
+        self.burst_manager.update(&mut self.state, dt);
 
-        match self.state {
-            GameState::Normal => {
-                self.reap_manager.update(&mut self.graph);
-                self.slide_manager.update(&mut self.graph, dt);
-
-                if self.spawn_manager.possibly_spawn(&mut self.graph) {
-                    play_sound_once(&resources.spawn_sound);
-                }
-                self.highlight_manager.update(dt);
-
-                if self.pop_manager.start_pop_if_ready(&mut self.graph) {
-                    self.state = GameState::Popping;
-                }
+        // Handle events (sounds, etc.)
+        for event in self.state.events.drain(..) {
+            match event {
+                GameEvent::Pop => play_sound_once(&resources.pop_sound),
+                GameEvent::Spawn => play_sound_once(&resources.spawn_sound),
+                GameEvent::Burst => play_sound_once(&resources.burst_sound),
+                GameEvent::Swap => {} // Splash sounds handled in interact for now
             }
-            GameState::Popping => {
-                if self.pop_manager.update(&mut self.graph, dt) {
-                    play_sound_once(&resources.pop_sound);
-                }
-                if self.pop_manager.pending_pop.is_none() {
-                    self.state = GameState::Normal;
-                }
-            }
-            GameState::Swapping => {
-                if let Some(bkey) = self.swap_manager.update(&mut self.graph, dt) {
-                    self.burst_manager.set_focus_bubble(bkey);
-                    if self.burst_manager.find_and_set_next_burstable(&self.graph) {
-                        self.state = GameState::Bursting;
-                    } else {
-                        self.burst_manager.focus_bubble = None;
-                        self.state = GameState::Normal;
-                    }
-                }
-            }
-            GameState::Bursting => match self.burst_manager.update(&mut self.graph, dt) {
-                BurstResult::Waiting => {}
-                BurstResult::DidBurst => {
-                    play_sound_once(&resources.burst_sound);
-                }
-                BurstResult::Finished => {
-                    play_sound_once(&resources.burst_sound);
-                    self.state = GameState::Normal;
-                }
-            },
         }
 
-        if let Err(e) = self.sanity_manager.check(&self.graph) {
-            let dump = self.graph.dump_state();
+        if let Err(e) = self.sanity_manager.check(&self.state) {
+            let dump = self.state.graph.dump_state();
             #[cfg(not(target_arch = "wasm32"))]
             {
                 use std::io::Write;
@@ -164,14 +125,14 @@ impl GameController {
 
     pub fn draw(&self, camera: &Camera2D) {
         let ctx = RenderContext {
-            graph: &self.graph,
+            graph: &self.state.graph,
             font: &self.font,
         };
 
         // --- Pass 1: World Space (Bubbles, Managers, UI) ---
         set_camera(camera);
 
-        self.world_manager.draw(&self.graph, &ctx);
+        self.world_manager.draw(&self.state.graph, &ctx);
         self.pop_manager.draw(&ctx);
         self.swap_manager.draw(&ctx);
         self.burst_manager.draw(&ctx);

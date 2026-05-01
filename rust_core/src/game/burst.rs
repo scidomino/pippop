@@ -1,3 +1,4 @@
+use crate::game::state::{GameEvent, GamePhase, GameState};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
@@ -21,7 +22,6 @@ pub struct BurstManager {
     /// The edge currently being "frozen" for the burst animation.
     pub active_edge: Option<EdgeKey>,
     pub timer: f32,
-    pub focus_bubble: Option<BubbleKey>,
 }
 
 impl BurstManager {
@@ -29,12 +29,7 @@ impl BurstManager {
         Self {
             active_edge: None,
             timer: 0.0,
-            focus_bubble: None,
         }
-    }
-
-    pub fn set_focus_bubble(&mut self, bkey: BubbleKey) {
-        self.focus_bubble = Some(bkey);
     }
 
     pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
@@ -51,36 +46,48 @@ impl BurstManager {
         }
     }
 
-    pub fn update(&mut self, graph: &mut Graph, dt: f32) -> BurstResult {
+    pub fn update(&mut self, state: &mut GameState, dt: f32) {
+        if state.phase != GamePhase::Bursting {
+            return;
+        }
+
+        if self.active_edge.is_none() {
+            if self.find_and_set_next_burstable(&state.graph, state.focus_bubble) {
+                // Initial burst setup successful
+            } else {
+                state.phase = GamePhase::Normal;
+                state.focus_bubble = None;
+                return;
+            }
+        }
+
         if let Some(ekey) = self.active_edge {
             self.timer -= dt;
             if self.timer <= 0.0 {
-                self.burst(graph, ekey);
+                self.burst(&mut state.graph, ekey, state.focus_bubble);
+                state.events.push(GameEvent::Burst);
 
-                if self.find_and_set_next_burstable(graph) {
-                    return BurstResult::DidBurst;
+                if self.find_and_set_next_burstable(&state.graph, state.focus_bubble) {
+                    // Continue bursting
+                } else {
+                    self.active_edge = None;
+                    state.focus_bubble = None;
+                    state.phase = GamePhase::Normal;
                 }
-
-                // If vertex wasn't found, or no next burstable edge
-                self.active_edge = None;
-                self.focus_bubble = None;
-                return BurstResult::Finished;
             }
-            return BurstResult::Waiting;
         }
-        BurstResult::Finished
     }
 
     /// Performs the topological merge of two bubbles across a shared edge.
     /// Ensures that the focus bubble survives the merge.
-    pub fn burst(&mut self, graph: &mut Graph, mut ekey: EdgeKey) {
+    pub fn burst(&mut self, graph: &mut Graph, mut ekey: EdgeKey, focus_bubble: Option<BubbleKey>) {
         if !self.is_burstable(graph, ekey) {
             return;
         }
 
         // In graph.remove_edge(ekey), ekey.bubble survives (b_top).
         // If our focus bubble is the twin, we must swap to ensure it survives.
-        if let Some(focus) = self.focus_bubble {
+        if let Some(focus) = focus_bubble {
             let twin_key = graph.vertices.get_edge(ekey).twin;
             if graph.vertices.get_edge(twin_key).bubble == focus {
                 ekey = twin_key;
@@ -100,8 +107,12 @@ impl BurstManager {
     }
 
     /// Sets up the manager to process a burst with a freeze delay using the focus bubble.
-    pub fn find_and_set_next_burstable(&mut self, graph: &Graph) -> bool {
-        if let Some(bkey) = self.focus_bubble {
+    pub fn find_and_set_next_burstable(
+        &mut self,
+        graph: &Graph,
+        focus_bubble: Option<BubbleKey>,
+    ) -> bool {
+        if let Some(bkey) = focus_bubble {
             if let Some(ekey) = self.find_burstable_edge_in_bubble(graph, bkey) {
                 self.active_edge = Some(ekey);
                 self.timer = FREEZE_DURATION;
@@ -144,39 +155,45 @@ impl BurstManager {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::game::state::GameState;
     use crate::graph::bubble::BubbleStyle;
     use crate::graphics::colors;
 
     #[test]
     fn test_burst_increments_swaps() {
-        let mut graph = Graph::new(
+        let graph = Graph::new(
             BubbleStyle::swappable(5),
             BubbleStyle::colored(colors::TURQUOISE),
         );
+        let mut state = GameState::new(graph);
 
-        let vkey = graph.vertices.keys().next().unwrap();
-        graph.spawn(vkey, BubbleStyle::colored(colors::TURQUOISE));
+        let vkey = state.graph.vertices.keys().next().unwrap();
+        state
+            .graph
+            .spawn(vkey, BubbleStyle::colored(colors::TURQUOISE));
 
         let mut burst_manager = BurstManager::new(1);
         // Find the colored bubble that isn't the swappable
-        let bkey = graph
+        let bkey = state
+            .graph
             .bubbles
             .iter()
             .find(|(_, b)| matches!(b.style, BubbleStyle::Colored { .. }))
             .map(|(k, _)| k)
             .expect("Should have a colored bubble");
 
-        burst_manager.set_focus_bubble(bkey);
+        state.focus_bubble = Some(bkey);
         assert!(
-            burst_manager.find_and_set_next_burstable(&graph),
+            burst_manager.find_and_set_next_burstable(&state.graph, state.focus_bubble),
             "Should find a burstable edge in focus bubble"
         );
 
         let ekey = burst_manager.active_edge.unwrap();
-        burst_manager.burst(&mut graph, ekey);
+        burst_manager.burst(&mut state.graph, ekey, state.focus_bubble);
 
-        let swappable_bkey = graph.bubbles.get_swappable().unwrap();
-        if let BubbleStyle::Swappable { swaps_left, .. } = graph.bubbles[swappable_bkey].style {
+        let swappable_bkey = state.graph.bubbles.get_swappable().unwrap();
+        if let BubbleStyle::Swappable { swaps_left, .. } = state.graph.bubbles[swappable_bkey].style
+        {
             assert_eq!(swaps_left, 6);
         } else {
             panic!("Expected Swappable style");

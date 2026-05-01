@@ -1,0 +1,37 @@
+use crate::graph::Graph;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GamePhase {
+    Normal,
+    Popping,
+    Swapping,
+    Bursting,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GameEvent {
+    Pop,
+    Spawn,
+    Burst,
+    Swap,
+}
+
+// This struct represents the entire state of the game at any given moment.
+// This is passed to the update method of the managers, which can modify it as needed.
+pub struct GameState {
+    pub graph: Graph,
+    pub phase: GamePhase,
+    pub events: Vec<GameEvent>,
+    pub focus_bubble: Option<crate::graph::bubble::BubbleKey>,
+}
+
+impl GameState {
+    pub fn new(graph: Graph) -> Self {
+        Self {
+            graph,
+            phase: GamePhase::Normal,
+            events: Vec::new(),
+            focus_bubble: None,
+        }
+    }
+}

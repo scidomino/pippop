@@ -1,3 +1,5 @@
+use crate::game::state::GamePhase;
+use crate::game::state::{GameEvent, GameState};
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::vertex::VertexKey;
 use crate::graph::Graph;
@@ -37,12 +39,19 @@ impl SpawnManager {
         manager
     }
 
-    pub fn update(&mut self, graph: &Graph, dt: f32) {
-        let has_pairs = self.has_two_color_pairs(graph);
+    pub fn update(&mut self, state: &mut GameState, dt: f32) {
+        let has_pairs = self.has_two_color_pairs(&state.graph);
         let multiplier = if has_pairs { 1.0 } else { 10.0 };
 
         self.total_play_time += dt;
         self.next_spawn_time -= dt * multiplier;
+
+        if self.next_spawn_time < 0.0 && state.phase == GamePhase::Normal {
+            self.spawn(&mut state.graph);
+            self.next_spawn_time = self.get_next_spawn_time();
+            self.next_color = *self.colors.choose().expect("colors is non-empty");
+            state.events.push(GameEvent::Spawn);
+        }
     }
 
     pub fn draw(&self, _ctx: &crate::graphics::RenderContext) {
@@ -51,16 +60,6 @@ impl SpawnManager {
         let y = 30.0;
         macroquad::shapes::draw_circle(x, y, radius, self.next_color);
         macroquad::shapes::draw_circle_lines(x, y, radius, 2.0, macroquad::prelude::WHITE);
-    }
-
-    pub fn possibly_spawn(&mut self, graph: &mut Graph) -> bool {
-        if self.next_spawn_time < 0.0 {
-            self.spawn(graph);
-            self.next_spawn_time = self.get_next_spawn_time();
-            self.next_color = *self.colors.choose().expect("colors is non-empty");
-            return true;
-        }
-        false
     }
 
     fn has_two_color_pairs(&self, graph: &Graph) -> bool {
@@ -116,6 +115,7 @@ impl SpawnManager {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::game::state::GameState;
     use crate::graphics::colors;
 
     #[test]
@@ -144,9 +144,11 @@ mod tests {
             BubbleStyle::colored(colors::TURQUOISE),
             BubbleStyle::colored(colors::ROSE),
         );
+        let mut state = GameState::new(graph);
 
+        manager.next_spawn_time = 100.0;
         let initial_time = manager.next_spawn_time;
-        manager.update(&graph, 1.0);
+        manager.update(&mut state, 1.0);
 
         assert_eq!(manager.total_play_time, 1.0);
         // Initial graph has Turquoise and Rose (no pairs), so multiplier should be 10.0
@@ -155,11 +157,12 @@ mod tests {
 
     #[test]
     fn test_spawn_integration() {
-        let mut graph = Graph::new(
+        let graph = Graph::new(
             BubbleStyle::colored(colors::TURQUOISE),
             BubbleStyle::colored(colors::ROSE),
         );
-        let initial_bubbles = graph.bubbles.len();
+        let mut state = GameState::new(graph);
+        let initial_bubbles = state.graph.bubbles.len();
 
         let timer = SpawnTimer {
             starting_wait: 1.0,
@@ -169,9 +172,9 @@ mod tests {
 
         // Force a spawn by setting time to negative
         manager.next_spawn_time = -1.0;
-        manager.possibly_spawn(&mut graph);
+        manager.update(&mut state, 0.0);
 
-        assert_eq!(graph.bubbles.len(), initial_bubbles + 1);
+        assert_eq!(state.graph.bubbles.len(), initial_bubbles + 1);
         assert!(manager.next_spawn_time > 0.0);
     }
 }

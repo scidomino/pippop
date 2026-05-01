@@ -57,7 +57,7 @@ async fn main() {
 
         if is_key_pressed(KeyCode::D) {
             if let Screen::Game(c) = &screen {
-                dump_graph(&c.graph);
+                dump_graph(&c.state.graph);
             }
         }
 

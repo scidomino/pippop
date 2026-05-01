@@ -1,5 +1,5 @@
+use crate::game::state::GameState;
 use crate::graph::bubble::BubbleStyle;
-use crate::graph::Graph;
 
 const UNNOTICEABLE_AREA: f32 = 100.0; // Slightly larger than Android to be safe with physics
 
@@ -14,8 +14,9 @@ impl ReapManager {
     /// Removes popping bubbles that have finished their animation when they are either:
     /// - deflated enough to be removed without causing noticeable visual artifacts, or
     /// - touching the open air.
-    pub fn update(&self, graph: &mut Graph) {
+    pub fn update(&self, state: &mut GameState, _dt: f32) {
         let mut to_remove = Vec::new();
+        let graph = &mut state.graph;
 
         // Identify bubbles that should be removed
         for (_, bubble) in graph.bubbles.iter() {
