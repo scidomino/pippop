@@ -98,9 +98,8 @@ impl PopManager {
             )
         {
             let style = graph.bubbles[bkey].style;
-            if let BubbleStyle::Standard { .. } = style {
-                let target_area = style.get_target_area();
-                graph.bubbles[bkey].style = BubbleStyle::Invisible { area: target_area };
+            if let BubbleStyle::Standard { size, .. } = style {
+                graph.bubbles[bkey].style = BubbleStyle::Invisible { size };
                 self.pending_pop = Some(PendingPop {
                     bkey,
                     style,
@@ -119,7 +118,7 @@ impl PopManager {
                 pending.timer -= dt;
                 if pending.timer <= 0.0 {
                     // "Pop" happened. Style target area is now 0.
-                    bubble.style = BubbleStyle::Invisible { area: 0.0 };
+                    bubble.style = BubbleStyle::Invisible { size: 0 };
                     self.pending_pop = None;
                     return true;
                 }

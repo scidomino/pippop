@@ -9,7 +9,7 @@ pub enum BubbleStyle {
     Standard { size: i32, color: Color },
     Swappable { swaps_left: i32 },
     OpenAir,
-    Invisible { area: f32 },
+    Invisible { size: i32 },
 }
 
 impl BubbleStyle {
@@ -35,10 +35,11 @@ impl BubbleStyle {
 
     pub fn get_target_area(&self) -> f32 {
         match self {
-            BubbleStyle::Standard { size, .. } => 3000.0 * (*size as f32).sqrt(),
+            BubbleStyle::Standard { size, .. } | BubbleStyle::Invisible { size } => {
+                3000.0 * (*size as f32).sqrt()
+            }
             BubbleStyle::Swappable { .. } => 3000.0,
             BubbleStyle::OpenAir => 0.0,
-            BubbleStyle::Invisible { area } => *area,
         }
     }
 }

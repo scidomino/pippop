@@ -19,7 +19,7 @@ impl ReapManager {
 
         // Identify bubbles that should be removed
         for (_, bubble) in graph.bubbles.iter() {
-            if !matches!(bubble.style, BubbleStyle::Invisible { area } if area <= 0.0) {
+            if !matches!(bubble.style, BubbleStyle::Invisible { size } if size <= 0) {
                 continue;
             }
 
