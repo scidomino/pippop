@@ -133,7 +133,7 @@ impl BurstManager {
         let s2 = &graph.bubbles[twin.bubble].style;
 
         match (s1, s2) {
-            (BubbleStyle::Standard { color: c1, .. }, BubbleStyle::Standard { color: c2, .. }) => {
+            (BubbleStyle::Colored { color: c1, .. }, BubbleStyle::Colored { color: c2, .. }) => {
                 c1 == c2
             }
             _ => false,
@@ -151,20 +151,20 @@ mod tests {
     fn test_burst_increments_swaps() {
         let mut graph = Graph::new(
             BubbleStyle::swappable(5),
-            BubbleStyle::standard(colors::TURQUOISE),
+            BubbleStyle::colored(colors::TURQUOISE),
         );
 
         let vkey = graph.vertices.keys().next().unwrap();
-        graph.spawn(vkey, BubbleStyle::standard(colors::TURQUOISE));
+        graph.spawn(vkey, BubbleStyle::colored(colors::TURQUOISE));
 
         let mut burst_manager = BurstManager::new(1);
-        // Find the standard bubble that isn't the swappable
+        // Find the colored bubble that isn't the swappable
         let bkey = graph
             .bubbles
             .iter()
-            .find(|(_, b)| matches!(b.style, BubbleStyle::Standard { .. }))
+            .find(|(_, b)| matches!(b.style, BubbleStyle::Colored { .. }))
             .map(|(k, _)| k)
-            .expect("Should have a standard bubble");
+            .expect("Should have a colored bubble");
 
         burst_manager.set_focus_bubble(bkey);
         assert!(

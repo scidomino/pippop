@@ -12,8 +12,8 @@ pub struct ActiveSwap {
 
     pub swappable_bkey: BubbleKey,
 
-    pub standard_bkey: BubbleKey,
-    pub standard_style: BubbleStyle,
+    pub colored_bkey: BubbleKey,
+    pub colored_style: BubbleStyle,
 
     pub progress: f32, // 0.0 to 1.0
     pub start_area: f32,
@@ -32,7 +32,7 @@ impl SwapManager {
 
     pub fn is_handling(&self, bkey: BubbleKey) -> bool {
         if let Some(swap) = &self.active_swap {
-            return swap.swappable_bkey == bkey || swap.standard_bkey == bkey;
+            return swap.swappable_bkey == bkey || swap.colored_bkey == bkey;
         }
         false
     }
@@ -55,7 +55,7 @@ impl SwapManager {
         t_points.push(ctx.graph.vertices[swap.edge.vertex].point.position);
 
         // 2. Get full points for both
-        let mut s_points = ctx.graph.bubbles[swap.standard_bkey]
+        let mut s_points = ctx.graph.bubbles[swap.colored_bkey]
             .edges
             .iter()
             .skip(1)
@@ -78,7 +78,7 @@ impl SwapManager {
         // 3. Create the two parts of the tween
         // Part 1: wall -> swappable
         let part1 = geometry::tween_points(&e_points, &p_points, swap.progress);
-        // Part 2: standard -> wall
+        // Part 2: colored -> wall
         let part2 = geometry::tween_points(&s_points, &t_points, swap.progress);
 
         // 4. Combine into a single smooth polygon
@@ -86,12 +86,12 @@ impl SwapManager {
         combined_points.extend(part1);
 
         // 5. Calculate a centroid for the label (interpolation of centroids)
-        let s_centroid = ctx.graph.bubbles[swap.standard_bkey].centroid;
+        let s_centroid = ctx.graph.bubbles[swap.colored_bkey].centroid;
         let p_centroid = ctx.graph.bubbles[swap.swappable_bkey].centroid;
         let combined_centroid = s_centroid.lerp(p_centroid, swap.progress);
 
         bubble::draw_bubble(
-            &swap.standard_style,
+            &swap.colored_style,
             &combined_points,
             combined_centroid,
             ctx.font,
@@ -124,10 +124,10 @@ impl SwapManager {
             swap.progress += dt / SWAP_TIME;
 
             let swappable_bkey = swap.swappable_bkey;
-            let standard_bkey = swap.standard_bkey;
+            let colored_bkey = swap.colored_bkey;
 
             let p = swap.progress.clamp(0.0, 1.0);
-            if let BubbleStyle::Swappable { area, .. } = &mut graph.bubbles[standard_bkey].style {
+            if let BubbleStyle::Swappable { area, .. } = &mut graph.bubbles[colored_bkey].style {
                 *area = swap.start_area + (swap.target_area - swap.start_area) * p;
             }
             if let BubbleStyle::Swappable { area, .. } = &mut graph.bubbles[swappable_bkey].style {
@@ -135,9 +135,9 @@ impl SwapManager {
             }
 
             if swap.progress >= 1.0 {
-                graph.bubbles[swappable_bkey].style = swap.standard_style;
+                graph.bubbles[swappable_bkey].style = swap.colored_style;
                 // Ensure the final swappable bubble has the exact target area
-                if let BubbleStyle::Swappable { area, .. } = &mut graph.bubbles[standard_bkey].style
+                if let BubbleStyle::Swappable { area, .. } = &mut graph.bubbles[colored_bkey].style
                 {
                     *area = swap.target_area;
                 }
@@ -152,23 +152,23 @@ impl SwapManager {
     fn start_swap(&mut self, graph: &mut Graph, edge_key: EdgeKey) {
         let twin_key = graph.vertices.get_edge(edge_key).twin;
 
-        let standard_bkey = graph.vertices.get_edge(edge_key).bubble;
+        let colored_bkey = graph.vertices.get_edge(edge_key).bubble;
         let swappable_bkey = graph.vertices.get_edge(twin_key).bubble;
 
         // Align bubble edge lists to start at the shared boundary for smooth tweening
-        graph.rebubble(standard_bkey, edge_key);
+        graph.rebubble(colored_bkey, edge_key);
         graph.rebubble(swappable_bkey, twin_key);
 
-        let standard_style = graph.bubbles[standard_bkey].style;
-        let start_area = standard_style.get_target_area();
+        let colored_style = graph.bubbles[colored_bkey].style;
+        let start_area = colored_style.get_target_area();
         let target_area = 3000.0;
 
         let BubbleStyle::Swappable { swaps_left, .. } = graph.bubbles[swappable_bkey].style else {
             panic!()
         };
 
-        // Immediately apply new swappable style to the standard bubble, starting with standard's area
-        graph.bubbles[standard_bkey].style = BubbleStyle::Swappable {
+        // Immediately apply new swappable style to the colored bubble, starting with colored's area
+        graph.bubbles[colored_bkey].style = BubbleStyle::Swappable {
             swaps_left: (swaps_left - 1).max(0),
             area: start_area,
         };
@@ -176,8 +176,8 @@ impl SwapManager {
         self.active_swap = Some(ActiveSwap {
             edge: edge_key,
             swappable_bkey,
-            standard_bkey,
-            standard_style,
+            colored_bkey,
+            colored_style,
             progress: 0.0,
             start_area,
             target_area,

@@ -32,7 +32,7 @@ pub fn draw_bubble(style: &BubbleStyle, points: &[Vec2], centroid: Vec2, font: &
     }
 
     let color = match style {
-        BubbleStyle::Standard { color, .. } => *color,
+        BubbleStyle::Colored { color, .. } => *color,
         BubbleStyle::Swappable { .. } => colors::TRANSPARENT,
         BubbleStyle::OpenAir | BubbleStyle::Invisible { .. } => return,
     };

@@ -20,8 +20,8 @@ pub struct TitleController {
 impl TitleController {
     pub fn new(resources: &Resources) -> Self {
         let graph = Graph::new(
-            BubbleStyle::standard(colors::TURQUOISE),
-            BubbleStyle::standard(colors::ROSE),
+            BubbleStyle::colored(colors::TURQUOISE),
+            BubbleStyle::colored(colors::ROSE),
         );
 
         Self {

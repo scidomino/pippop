@@ -6,7 +6,7 @@ use std::ops::{Deref, DerefMut};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BubbleStyle {
-    Standard { size: i32, color: Color },
+    Colored { size: i32, color: Color },
     Swappable { swaps_left: i32, area: f32 },
     OpenAir,
     Invisible { size: i32 },
@@ -20,13 +20,13 @@ impl BubbleStyle {
         }
     }
 
-    pub fn standard(color: Color) -> Self {
-        BubbleStyle::Standard { size: 1, color }
+    pub fn colored(color: Color) -> Self {
+        BubbleStyle::Colored { size: 1, color }
     }
 
     pub fn is_poppable(&self) -> bool {
         match self {
-            BubbleStyle::Standard { size, .. } => *size >= 5,
+            BubbleStyle::Colored { size, .. } => *size >= 5,
             _ => false,
         }
     }
@@ -34,8 +34,8 @@ impl BubbleStyle {
     pub fn merge(&self, other: &BubbleStyle) -> BubbleStyle {
         match (self, other) {
             (BubbleStyle::OpenAir, _) | (_, BubbleStyle::OpenAir) => BubbleStyle::OpenAir,
-            (BubbleStyle::Standard { size: s1, color }, BubbleStyle::Standard { size: s2, .. }) => {
-                BubbleStyle::Standard {
+            (BubbleStyle::Colored { size: s1, color }, BubbleStyle::Colored { size: s2, .. }) => {
+                BubbleStyle::Colored {
                     size: s1 + s2,
                     color: *color,
                 }
@@ -46,7 +46,7 @@ impl BubbleStyle {
 
     pub fn get_target_area(&self) -> f32 {
         match self {
-            BubbleStyle::Standard { size, .. } | BubbleStyle::Invisible { size } => {
+            BubbleStyle::Colored { size, .. } | BubbleStyle::Invisible { size } => {
                 3000.0 * (*size as f32).sqrt()
             }
             BubbleStyle::Swappable { area, .. } => *area,
@@ -184,11 +184,11 @@ mod tests {
     #[test]
     fn test_bubble_contains() {
         let mut graph = Graph::new(
-            BubbleStyle::Standard {
+            BubbleStyle::Colored {
                 size: 1,
                 color: crate::graphics::colors::TURQUOISE,
             },
-            BubbleStyle::Standard {
+            BubbleStyle::Colored {
                 size: 1,
                 color: crate::graphics::colors::ROSE,
             },

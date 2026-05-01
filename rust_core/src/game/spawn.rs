@@ -66,7 +66,7 @@ impl SpawnManager {
     fn has_two_color_pairs(&self, graph: &Graph) -> bool {
         let mut color_counts = HashMap::new();
         for bubble in graph.bubbles.values() {
-            if let BubbleStyle::Standard { color, .. } = bubble.style {
+            if let BubbleStyle::Colored { color, .. } = bubble.style {
                 let key: [u8; 4] = color.into();
                 *color_counts.entry(key).or_insert(0) += 1;
             }
@@ -91,7 +91,7 @@ impl SpawnManager {
             .choose()
             .unwrap_or_else(|| open_air_vertices.choose().expect("open air has vertices"));
 
-        graph.spawn(vkey, BubbleStyle::standard(color));
+        graph.spawn(vkey, BubbleStyle::colored(color));
     }
 
     fn vertex_borders_color(&self, graph: &Graph, vkey: VertexKey, target_color: Color) -> bool {
@@ -100,7 +100,7 @@ impl SpawnManager {
             .iter()
             .filter_map(|e| graph.bubbles.get(e.bubble))
             .any(|bubble| match bubble.style {
-                BubbleStyle::Standard { color, .. } => color == target_color,
+                BubbleStyle::Colored { color, .. } => color == target_color,
                 _ => false,
             })
     }
@@ -141,23 +141,23 @@ mod tests {
         };
         let mut manager = SpawnManager::new(colors::get_group(3), timer);
         let graph = Graph::new(
-            BubbleStyle::standard(colors::TURQUOISE),
-            BubbleStyle::standard(colors::ROSE),
+            BubbleStyle::colored(colors::TURQUOISE),
+            BubbleStyle::colored(colors::ROSE),
         );
 
         let initial_time = manager.next_spawn_time;
         manager.update(&graph, 1.0);
 
         assert_eq!(manager.total_play_time, 1.0);
-        // Standard initial graph has Turquoise and Rose (no pairs), so multiplier should be 10.0
+        // Initial graph has Turquoise and Rose (no pairs), so multiplier should be 10.0
         assert_eq!(manager.next_spawn_time, initial_time - 10.0);
     }
 
     #[test]
     fn test_spawn_integration() {
         let mut graph = Graph::new(
-            BubbleStyle::standard(colors::TURQUOISE),
-            BubbleStyle::standard(colors::ROSE),
+            BubbleStyle::colored(colors::TURQUOISE),
+            BubbleStyle::colored(colors::ROSE),
         );
         let initial_bubbles = graph.bubbles.len();
 

@@ -292,7 +292,7 @@ impl Graph {
                 let twin_ekey = self.vertices.get_edge(ekey).twin;
                 let bkey = self.vertices.get_edge(twin_ekey).bubble;
 
-                if let BubbleStyle::Standard { .. } = self.bubbles[bkey].style {
+                if let BubbleStyle::Colored { .. } = self.bubbles[bkey].style {
                     let centroid = self.bubbles[bkey].centroid;
                     Some((twin_ekey, centroid.distance_squared(point)))
                 } else {
@@ -425,8 +425,8 @@ mod tests {
     #[test]
     fn test_get_swappable_bubble() {
         let mut graph = Graph::new(
-            BubbleStyle::standard(crate::graphics::colors::TURQUOISE),
-            BubbleStyle::standard(crate::graphics::colors::ROSE),
+            BubbleStyle::colored(crate::graphics::colors::TURQUOISE),
+            BubbleStyle::colored(crate::graphics::colors::ROSE),
         );
 
         // Initially no swappable bubble in init()
@@ -443,10 +443,10 @@ mod tests {
     fn test_get_closest_swap_candidate() {
         let graph = Graph::new(
             BubbleStyle::swappable(5),
-            BubbleStyle::standard(colors::TURQUOISE),
+            BubbleStyle::colored(colors::TURQUOISE),
         );
 
-        // Assign b1 as swappable and b2 as a standard bubble.
+        // Assign b1 as swappable and b2 as a colored bubble.
         let b2 = graph.bubbles.keys().nth(1).unwrap();
 
         // Find a point near b2
@@ -464,7 +464,7 @@ mod tests {
     fn test_rebubble_reorders_edges() {
         let mut graph = Graph::new(
             BubbleStyle::swappable(5),
-            BubbleStyle::standard(crate::graphics::colors::TURQUOISE),
+            BubbleStyle::colored(crate::graphics::colors::TURQUOISE),
         );
 
         let bkey = graph.bubbles.keys().next().unwrap();
@@ -488,23 +488,18 @@ mod tests {
     #[test]
     fn test_remove_edge_with_duplicate_neighbors() {
         let mut graph = Graph::new(
-            BubbleStyle::standard(crate::graphics::colors::TURQUOISE),
-            BubbleStyle::standard(crate::graphics::colors::ROSE),
+            BubbleStyle::colored(crate::graphics::colors::TURQUOISE),
+            BubbleStyle::colored(crate::graphics::colors::ROSE),
         );
 
         let s1 = graph
             .bubbles
             .keys()
-            .find(|&k| {
-                matches!(
-                    graph.bubbles[k].style,
-                    BubbleStyle::Standard { size: 1, .. }
-                )
-            })
+            .find(|&k| matches!(graph.bubbles[k].style, BubbleStyle::Colored { size: 1, .. }))
             .unwrap();
         let oa = graph.get_open_air();
 
-        // 1. Remove one internal wall to merge standard bubbles.
+        // 1. Remove one internal wall to merge colored bubbles.
         let e12 = graph.bubbles[s1]
             .edges
             .iter()
@@ -546,8 +541,8 @@ mod tests {
     fn test_bridge_creation_and_resolution() {
         // Create a large enough graph by spawning a few times
         let mut graph = Graph::new(
-            BubbleStyle::standard(crate::graphics::colors::TURQUOISE),
-            BubbleStyle::standard(crate::graphics::colors::ROSE),
+            BubbleStyle::colored(crate::graphics::colors::TURQUOISE),
+            BubbleStyle::colored(crate::graphics::colors::ROSE),
         );
 
         let oa_key = graph.get_open_air();
@@ -556,15 +551,15 @@ mod tests {
         let mut vkeys: Vec<_> = graph.vertices.keys().collect();
         graph.spawn(
             vkeys[0],
-            BubbleStyle::standard(crate::graphics::colors::GREEN),
+            BubbleStyle::colored(crate::graphics::colors::GREEN),
         );
         vkeys = graph.vertices.keys().collect();
         graph.spawn(
             vkeys[2],
-            BubbleStyle::standard(crate::graphics::colors::YELLOW),
+            BubbleStyle::colored(crate::graphics::colors::YELLOW),
         );
 
-        // Find an edge that separates two distinct standard bubbles
+        // Find an edge that separates two distinct colored bubbles
         let mut target_ekey = None;
         for (vkey, vertex) in &graph.vertices {
             for slot in Slot::all() {

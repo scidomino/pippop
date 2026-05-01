@@ -34,13 +34,13 @@ impl PopManager {
                 return;
             }
 
-            if let BubbleStyle::Standard { size, color } = pending.style {
+            if let BubbleStyle::Colored { size, color } = pending.style {
                 let progress = (pending.timer / POPPING_TIME).clamp(0.0, 1.0);
                 let morphed_points = self.apply_pop_morph(&points, bubble.centroid, size, progress);
 
-                // Create a temporary Standard style with the faded color to use for rendering
+                // Create a temporary Colored style with the faded color to use for rendering
                 crate::graphics::bubble::draw_bubble(
-                    &BubbleStyle::Standard {
+                    &BubbleStyle::Colored {
                         size,
                         color: Color::new(color.r, color.g, color.b, progress),
                     },
@@ -98,7 +98,7 @@ impl PopManager {
             )
         {
             let style = graph.bubbles[bkey].style;
-            if let BubbleStyle::Standard { size, .. } = style {
+            if let BubbleStyle::Colored { size, .. } = style {
                 graph.bubbles[bkey].style = BubbleStyle::Invisible { size };
                 self.pending_pop = Some(PendingPop {
                     bkey,

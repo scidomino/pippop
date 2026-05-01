@@ -55,7 +55,7 @@ impl GameController {
     pub fn new(resources: &Resources) -> Self {
         let graph = Graph::new(
             BubbleStyle::swappable(5),
-            BubbleStyle::standard(colors::TURQUOISE),
+            BubbleStyle::colored(colors::TURQUOISE),
         );
 
         Self {
