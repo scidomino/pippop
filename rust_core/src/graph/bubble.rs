@@ -20,6 +20,10 @@ impl BubbleStyle {
         }
     }
 
+    pub fn standard(color: Color) -> Self {
+        BubbleStyle::Standard { size: 1, color }
+    }
+
     pub fn is_poppable(&self) -> bool {
         match self {
             BubbleStyle::Standard { size, .. } => *size >= 5,

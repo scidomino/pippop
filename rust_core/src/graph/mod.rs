@@ -420,18 +420,13 @@ impl Graph {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::graphics::colors;
 
     #[test]
     fn test_get_swappable_bubble() {
         let mut graph = Graph::new(
-            BubbleStyle::Standard {
-                size: 1,
-                color: crate::graphics::colors::TURQUOISE,
-            },
-            BubbleStyle::Standard {
-                size: 1,
-                color: crate::graphics::colors::ROSE,
-            },
+            BubbleStyle::standard(crate::graphics::colors::TURQUOISE),
+            BubbleStyle::standard(crate::graphics::colors::ROSE),
         );
 
         // Initially no swappable bubble in init()
@@ -448,10 +443,7 @@ mod tests {
     fn test_get_closest_swap_candidate() {
         let graph = Graph::new(
             BubbleStyle::swappable(5),
-            BubbleStyle::Standard {
-                size: 1,
-                color: crate::graphics::colors::TURQUOISE,
-            },
+            BubbleStyle::standard(colors::TURQUOISE),
         );
 
         // Assign b1 as swappable and b2 as a standard bubble.
@@ -472,10 +464,7 @@ mod tests {
     fn test_rebubble_reorders_edges() {
         let mut graph = Graph::new(
             BubbleStyle::swappable(5),
-            BubbleStyle::Standard {
-                size: 1,
-                color: crate::graphics::colors::TURQUOISE,
-            },
+            BubbleStyle::standard(crate::graphics::colors::TURQUOISE),
         );
 
         let bkey = graph.bubbles.keys().next().unwrap();
@@ -499,14 +488,8 @@ mod tests {
     #[test]
     fn test_remove_edge_with_duplicate_neighbors() {
         let mut graph = Graph::new(
-            BubbleStyle::Standard {
-                size: 1,
-                color: crate::graphics::colors::TURQUOISE,
-            },
-            BubbleStyle::Standard {
-                size: 1,
-                color: crate::graphics::colors::ROSE,
-            },
+            BubbleStyle::standard(crate::graphics::colors::TURQUOISE),
+            BubbleStyle::standard(crate::graphics::colors::ROSE),
         );
 
         let s1 = graph
@@ -563,14 +546,8 @@ mod tests {
     fn test_bridge_creation_and_resolution() {
         // Create a large enough graph by spawning a few times
         let mut graph = Graph::new(
-            BubbleStyle::Standard {
-                size: 1,
-                color: crate::graphics::colors::TURQUOISE,
-            },
-            BubbleStyle::Standard {
-                size: 1,
-                color: crate::graphics::colors::ROSE,
-            },
+            BubbleStyle::standard(crate::graphics::colors::TURQUOISE),
+            BubbleStyle::standard(crate::graphics::colors::ROSE),
         );
 
         let oa_key = graph.get_open_air();
@@ -579,18 +556,12 @@ mod tests {
         let mut vkeys: Vec<_> = graph.vertices.keys().collect();
         graph.spawn(
             vkeys[0],
-            BubbleStyle::Standard {
-                size: 1,
-                color: crate::graphics::colors::GREEN,
-            },
+            BubbleStyle::standard(crate::graphics::colors::GREEN),
         );
         vkeys = graph.vertices.keys().collect();
         graph.spawn(
             vkeys[2],
-            BubbleStyle::Standard {
-                size: 1,
-                color: crate::graphics::colors::YELLOW,
-            },
+            BubbleStyle::standard(crate::graphics::colors::YELLOW),
         );
 
         // Find an edge that separates two distinct standard bubbles

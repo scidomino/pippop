@@ -91,7 +91,7 @@ impl SpawnManager {
             .choose()
             .unwrap_or_else(|| open_air_vertices.choose().expect("open air has vertices"));
 
-        graph.spawn(vkey, BubbleStyle::Standard { size: 1, color });
+        graph.spawn(vkey, BubbleStyle::standard(color));
     }
 
     fn vertex_borders_color(&self, graph: &Graph, vkey: VertexKey, target_color: Color) -> bool {
@@ -141,14 +141,8 @@ mod tests {
         };
         let mut manager = SpawnManager::new(colors::get_group(3), timer);
         let graph = Graph::new(
-            BubbleStyle::Standard {
-                size: 1,
-                color: colors::TURQUOISE,
-            },
-            BubbleStyle::Standard {
-                size: 1,
-                color: colors::ROSE,
-            },
+            BubbleStyle::standard(colors::TURQUOISE),
+            BubbleStyle::standard(colors::ROSE),
         );
 
         let initial_time = manager.next_spawn_time;
@@ -162,14 +156,8 @@ mod tests {
     #[test]
     fn test_spawn_integration() {
         let mut graph = Graph::new(
-            BubbleStyle::Standard {
-                size: 1,
-                color: colors::TURQUOISE,
-            },
-            BubbleStyle::Standard {
-                size: 1,
-                color: colors::ROSE,
-            },
+            BubbleStyle::standard(colors::TURQUOISE),
+            BubbleStyle::standard(colors::ROSE),
         );
         let initial_bubbles = graph.bubbles.len();
 

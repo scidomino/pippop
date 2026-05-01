@@ -151,20 +151,11 @@ mod tests {
     fn test_burst_increments_swaps() {
         let mut graph = Graph::new(
             BubbleStyle::swappable(5),
-            BubbleStyle::Standard {
-                size: 1,
-                color: colors::TURQUOISE,
-            },
+            BubbleStyle::standard(colors::TURQUOISE),
         );
 
         let vkey = graph.vertices.keys().next().unwrap();
-        graph.spawn(
-            vkey,
-            BubbleStyle::Standard {
-                size: 1,
-                color: colors::TURQUOISE,
-            },
-        );
+        graph.spawn(vkey, BubbleStyle::standard(colors::TURQUOISE));
 
         let mut burst_manager = BurstManager::new(1);
         // Find the standard bubble that isn't the swappable
