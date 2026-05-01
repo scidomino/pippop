@@ -44,7 +44,12 @@ impl HighlightManager {
         self.time += dt;
     }
 
-    pub fn interact(&mut self, interaction: Interaction) {
+    pub fn interact(&mut self, state: &mut GameState, interaction: Interaction) {
+        if state.phase != crate::game::state::GamePhase::Normal {
+            self.point = None;
+            return;
+        }
+
         if matches!(interaction.state, InteractionState::Pressed) {
             self.point = Some(interaction.position);
             self.time = 0.0;

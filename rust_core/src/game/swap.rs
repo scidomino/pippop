@@ -1,4 +1,4 @@
-use crate::game::state::{GamePhase, GameState};
+use crate::game::state::{GamePhase, GameState, Interaction};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
@@ -99,25 +99,30 @@ impl SwapManager {
         );
     }
 
-    pub fn interact(&mut self, graph: &mut Graph, point: Vec2) -> bool {
+    pub fn interact(&mut self, state: &mut GameState, interaction: Interaction) {
         // Can't swap if already swapping
-        if self.active_swap.is_some() {
-            return false;
+        if state.phase != crate::game::state::GamePhase::Normal {
+            return;
         }
 
+        if interaction.state != crate::game::state::InteractionState::Released {
+            return;
+        }
+
+        let point = interaction.position;
+
         // Cannot start a swap if clicking inside the swappable bubble itself
-        if let Some(swappable_bkey) = graph.bubbles.get_swappable() {
-            if graph.bubbles[swappable_bkey].contains(point, graph) {
-                return false;
+        if let Some(swappable_bkey) = state.graph.bubbles.get_swappable() {
+            if state.graph.bubbles[swappable_bkey].contains(point, &state.graph) {
+                return;
             }
         }
 
-        if let Some(edge_key) = graph.get_closest_swap_candidate(point) {
-            self.start_swap(graph, edge_key);
-            return true;
+        if let Some(edge_key) = state.graph.get_closest_swap_candidate(point) {
+            self.start_swap(&mut state.graph, edge_key);
+            state.phase = crate::game::state::GamePhase::Swapping;
+            state.events.push(crate::game::state::GameEvent::Swap);
         }
-
-        false
     }
 
     pub fn update(&mut self, state: &mut GameState, dt: f32) {

@@ -5,7 +5,7 @@ use crate::game::reap::ReapManager;
 use crate::game::sanity::SanityManager;
 use crate::game::slide::SlideManager;
 use crate::game::spawn::{SpawnManager, SpawnTimer};
-use crate::game::state::{GameEvent, GamePhase, GameState, Interaction, InteractionState};
+use crate::game::state::{GameEvent, GameState, Interaction};
 use crate::game::swap::SwapManager;
 use crate::game::world::WorldManager;
 use crate::graph::bubble::BubbleStyle;
@@ -55,23 +55,10 @@ impl GameController {
         }
     }
 
-    pub fn interact(&mut self, resources: &Resources, interaction: Interaction) {
-        if self.state.phase == GamePhase::Normal {
-            if matches!(interaction.state, InteractionState::Released) {
-                if self
-                    .swap_manager
-                    .interact(&mut self.state.graph, interaction.position)
-                {
-                    self.state.phase = GamePhase::Swapping;
-                    if !resources.splash_sounds.is_empty() {
-                        let idx = macroquad::rand::gen_range(0, resources.splash_sounds.len());
-                        play_sound_once(&resources.splash_sounds[idx]);
-                    }
-                }
-            } else {
-                self.highlight_manager.interact(interaction);
-            }
-        }
+    pub fn interact(&mut self, _resources: &Resources, interaction: Interaction) {
+        self.swap_manager.interact(&mut self.state, interaction);
+        self.highlight_manager
+            .interact(&mut self.state, interaction);
     }
 
     pub fn update(&mut self, resources: &Resources, dt: f32) {
@@ -90,7 +77,12 @@ impl GameController {
                 GameEvent::Pop => play_sound_once(&resources.pop_sound),
                 GameEvent::Spawn => play_sound_once(&resources.spawn_sound),
                 GameEvent::Burst => play_sound_once(&resources.burst_sound),
-                GameEvent::Swap => {} // Splash sounds handled in interact for now
+                GameEvent::Swap => {
+                    if !resources.splash_sounds.is_empty() {
+                        let idx = macroquad::rand::gen_range(0, resources.splash_sounds.len());
+                        play_sound_once(&resources.splash_sounds[idx]);
+                    }
+                }
             }
         }
 
