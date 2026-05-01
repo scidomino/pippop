@@ -1,9 +1,9 @@
+use crate::game::game::Interaction;
+use crate::game::game::InteractionState;
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
 use crate::graphics::colors;
 use crate::graphics::geometry;
-use crate::managers::game::Interaction;
-use crate::managers::game::InteractionState;
 use macroquad::math::Vec2;
 use macroquad::prelude::*;
 

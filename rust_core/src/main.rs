@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
+use rust_core::game::game::{GameController, Interaction, InteractionState};
+use rust_core::game::title::TitleController;
 use rust_core::graph::Graph;
-use rust_core::managers::game::{GameController, Interaction, InteractionState};
-use rust_core::managers::title::TitleController;
 use rust_core::resources::Resources;
 
 enum Screen {

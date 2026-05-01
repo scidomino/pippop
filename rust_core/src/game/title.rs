@@ -1,10 +1,10 @@
+use crate::game::game::{Interaction, InteractionState};
+use crate::game::slide::SlideManager;
+use crate::game::spawn::{SpawnManager, SpawnTimer};
+use crate::game::world::WorldManager;
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
 use crate::graphics::{colors, RenderContext};
-use crate::managers::game::{Interaction, InteractionState};
-use crate::managers::slide::SlideManager;
-use crate::managers::spawn::{SpawnManager, SpawnTimer};
-use crate::managers::world::WorldManager;
 use crate::resources::Resources;
 use macroquad::prelude::*;
 
