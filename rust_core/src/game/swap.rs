@@ -9,10 +9,12 @@ const SWAP_TIME: f32 = 0.2;
 
 pub struct ActiveSwap {
     pub edge: EdgeKey,
+
     pub player_bkey: BubbleKey,
-    pub nonplayer_bkey: BubbleKey,
-    pub nonplayer_style: BubbleStyle,
-    pub player_style: BubbleStyle,
+
+    pub standard_bkey: BubbleKey,
+    pub standard_style: BubbleStyle,
+
     pub progress: f32, // 0.0 to 1.0
 }
 
@@ -28,7 +30,7 @@ impl SwapManager {
 
     pub fn is_handling(&self, bkey: BubbleKey) -> bool {
         if let Some(swap) = &self.active_swap {
-            return swap.player_bkey == bkey || swap.nonplayer_bkey == bkey;
+            return swap.player_bkey == bkey || swap.standard_bkey == bkey;
         }
         false
     }
@@ -51,13 +53,13 @@ impl SwapManager {
         t_points.push(ctx.graph.vertices[swap.edge.vertex].point.position);
 
         // 2. Get full points for both
-        let mut np_points = ctx.graph.bubbles[swap.nonplayer_bkey]
+        let mut s_points = ctx.graph.bubbles[swap.standard_bkey]
             .edges
             .iter()
             .skip(1)
             .flat_map(|&ekey| ctx.graph.vertices.get_edge(ekey).points.clone())
             .collect::<Vec<Vec2>>();
-        np_points.push(ctx.graph.vertices[swap.edge.vertex].point.position);
+        s_points.push(ctx.graph.vertices[swap.edge.vertex].point.position);
 
         let mut p_points = ctx.graph.bubbles[swap.player_bkey]
             .edges
@@ -67,27 +69,27 @@ impl SwapManager {
             .collect::<Vec<Vec2>>();
         p_points.push(ctx.graph.vertices[twin.vertex].point.position);
 
-        if e_points.is_empty() || np_points.is_empty() || p_points.is_empty() {
+        if e_points.is_empty() || s_points.is_empty() || p_points.is_empty() {
             return;
         }
 
         // 3. Create the two parts of the tween
         // Part 1: wall -> player
         let part1 = geometry::tween_points(&e_points, &p_points, swap.progress);
-        // Part 2: nonplayer -> wall
-        let part2 = geometry::tween_points(&np_points, &t_points, swap.progress);
+        // Part 2: standard -> wall
+        let part2 = geometry::tween_points(&s_points, &t_points, swap.progress);
 
         // 4. Combine into a single smooth polygon
         let mut combined_points = part2;
         combined_points.extend(part1);
 
         // 5. Calculate a centroid for the label (interpolation of centroids)
-        let np_centroid = ctx.graph.bubbles[swap.nonplayer_bkey].centroid;
+        let s_centroid = ctx.graph.bubbles[swap.standard_bkey].centroid;
         let p_centroid = ctx.graph.bubbles[swap.player_bkey].centroid;
-        let combined_centroid = np_centroid.lerp(p_centroid, swap.progress);
+        let combined_centroid = s_centroid.lerp(p_centroid, swap.progress);
 
         bubble::draw_bubble(
-            &swap.nonplayer_style,
+            &swap.standard_style,
             &combined_points,
             combined_centroid,
             ctx.font,
@@ -107,7 +109,7 @@ impl SwapManager {
             }
         }
 
-        if let Some(edge_key) = graph.get_closest_otter_swappable(point) {
+        if let Some(edge_key) = graph.get_closest_swappable(point) {
             self.start_swap(graph, edge_key);
             return true;
         }
@@ -122,7 +124,7 @@ impl SwapManager {
             let player_bkey = swap.player_bkey;
 
             if swap.progress >= 1.0 {
-                graph.bubbles[player_bkey].style = swap.nonplayer_style;
+                graph.bubbles[player_bkey].style = swap.standard_style;
                 self.active_swap = None;
                 return Some(player_bkey);
             }
@@ -134,31 +136,28 @@ impl SwapManager {
     fn start_swap(&mut self, graph: &mut Graph, edge_key: EdgeKey) {
         let twin_key = graph.vertices.get_edge(edge_key).twin;
 
-        let nonplayer_bkey = graph.vertices.get_edge(edge_key).bubble;
+        let standard_bkey = graph.vertices.get_edge(edge_key).bubble;
         let player_bkey = graph.vertices.get_edge(twin_key).bubble;
 
         // Align bubble edge lists to start at the shared boundary for smooth tweening
-        graph.rebubble(nonplayer_bkey, edge_key);
+        graph.rebubble(standard_bkey, edge_key);
         graph.rebubble(player_bkey, twin_key);
 
-        let nonplayer_style = graph.bubbles[nonplayer_bkey].style;
-        let player_style = graph.bubbles[player_bkey].style;
-        let new_player_style = match player_style {
-            BubbleStyle::Player { swaps_left } => BubbleStyle::Player {
-                swaps_left: (swaps_left - 1).max(0),
-            },
-            other => other,
+        let standard_style = graph.bubbles[standard_bkey].style;
+        let BubbleStyle::Player { swaps_left } = graph.bubbles[player_bkey].style else {
+            panic!()
         };
 
-        // Immediately apply new player style to the nonplayer bubble
-        graph.bubbles[nonplayer_bkey].style = new_player_style;
+        // Immediately apply new player style to the standard bubble
+        graph.bubbles[standard_bkey].style = BubbleStyle::Player {
+            swaps_left: (swaps_left - 1).max(0),
+        };
 
         self.active_swap = Some(ActiveSwap {
             edge: edge_key,
             player_bkey,
-            nonplayer_bkey,
-            nonplayer_style,
-            player_style,
+            standard_bkey,
+            standard_style,
             progress: 0.0,
         });
     }

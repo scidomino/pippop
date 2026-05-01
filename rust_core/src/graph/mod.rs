@@ -282,7 +282,7 @@ impl Graph {
         }
     }
 
-    pub fn get_closest_otter_swappable(&self, point: Vec2) -> Option<EdgeKey> {
+    pub fn get_closest_swappable(&self, point: Vec2) -> Option<EdgeKey> {
         let player_bkey = self.bubbles.get_player_bubble()?;
 
         self.bubbles[player_bkey]
@@ -460,7 +460,7 @@ mod tests {
         // Find a point near b2
         let centroid2 = graph.bubbles[b2].centroid;
 
-        let closest = graph.get_closest_otter_swappable(centroid2);
+        let closest = graph.get_closest_swappable(centroid2);
         assert!(closest.is_some());
 
         let ekey = closest.unwrap();
