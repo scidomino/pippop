@@ -184,7 +184,7 @@ impl SwapManager {
 
         // Immediately apply new swappable style to the colored bubble, starting with colored's area
         graph.bubbles[colored_bkey].style = BubbleStyle::Swappable {
-            swaps_left: (swaps_left - 1).max(0),
+            swaps_left: swaps_left - 1,
             area: start_area,
         };
 
