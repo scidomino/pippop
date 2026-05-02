@@ -18,7 +18,7 @@ impl SanityManager {
         Self
     }
 
-    pub fn update(&self, state: &GameState, _dt: f32) {
+    pub fn update(&self, state: &GameState) {
         if let Err(e) = self.check(state) {
             let dump = state.graph.dump_state();
             #[cfg(not(target_arch = "wasm32"))]

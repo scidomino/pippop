@@ -49,7 +49,7 @@ impl SpawnManager {
         }
     }
 
-    pub fn draw(&self, _ctx: &crate::graphics::RenderContext) {
+    pub fn draw(&self) {
         let radius = 20.0 * 2.0f32.powf(-self.next_spawn_time.max(0.0));
         let x = macroquad::window::screen_width() - 30.0;
         let y = 30.0;

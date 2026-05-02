@@ -14,7 +14,7 @@ impl ReapManager {
     /// Removes popping bubbles that have finished their animation when they are either:
     /// - deflated enough to be removed without causing noticeable visual artifacts, or
     /// - touching the open air.
-    pub fn update(&self, state: &mut GameState, _dt: f32) {
+    pub fn update(&self, state: &mut GameState) {
         let mut to_remove = Vec::new();
         let graph = &mut state.graph;
 

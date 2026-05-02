@@ -39,7 +39,7 @@ impl GameController {
             world: WorldManager::new(),
             spawn: SpawnManager::new(colors::get_group(6)),
             slide: SlideManager::new(),
-            burst: BurstManager::new(1),
+            burst: BurstManager::new(),
             swap: SwapManager::new(),
             pop: PopManager::new(),
             reap: ReapManager::new(),
@@ -48,7 +48,7 @@ impl GameController {
         }
     }
 
-    pub fn interact(&mut self, _resources: &Resources, interaction: Interaction) {
+    pub fn interact(&mut self, interaction: Interaction) {
         self.swap.interact(&mut self.state, interaction);
         self.highlight.interact(&mut self.state, interaction);
     }
@@ -56,13 +56,13 @@ impl GameController {
     pub fn update(&mut self, resources: &Resources, dt: f32) {
         self.world.update(&mut self.state, dt);
         self.spawn.update(&mut self.state, dt);
-        self.reap.update(&mut self.state, dt);
+        self.reap.update(&mut self.state);
         self.slide.update(&mut self.state, dt);
-        self.highlight.update(&mut self.state, dt);
+        self.highlight.update(dt);
         self.pop.update(&mut self.state, dt);
         self.swap.update(&mut self.state, dt);
         self.burst.update(&mut self.state, dt);
-        self.sanity.update(&self.state, dt);
+        self.sanity.update(&self.state);
 
         // Handle events (sounds, etc.)
         for event in self.state.events.drain(..) {
@@ -92,7 +92,7 @@ impl GameController {
 
         // --- Pass 2: Screen Space (UI) ---
         set_default_camera();
-        self.spawn.draw(&ctx);
+        self.spawn.draw();
         draw_text(
             &format!("FPS: {:03}", get_fps()),
             10.0,

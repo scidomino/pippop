@@ -25,7 +25,7 @@ pub struct BurstManager {
 }
 
 impl BurstManager {
-    pub fn new(_threshold: usize) -> Self {
+    pub fn new() -> Self {
         Self {
             active_edge: None,
             timer: 0.0,
@@ -172,7 +172,7 @@ mod tests {
             .graph
             .spawn(vkey, BubbleStyle::colored(colors::TURQUOISE));
 
-        let mut burst_manager = BurstManager::new(1);
+        let mut burst_manager = BurstManager::new();
         // Find the colored bubble that isn't the swappable
         let bkey = state
             .graph

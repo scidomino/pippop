@@ -40,7 +40,7 @@ impl HighlightManager {
         }
     }
 
-    pub fn update(&mut self, _state: &mut GameState, dt: f32) {
+    pub fn update(&mut self, dt: f32) {
         self.time += dt;
     }
 
