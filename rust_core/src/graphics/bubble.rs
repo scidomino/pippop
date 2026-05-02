@@ -9,17 +9,11 @@ pub fn get_bubble_points(graph: &Graph, bkey: crate::graph::bubble::BubbleKey) -
 }
 
 pub fn get_points_for_bubble(graph: &Graph, bubble: &Bubble) -> Vec<Vec2> {
-    let mut total_points = 0;
-    for &ekey in &bubble.edges {
-        total_points += graph.vertices.get_edge(ekey).points.len();
-    }
-
-    let mut points = Vec::with_capacity(total_points);
-
-    for &ekey in &bubble.edges {
-        points.extend_from_slice(&graph.vertices.get_edge(ekey).points);
-    }
-    points
+    bubble
+        .edges
+        .iter()
+        .flat_map(|&ekey| graph.vertices.get_edge(ekey).points.iter().copied())
+        .collect()
 }
 
 pub fn push_edge_points(graph: &Graph, ekey: crate::graph::edge::EdgeKey, points: &mut Vec<Vec2>) {

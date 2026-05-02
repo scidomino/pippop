@@ -15,65 +15,61 @@ impl ReapManager {
     /// - deflated enough to be removed without causing noticeable visual artifacts, or
     /// - touching the open air.
     pub fn update(&self, state: &mut GameState) {
-        let mut to_remove = Vec::new();
-        let graph = &mut state.graph;
+        let graph = &state.graph;
+        let to_remove: Vec<_> = graph
+            .bubbles
+            .iter()
+            .filter(|(_, b)| matches!(b.style, BubbleStyle::Invisible { size } if size <= 0))
+            .filter_map(|(_, bubble)| {
+                // Check if it's touching OpenAir
+                let touches_open_air = bubble.edges.iter().find_map(|&ekey| {
+                    let twin_ekey = graph.vertices.get_edge(ekey).twin;
+                    let twin_bubble_key = graph.vertices.get_edge(twin_ekey).bubble;
+                    matches!(graph.bubbles[twin_bubble_key].style, BubbleStyle::OpenAir)
+                        .then_some(twin_ekey)
+                });
 
-        // Identify bubbles that should be removed
-        for (_, bubble) in graph.bubbles.iter() {
-            if !matches!(bubble.style, BubbleStyle::Invisible { size } if size <= 0) {
-                continue;
-            }
-
-            // Check if it's touching OpenAir
-            let mut touches_open_air = None;
-            let mut adjacent_count = std::collections::HashMap::new();
-
-            for &ekey in &bubble.edges {
-                let twin_ekey = graph.vertices.get_edge(ekey).twin;
-                let twin_bubble_key = graph.vertices.get_edge(twin_ekey).bubble;
-                let twin_bubble = &graph.bubbles[twin_bubble_key];
-
-                if matches!(twin_bubble.style, BubbleStyle::OpenAir) {
-                    touches_open_air = Some(twin_ekey);
-                    break;
+                if let Some(ekey) = touches_open_air {
+                    return Some(ekey);
                 }
-                *adjacent_count.entry(twin_bubble_key).or_insert(0) += 1;
-            }
 
-            if let Some(ekey) = touches_open_air {
-                to_remove.push(ekey);
-            } else {
                 // If not touching open air, check if it's tiny
-                let area = bubble.area;
-                if area < UNNOTICEABLE_AREA {
-                    // Find a neighbor that shares exactly one edge to merge into
-                    if let Some((&neighbor_key, _)) =
-                        adjacent_count.iter().find(|&(_, &count)| count == 1)
-                    {
-                        // Find the edge that connects to this neighbor
-                        let edge_to_neighbor = bubble
-                            .edges
-                            .iter()
-                            .find(|&&e| {
-                                graph
-                                    .vertices
-                                    .get_edge(graph.vertices.get_edge(e).twin)
-                                    .bubble
-                                    == neighbor_key
-                            })
-                            .cloned();
-
-                        if let Some(ekey) = edge_to_neighbor {
-                            to_remove.push(graph.vertices.get_edge(ekey).twin);
-                        }
+                if bubble.area < UNNOTICEABLE_AREA {
+                    let mut adjacent_count = std::collections::HashMap::new();
+                    for &ekey in &bubble.edges {
+                        let twin_bubble_key = graph
+                            .vertices
+                            .get_edge(graph.vertices.get_edge(ekey).twin)
+                            .bubble;
+                        *adjacent_count.entry(twin_bubble_key).or_insert(0) += 1;
                     }
+
+                    // Find a neighbor that shares exactly one edge to merge into
+                    let neighbor_key = adjacent_count
+                        .iter()
+                        .find(|&(_, &count)| count == 1)
+                        .map(|(&k, _)| k)?;
+
+                    // Find the edge that connects to this neighbor
+                    return bubble
+                        .edges
+                        .iter()
+                        .find(|&&e| {
+                            graph
+                                .vertices
+                                .get_edge(graph.vertices.get_edge(e).twin)
+                                .bubble
+                                == neighbor_key
+                        })
+                        .map(|&ekey| graph.vertices.get_edge(ekey).twin);
                 }
-            }
-        }
+                None
+            })
+            .collect();
 
         for ekey in to_remove {
-            if graph.vertices.contains_key(ekey.vertex) {
-                graph.remove_edge(ekey);
+            if state.graph.vertices.contains_key(ekey.vertex) {
+                state.graph.remove_edge(ekey);
             }
         }
     }

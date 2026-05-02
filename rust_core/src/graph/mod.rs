@@ -258,24 +258,26 @@ impl Graph {
 
         // 2. Update bubbles
         for bubble in bubbles.values_mut() {
-            let mut total_area = 0.0;
-            let mut total_centroid = Vec2::ZERO;
-
-            for &ekey in &bubble.edges {
-                let edge = vertices.get_edge(ekey);
-                let twin_edge = vertices.get_edge(edge.twin);
-
-                total_area += edge.half_area - twin_edge.half_area;
-                total_centroid += edge.centroid_contribution;
-            }
+            let (total_area, total_centroid) =
+                bubble
+                    .edges
+                    .iter()
+                    .fold((0.0, Vec2::ZERO), |(acc_area, acc_centroid), &ekey| {
+                        let edge = vertices.get_edge(ekey);
+                        let twin_edge = vertices.get_edge(edge.twin);
+                        (
+                            acc_area + (edge.half_area - twin_edge.half_area),
+                            acc_centroid + edge.centroid_contribution,
+                        )
+                    });
 
             bubble.area = total_area;
             if total_area.abs() < 1e-6 {
-                if !bubble.edges.is_empty() {
-                    bubble.centroid = vertices[bubble.edges[0].vertex].point.position;
-                } else {
-                    bubble.centroid = Vec2::ZERO;
-                }
+                bubble.centroid = bubble
+                    .edges
+                    .first()
+                    .map(|&ekey| vertices[ekey.vertex].point.position)
+                    .unwrap_or(Vec2::ZERO);
             } else {
                 bubble.centroid = total_centroid / total_area;
             }
@@ -352,19 +354,20 @@ impl Graph {
     }
 
     pub fn get_degenerate_edges(&self, bkey: BubbleKey) -> Vec<EdgeKey> {
-        let mut degenerates = Vec::new();
-        if let Some(bubble) = self.bubbles.get(bkey) {
-            for &ekey in &bubble.edges {
-                let twin_ekey = self.vertices.get_edge(ekey).twin;
-                if self.vertices.get_edge(twin_ekey).bubble == bkey {
-                    // Prevent returning both the edge and its twin
-                    if !degenerates.contains(&ekey) && !degenerates.contains(&twin_ekey) {
-                        degenerates.push(ekey);
-                    }
-                }
-            }
-        }
-        degenerates
+        self.bubbles
+            .get(bkey)
+            .map(|bubble| {
+                bubble
+                    .edges
+                    .iter()
+                    .filter(|&&ekey| {
+                        let twin_ekey = self.vertices.get_edge(ekey).twin;
+                        self.vertices.get_edge(twin_ekey).bubble == bkey && ekey < twin_ekey
+                    })
+                    .copied()
+                    .collect()
+            })
+            .unwrap_or_default()
     }
 
     /// Spawns a new bubble by "splitting" a vertex into three vertices.

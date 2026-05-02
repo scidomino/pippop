@@ -3,7 +3,7 @@ use super::point::Point;
 use super::vertex::VertexKey;
 use macroquad::math::Vec2;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum Slot {
     A = 0,
@@ -64,7 +64,7 @@ impl<T> std::ops::IndexMut<Slot> for [T; 3] {
 /// Instead of a global edge pool, edges are owned by their originating vertex.
 /// The key is a combination of the origin `VertexKey` and a `Slot` (A, B, or C),
 /// representing which of the three outgoing slots this edge occupies.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct EdgeKey {
     pub vertex: VertexKey,
     pub slot: Slot,

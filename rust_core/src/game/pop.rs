@@ -89,13 +89,13 @@ impl PopManager {
                     return;
                 }
 
-                if let Some(bkey) = state.graph.bubbles.iter().find_map(|(k, b)| {
-                    if b.style.is_poppable() {
-                        Some(k)
-                    } else {
-                        None
-                    }
-                }) {
+                if let Some(bkey) = state
+                    .graph
+                    .bubbles
+                    .iter()
+                    .find(|(_, b)| b.style.is_poppable())
+                    .map(|(k, _)| k)
+                {
                     let style = state.graph.bubbles[bkey].style;
                     if let BubbleStyle::Colored { size, .. } = style {
                         state.graph.bubbles[bkey].style = BubbleStyle::Invisible { size };

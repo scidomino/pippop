@@ -123,13 +123,13 @@ impl BurstManager {
     }
 
     fn find_burstable_edge_in_bubble(&self, graph: &Graph, bkey: BubbleKey) -> Option<EdgeKey> {
-        let bubble = graph.bubbles.get(bkey)?;
-        for &ekey in &bubble.edges {
-            if self.is_burstable(graph, ekey) {
-                return Some(ekey);
-            }
-        }
-        None
+        graph
+            .bubbles
+            .get(bkey)?
+            .edges
+            .iter()
+            .find(|&&ekey| self.is_burstable(graph, ekey))
+            .copied()
     }
 
     pub fn is_burstable(&self, graph: &Graph, ekey: EdgeKey) -> bool {

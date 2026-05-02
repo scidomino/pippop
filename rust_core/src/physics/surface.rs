@@ -31,14 +31,14 @@ fn vertex_surface_force(bez: &crate::graphics::geometry::Bezier) -> Vec2 {
     let b = 6.0 * (bez.ec - 2.0 * bez.sc + bez.s);
     let c = 3.0 * (bez.sc - bez.s);
 
-    let mut force = Vec2::ZERO;
-    for (w, p) in LEGENDRE_GAUSS_POINTS.iter() {
-        let vel = c + *p * (b + *p * a);
-        let inv_t = 1.0 - p;
-        let der_v = -3.0 * inv_t * inv_t;
-        force += *w * der_v * vel.normalize_or_zero();
-    }
-    force
+    LEGENDRE_GAUSS_POINTS
+        .iter()
+        .map(|&(w, p)| {
+            let vel = c + p * (b + p * a);
+            let der_v = -3.0 * (1.0 - p).powi(2);
+            w * der_v * vel.normalize_or_zero()
+        })
+        .sum()
 }
 
 fn edge_surface_force(bez: &crate::graphics::geometry::Bezier) -> Vec2 {
@@ -46,12 +46,12 @@ fn edge_surface_force(bez: &crate::graphics::geometry::Bezier) -> Vec2 {
     let b = 6.0 * (bez.ec - 2.0 * bez.sc + bez.s);
     let c = 3.0 * (bez.sc - bez.s);
 
-    let mut force = Vec2::ZERO;
-    for (w, p) in LEGENDRE_GAUSS_POINTS.iter() {
-        let vel = c + *p * (b + *p * a);
-        let inv_t = 1.0 - p;
-        let der_sc = 3.0 * inv_t * (1.0 - 3.0 * p);
-        force += *w * der_sc * vel.normalize_or_zero();
-    }
-    force
+    LEGENDRE_GAUSS_POINTS
+        .iter()
+        .map(|&(w, p)| {
+            let vel = c + p * (b + p * a);
+            let der_sc = 3.0 * (1.0 - p) * (1.0 - 3.0 * p);
+            w * der_sc * vel.normalize_or_zero()
+        })
+        .sum()
 }

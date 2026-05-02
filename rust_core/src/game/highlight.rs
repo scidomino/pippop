@@ -74,16 +74,21 @@ impl HighlightManager {
                     .powi(2);
 
                 if let Some(swappable_bkey) = graph.bubbles.get_swappable() {
-                    let swappable_bubble = &graph.bubbles[swappable_bkey];
-                    for &ekey in &swappable_bubble.edges {
-                        let twin_bkey = graph
-                            .vertices
-                            .get_edge(graph.vertices.get_edge(ekey).twin)
-                            .bubble;
-                        if !matches!(graph.bubbles[twin_bkey].style, BubbleStyle::OpenAir) {
-                            requests.push((twin_bkey, ratio));
-                        }
-                    }
+                    requests.extend(
+                        graph.bubbles[swappable_bkey]
+                            .edges
+                            .iter()
+                            .map(|&ekey| {
+                                graph
+                                    .vertices
+                                    .get_edge(graph.vertices.get_edge(ekey).twin)
+                                    .bubble
+                            })
+                            .filter(|&twin_bkey| {
+                                !matches!(graph.bubbles[twin_bkey].style, BubbleStyle::OpenAir)
+                            })
+                            .map(|twin_bkey| (twin_bkey, ratio)),
+                    );
                 }
             }
         }
