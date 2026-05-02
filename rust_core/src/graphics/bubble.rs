@@ -72,3 +72,27 @@ pub fn draw_bubble(style: &BubbleStyle, points: &[Vec2], centroid: Vec2, font: &
         },
     );
 }
+
+pub fn draw_debug_points(graph: &Graph) {
+    for (_, vertex) in &graph.vertices {
+        for edge in &vertex.edges {
+            // Draw edge control point
+            draw_circle(
+                edge.point.position.x,
+                edge.point.position.y,
+                3.0,
+                colors::YELLOW,
+            );
+
+            // Draw line from vertex to control point
+            draw_line(
+                vertex.point.position.x,
+                vertex.point.position.y,
+                edge.point.position.x,
+                edge.point.position.y,
+                0.5,
+                Color::new(1.0, 1.0, 1.0, 0.3),
+            );
+        }
+    }
+}
