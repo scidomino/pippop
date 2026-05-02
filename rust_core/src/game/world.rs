@@ -18,6 +18,9 @@ impl WorldManager {
 
     /// Advances the physics simulation using a fixed timestep.
     pub fn update(&mut self, state: &mut GameState, dt: f32) {
+        if state.phase == GamePhase::Bursting {
+            return;
+        }
         self.physics_accumulator += dt;
         while self.physics_accumulator >= 0.016 {
             physics::advance_frame(&mut state.graph);
