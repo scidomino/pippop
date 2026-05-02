@@ -41,7 +41,15 @@ impl Screen {
     }
 }
 
-#[macroquad::main("PipPop")]
+fn window_conf() -> Conf {
+    Conf {
+        window_title: "PipPop".to_owned(),
+        sample_count: 4,
+        ..Default::default()
+    }
+}
+
+#[macroquad::main(window_conf)]
 async fn main() {
     env_logger::init();
 
