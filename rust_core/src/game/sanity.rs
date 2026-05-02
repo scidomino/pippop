@@ -86,9 +86,6 @@ impl SanityManager {
                 }
 
                 // Check continuity (next_on_bubble should be the next edge in the list)
-                // Note: next_on_bubble is private to Graph but we can call it if we are in the same crate
-                // Actually, let's see if it's pub. It was NOT pub in the previous read.
-                // I should check if I need to make it pub or move the logic here.
                 let next_ekey = graph.vertices.next_on_bubble(ekey);
                 let expected_next = bubble.edges[(i + 1) % bubble.edges.len()];
                 if next_ekey != expected_next {
