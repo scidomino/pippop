@@ -2,9 +2,7 @@ use crate::game::state::{GameEvent, GamePhase, GameState};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
-use crate::graphics::bubble;
-use crate::graphics::colors;
-use crate::graphics::geometry;
+use crate::graphics::{bubble, colors, geometry, RenderContext};
 use macroquad::prelude::*;
 
 const FREEZE_DURATION: f32 = 0.5;
@@ -32,7 +30,7 @@ impl BurstManager {
         }
     }
 
-    pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
+    pub fn draw(&self, ctx: &RenderContext) {
         if let Some(ekey) = self.active_edge {
             let mut points = Vec::with_capacity(12);
             bubble::push_edge_points(ctx.graph, ekey, &mut points);
@@ -155,8 +153,6 @@ impl BurstManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::game::state::GameState;
-    use crate::graph::bubble::BubbleStyle;
     use crate::graphics::colors;
 
     #[test]

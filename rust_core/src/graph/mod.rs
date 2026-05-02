@@ -6,6 +6,7 @@ pub mod vertex;
 use bubble::{Bubble, BubbleKey, BubbleSet, BubbleStyle};
 use edge::{EdgeKey, Slot};
 use macroquad::math::Vec2;
+use std::cmp::Ordering;
 use vertex::{Vertex, VertexKey, VertexSet};
 
 use crate::graph::point::Point;
@@ -301,7 +302,7 @@ impl Graph {
                     None
                 }
             })
-            .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal))
+            .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal))
             .map(|(ekey, _)| ekey)
     }
 
@@ -428,8 +429,8 @@ mod tests {
     #[test]
     fn test_get_swappable_bubble() {
         let mut graph = Graph::new(
-            BubbleStyle::colored(crate::graphics::colors::TURQUOISE),
-            BubbleStyle::colored(crate::graphics::colors::ROSE),
+            BubbleStyle::colored(colors::TURQUOISE),
+            BubbleStyle::colored(colors::ROSE),
         );
 
         // Initially no swappable bubble in init()
@@ -467,7 +468,7 @@ mod tests {
     fn test_rebubble_reorders_edges() {
         let mut graph = Graph::new(
             BubbleStyle::swappable(5),
-            BubbleStyle::colored(crate::graphics::colors::TURQUOISE),
+            BubbleStyle::colored(colors::TURQUOISE),
         );
 
         let bkey = graph.bubbles.keys().next().unwrap();
@@ -491,8 +492,8 @@ mod tests {
     #[test]
     fn test_remove_edge_with_duplicate_neighbors() {
         let mut graph = Graph::new(
-            BubbleStyle::colored(crate::graphics::colors::TURQUOISE),
-            BubbleStyle::colored(crate::graphics::colors::ROSE),
+            BubbleStyle::colored(colors::TURQUOISE),
+            BubbleStyle::colored(colors::ROSE),
         );
 
         let s1 = graph
@@ -544,23 +545,17 @@ mod tests {
     fn test_bridge_creation_and_resolution() {
         // Create a large enough graph by spawning a few times
         let mut graph = Graph::new(
-            BubbleStyle::colored(crate::graphics::colors::TURQUOISE),
-            BubbleStyle::colored(crate::graphics::colors::ROSE),
+            BubbleStyle::colored(colors::TURQUOISE),
+            BubbleStyle::colored(colors::ROSE),
         );
 
         let oa_key = graph.get_open_air();
 
         // Spawn a couple times to get a non-trivial graph
         let mut vkeys: Vec<_> = graph.vertices.keys().collect();
-        graph.spawn(
-            vkeys[0],
-            BubbleStyle::colored(crate::graphics::colors::GREEN),
-        );
+        graph.spawn(vkeys[0], BubbleStyle::colored(colors::GREEN));
         vkeys = graph.vertices.keys().collect();
-        graph.spawn(
-            vkeys[2],
-            BubbleStyle::colored(crate::graphics::colors::YELLOW),
-        );
+        graph.spawn(vkeys[2], BubbleStyle::colored(colors::YELLOW));
 
         // Find an edge that separates two distinct colored bubbles
         let mut target_ekey = None;

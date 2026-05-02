@@ -1,9 +1,8 @@
-use crate::game::state::{GamePhase, GameState, Interaction};
+use crate::game::state::{GameEvent, GamePhase, GameState, Interaction, InteractionState};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
-use crate::graphics::bubble;
-use crate::graphics::geometry;
+use crate::graphics::{bubble, geometry, RenderContext};
 use macroquad::math::Vec2;
 
 const SWAP_TIME: f32 = 0.2;
@@ -38,13 +37,13 @@ impl SwapManager {
         false
     }
 
-    pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
+    pub fn draw(&self, ctx: &RenderContext) {
         if let Some(swap) = &self.active_swap {
             self.draw_bubbles(ctx, swap);
         }
     }
 
-    fn draw_bubbles(&self, ctx: &crate::graphics::RenderContext, swap: &ActiveSwap) {
+    fn draw_bubbles(&self, ctx: &RenderContext, swap: &ActiveSwap) {
         let twin = ctx.graph.vertices.get_edge(swap.edge).twin;
 
         // 1. Get the shared edge points (wall) from the swappable's perspective
@@ -101,11 +100,11 @@ impl SwapManager {
 
     pub fn interact(&mut self, state: &mut GameState, interaction: Interaction) {
         // Can't swap if already swapping
-        if state.phase != crate::game::state::GamePhase::Normal {
+        if state.phase != GamePhase::Normal {
             return;
         }
 
-        if interaction.state != crate::game::state::InteractionState::Released {
+        if interaction.state != InteractionState::Released {
             return;
         }
 
@@ -120,8 +119,8 @@ impl SwapManager {
 
         if let Some(edge_key) = state.graph.get_closest_swap_candidate(point) {
             self.start_swap(&mut state.graph, edge_key);
-            state.phase = crate::game::state::GamePhase::Swapping;
-            state.events.push(crate::game::state::GameEvent::Swap);
+            state.phase = GamePhase::Swapping;
+            state.events.push(GameEvent::Swap);
         }
     }
 

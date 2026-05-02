@@ -1,4 +1,5 @@
 use macroquad::prelude::*;
+use std::f32::consts::PI;
 
 const FLATNESS: f32 = 0.5;
 const MAX_DEPTH: u32 = 10;
@@ -289,7 +290,7 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
         let mut prev_idx = 0 as u16; // outer1 at i=0
 
         for s in 1..cap_segments {
-            let a = start_angle + (s as f32 / cap_segments as f32) * std::f32::consts::PI;
+            let a = start_angle + (s as f32 / cap_segments as f32) * PI;
             let pos = p_start + Vec2::new(a.cos(), a.sin()) * (width * 0.5);
             let new_idx = vertices.len() as u16;
             vertices.push(Vertex::new2(
@@ -316,7 +317,7 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
         let mut prev_idx = base + 0; // outer1
 
         for s in 1..cap_segments {
-            let a = end_angle - (s as f32 / cap_segments as f32) * std::f32::consts::PI;
+            let a = end_angle - (s as f32 / cap_segments as f32) * PI;
             let pos = p_end + Vec2::new(a.cos(), a.sin()) * (width * 0.5);
             let new_idx = vertices.len() as u16;
             vertices.push(Vertex::new2(

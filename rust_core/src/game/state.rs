@@ -1,4 +1,6 @@
+use crate::graph::bubble::BubbleKey;
 use crate::graph::Graph;
+use macroquad::math::Vec2;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GamePhase {
@@ -22,7 +24,7 @@ pub struct GameState {
     pub graph: Graph,
     pub phase: GamePhase,
     pub events: Vec<GameEvent>,
-    pub focus_bubble: Option<crate::graph::bubble::BubbleKey>,
+    pub focus_bubble: Option<BubbleKey>,
 }
 
 impl GameState {
@@ -45,6 +47,6 @@ pub enum InteractionState {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Interaction {
-    pub position: macroquad::math::Vec2,
+    pub position: Vec2,
     pub state: InteractionState,
 }

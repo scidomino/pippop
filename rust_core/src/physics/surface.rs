@@ -1,5 +1,6 @@
 use super::vector::GraphVector;
 use crate::graph::Graph;
+use crate::graphics::geometry::Bezier;
 use macroquad::math::Vec2;
 
 const SURFACE_TENSION: f32 = 0.3;
@@ -26,7 +27,7 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
     }
 }
 
-fn vertex_surface_force(bez: &crate::graphics::geometry::Bezier) -> Vec2 {
+fn vertex_surface_force(bez: &Bezier) -> Vec2 {
     let a = 3.0 * (bez.e - 3.0 * bez.ec + 3.0 * bez.sc - bez.s);
     let b = 6.0 * (bez.ec - 2.0 * bez.sc + bez.s);
     let c = 3.0 * (bez.sc - bez.s);
@@ -41,7 +42,7 @@ fn vertex_surface_force(bez: &crate::graphics::geometry::Bezier) -> Vec2 {
         .sum()
 }
 
-fn edge_surface_force(bez: &crate::graphics::geometry::Bezier) -> Vec2 {
+fn edge_surface_force(bez: &Bezier) -> Vec2 {
     let a = 3.0 * (bez.e - 3.0 * bez.ec + 3.0 * bez.sc - bez.s);
     let b = 6.0 * (bez.ec - 2.0 * bez.sc + bez.s);
     let c = 3.0 * (bez.sc - bez.s);

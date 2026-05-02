@@ -4,6 +4,8 @@ use rust_core::game::state::{Interaction, InteractionState};
 use rust_core::game::title::TitleController;
 use rust_core::graph::Graph;
 use rust_core::resources::Resources;
+use std::fs::File;
+use std::io::Write;
 
 enum Screen {
     Title(TitleController),
@@ -78,8 +80,7 @@ fn dump_graph(graph: &Graph) {
     let dump = graph.dump_state();
     #[cfg(not(target_arch = "wasm32"))]
     {
-        use std::io::Write;
-        if let Ok(mut file) = std::fs::File::create("graph_dump.txt") {
+        if let Ok(mut file) = File::create("graph_dump.txt") {
             let _ = file.write_all(dump.as_bytes());
             log::info!("Graph state dumped to graph_dump.txt");
         }

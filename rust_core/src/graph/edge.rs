@@ -2,6 +2,7 @@ use super::bubble::BubbleKey;
 use super::point::Point;
 use super::vertex::VertexKey;
 use macroquad::math::Vec2;
+use std::ops::{Index, IndexMut};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[repr(u8)]
@@ -45,7 +46,7 @@ impl Slot {
     }
 }
 
-impl<T> std::ops::Index<Slot> for [T; 3] {
+impl<T> Index<Slot> for [T; 3] {
     type Output = T;
 
     fn index(&self, slot: Slot) -> &Self::Output {
@@ -53,7 +54,7 @@ impl<T> std::ops::Index<Slot> for [T; 3] {
     }
 }
 
-impl<T> std::ops::IndexMut<Slot> for [T; 3] {
+impl<T> IndexMut<Slot> for [T; 3] {
     fn index_mut(&mut self, slot: Slot) -> &mut Self::Output {
         &mut self[slot.as_usize()]
     }

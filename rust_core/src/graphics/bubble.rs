@@ -1,10 +1,11 @@
-use crate::graph::bubble::{Bubble, BubbleStyle};
+use crate::graph::bubble::{Bubble, BubbleKey, BubbleStyle};
+use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
 use crate::graphics::colors;
 use crate::graphics::geometry;
 use macroquad::prelude::*;
 
-pub fn get_bubble_points(graph: &Graph, bkey: crate::graph::bubble::BubbleKey) -> Vec<Vec2> {
+pub fn get_bubble_points(graph: &Graph, bkey: BubbleKey) -> Vec<Vec2> {
     get_points_for_bubble(graph, &graph.bubbles[bkey])
 }
 
@@ -16,7 +17,7 @@ pub fn get_points_for_bubble(graph: &Graph, bubble: &Bubble) -> Vec<Vec2> {
         .collect()
 }
 
-pub fn push_edge_points(graph: &Graph, ekey: crate::graph::edge::EdgeKey, points: &mut Vec<Vec2>) {
+pub fn push_edge_points(graph: &Graph, ekey: EdgeKey, points: &mut Vec<Vec2>) {
     points.extend_from_slice(&graph.vertices.get_edge(ekey).points);
 }
 

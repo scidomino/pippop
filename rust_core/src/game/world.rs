@@ -1,6 +1,7 @@
 use crate::game::state::{GamePhase, GameState};
 use crate::graphics::{bubble, RenderContext};
 use crate::physics;
+use std::env;
 
 pub struct WorldManager {
     pub physics_accumulator: f32,
@@ -9,7 +10,7 @@ pub struct WorldManager {
 
 impl WorldManager {
     pub fn new() -> Self {
-        let debug_control_points = std::env::var("PIPPOP_DEBUG_CONTROL_POINTS").is_ok();
+        let debug_control_points = env::var("PIPPOP_DEBUG_CONTROL_POINTS").is_ok();
         Self {
             physics_accumulator: 0.0,
             debug_control_points,

@@ -1,7 +1,9 @@
 use super::edge::EdgeKey;
+use crate::graph::Graph;
+use crate::graphics::bubble;
 use macroquad::math::Vec2;
 use macroquad::prelude::Color;
-use slotmap::{new_key_type, SlotMap};
+use slotmap::{basic::Iter, basic::IterMut, new_key_type, SlotMap};
 use std::ops::{Deref, DerefMut};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -86,8 +88,8 @@ impl Bubble {
         }
     }
 
-    pub fn contains(&self, point: Vec2, graph: &crate::graph::Graph) -> bool {
-        let points = crate::graphics::bubble::get_points_for_bubble(graph, self);
+    pub fn contains(&self, point: Vec2, graph: &Graph) -> bool {
+        let points = bubble::get_points_for_bubble(graph, self);
         if points.len() < 3 {
             return false;
         }
@@ -152,7 +154,7 @@ impl DerefMut for BubbleSet {
 
 impl<'a> IntoIterator for &'a BubbleSet {
     type Item = (BubbleKey, &'a Bubble);
-    type IntoIter = slotmap::basic::Iter<'a, BubbleKey, Bubble>;
+    type IntoIter = Iter<'a, BubbleKey, Bubble>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.iter()
@@ -161,7 +163,7 @@ impl<'a> IntoIterator for &'a BubbleSet {
 
 impl<'a> IntoIterator for &'a mut BubbleSet {
     type Item = (BubbleKey, &'a mut Bubble);
-    type IntoIter = slotmap::basic::IterMut<'a, BubbleKey, Bubble>;
+    type IntoIter = IterMut<'a, BubbleKey, Bubble>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.iter_mut()
@@ -171,25 +173,25 @@ impl<'a> IntoIterator for &'a mut BubbleSet {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::graph::Graph;
-    use macroquad::math::Vec2;
+    use crate::graphics::colors;
+    use crate::physics;
 
     #[test]
     fn test_bubble_contains() {
         let mut graph = Graph::new(
             BubbleStyle::Colored {
                 size: 1,
-                color: crate::graphics::colors::TURQUOISE,
+                color: colors::TURQUOISE,
             },
             BubbleStyle::Colored {
                 size: 1,
-                color: crate::graphics::colors::ROSE,
+                color: colors::ROSE,
             },
         );
 
         // Run physics a few frames to expand the bubbles from their initial degenerate state
         for _ in 0..10 {
-            crate::physics::advance_frame(&mut graph);
+            physics::advance_frame(&mut graph);
         }
 
         let bkey = graph.bubbles.keys().next().unwrap();

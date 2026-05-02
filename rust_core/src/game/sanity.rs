@@ -4,6 +4,8 @@ use crate::graph::{
     edge::{EdgeKey, Slot},
 };
 use std::collections::HashSet;
+use std::fs::File;
+use std::io::Write;
 
 pub struct SanityManager;
 
@@ -23,8 +25,7 @@ impl SanityManager {
             let dump = state.graph.dump_state();
             #[cfg(not(target_arch = "wasm32"))]
             {
-                use std::io::Write;
-                if let Ok(mut file) = std::fs::File::create("sanity_fail_dump.txt") {
+                if let Ok(mut file) = File::create("sanity_fail_dump.txt") {
                     let _ = file.write_all(dump.as_bytes());
                 }
             }

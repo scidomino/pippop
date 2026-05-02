@@ -1,5 +1,6 @@
 use macroquad::audio::{load_sound_from_bytes, play_sound_once, Sound};
 use macroquad::prelude::*;
+use macroquad::rand;
 
 pub struct Resources {
     pub font: Font,
@@ -60,7 +61,7 @@ impl Resources {
 
     pub fn play_swap(&self) {
         if !self.splash_sounds.is_empty() {
-            let idx = macroquad::rand::gen_range(0, self.splash_sounds.len());
+            let idx = rand::gen_range(0, self.splash_sounds.len());
             play_sound_once(&self.splash_sounds[idx]);
         }
     }

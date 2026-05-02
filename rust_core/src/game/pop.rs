@@ -1,7 +1,9 @@
 use crate::game::state::{GameEvent, GamePhase, GameState};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
+use crate::graphics::{bubble, RenderContext};
 use macroquad::math::{vec2, Vec2};
 use macroquad::prelude::Color;
+use std::f32::consts::PI;
 
 const POPPING_TIME: f32 = 0.5;
 
@@ -26,10 +28,10 @@ impl PopManager {
         matches!(&self.pending_pop, Some(p) if p.bkey == bkey)
     }
 
-    pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
+    pub fn draw(&self, ctx: &RenderContext) {
         if let Some(pending) = &self.pending_pop {
             let bubble = &ctx.graph.bubbles[pending.bkey];
-            let points = crate::graphics::bubble::get_points_for_bubble(ctx.graph, bubble);
+            let points = bubble::get_points_for_bubble(ctx.graph, bubble);
             if points.is_empty() {
                 return;
             }
@@ -39,7 +41,7 @@ impl PopManager {
                 let morphed_points = self.apply_pop_morph(&points, bubble.centroid, size, progress);
 
                 // Create a temporary Colored style with the faded color to use for rendering
-                crate::graphics::bubble::draw_bubble(
+                bubble::draw_bubble(
                     &BubbleStyle::Colored {
                         size,
                         color: Color::new(color.r, color.g, color.b, progress),
@@ -60,7 +62,7 @@ impl PopManager {
         progress: f32,
     ) -> Vec<Vec2> {
         let target_area = 3000.0 * (size as f32).sqrt();
-        let radius = 5.0 * (target_area / std::f32::consts::PI).sqrt();
+        let radius = 5.0 * (target_area / PI).sqrt();
 
         let first_p = points[0];
         let start_angle = (first_p.y - centroid.y).atan2(first_p.x - centroid.x);
@@ -73,7 +75,7 @@ impl PopManager {
             .iter()
             .enumerate()
             .map(|(i, &p)| {
-                let angle = start_angle - (2.0 * std::f32::consts::PI) * (i as f32 / n as f32);
+                let angle = start_angle - (2.0 * PI) * (i as f32 / n as f32);
                 let circle_p = centroid + vec2(angle.cos() * radius, angle.sin() * radius);
                 p * morph_ratio + circle_p * inv_morph
             })

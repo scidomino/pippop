@@ -1,6 +1,7 @@
 use super::edge::{Edge, EdgeKey, Slot};
 use super::point::Point;
-use slotmap::{new_key_type, SlotMap};
+use crate::graphics::geometry::Bezier;
+use slotmap::{basic::Iter, basic::IterMut, new_key_type, SlotMap};
 use std::ops::{Deref, DerefMut};
 
 new_key_type! {
@@ -8,7 +9,7 @@ new_key_type! {
 }
 
 impl VertexKey {
-    pub fn slot(self, slot: super::edge::Slot) -> EdgeKey {
+    pub fn slot(self, slot: Slot) -> EdgeKey {
         EdgeKey::new(self, slot)
     }
 
@@ -66,10 +67,10 @@ impl VertexSet {
         (&vertex.edges[key.slot], vertex)
     }
 
-    pub fn get_bezier(&self, ekey: EdgeKey) -> crate::graphics::geometry::Bezier {
+    pub fn get_bezier(&self, ekey: EdgeKey) -> Bezier {
         let (edge, vertex) = self.get_edge_and_vertex(ekey);
         let (twin, twin_vertex) = self.get_edge_and_vertex(edge.twin);
-        crate::graphics::geometry::Bezier::from_points(
+        Bezier::from_points(
             vertex.point.position,
             edge.point.position,
             twin.point.position,
@@ -98,7 +99,7 @@ impl DerefMut for VertexSet {
 
 impl<'a> IntoIterator for &'a VertexSet {
     type Item = (VertexKey, &'a Vertex);
-    type IntoIter = slotmap::basic::Iter<'a, VertexKey, Vertex>;
+    type IntoIter = Iter<'a, VertexKey, Vertex>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.iter()
@@ -107,7 +108,7 @@ impl<'a> IntoIterator for &'a VertexSet {
 
 impl<'a> IntoIterator for &'a mut VertexSet {
     type Item = (VertexKey, &'a mut Vertex);
-    type IntoIter = slotmap::basic::IterMut<'a, VertexKey, Vertex>;
+    type IntoIter = IterMut<'a, VertexKey, Vertex>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.iter_mut()

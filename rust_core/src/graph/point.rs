@@ -1,4 +1,4 @@
-use macroquad::math::Vec2;
+use macroquad::math::{vec2, Vec2};
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Point {
@@ -8,7 +8,7 @@ pub struct Point {
 
 impl Point {
     pub fn new(x: f32, y: f32) -> Self {
-        Self::from_vec2(macroquad::math::vec2(x, y))
+        Self::from_vec2(vec2(x, y))
     }
     pub fn from_vec2(position: Vec2) -> Self {
         Self {

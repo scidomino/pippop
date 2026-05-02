@@ -1,10 +1,10 @@
-use crate::game::state::{GameState, Interaction, InteractionState};
-use crate::graph::bubble::BubbleStyle;
+use crate::game::state::{GamePhase, GameState, Interaction, InteractionState};
+use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::Graph;
-use crate::graphics::colors;
-use crate::graphics::geometry;
+use crate::graphics::{bubble, colors, geometry, RenderContext};
 use macroquad::math::Vec2;
 use macroquad::prelude::*;
+use std::f32::consts::PI;
 
 const TEASER_DELAY: f32 = 4.0;
 const TEASER_THROB: f32 = 1.0;
@@ -28,10 +28,10 @@ impl HighlightManager {
         }
     }
 
-    pub fn draw(&self, ctx: &crate::graphics::RenderContext) {
+    pub fn draw(&self, ctx: &RenderContext) {
         let glow_requests = self.get_glow_requests(ctx.graph);
         for (bkey, intensity) in glow_requests {
-            let points = crate::graphics::bubble::get_bubble_points(ctx.graph, bkey);
+            let points = bubble::get_bubble_points(ctx.graph, bkey);
             if !points.is_empty() {
                 let width = 20.0 * intensity;
                 let glow_mesh = geometry::generate_glow_mesh(&points, width, colors::WHITE, true);
@@ -45,7 +45,7 @@ impl HighlightManager {
     }
 
     pub fn interact(&mut self, state: &mut GameState, interaction: Interaction) {
-        if state.phase != crate::game::state::GamePhase::Normal {
+        if state.phase != GamePhase::Normal {
             self.point = None;
             return;
         }
@@ -58,7 +58,7 @@ impl HighlightManager {
         }
     }
 
-    pub fn get_glow_requests(&self, graph: &Graph) -> Vec<(crate::graph::bubble::BubbleKey, f32)> {
+    pub fn get_glow_requests(&self, graph: &Graph) -> Vec<(BubbleKey, f32)> {
         let mut requests = Vec::new();
 
         if let Some(p) = self.point {
@@ -69,9 +69,7 @@ impl HighlightManager {
         } else {
             let cycle_time = self.time % TEASER_DELAY;
             if cycle_time > TEASER_DELAY / 2.0 {
-                let ratio = (self.time * std::f32::consts::PI * 2.0 / TEASER_THROB)
-                    .sin()
-                    .powi(2);
+                let ratio = (self.time * PI * 2.0 / TEASER_THROB).sin().powi(2);
 
                 if let Some(swappable_bkey) = graph.bubbles.get_swappable() {
                     requests.extend(

@@ -3,7 +3,7 @@ use crate::game::state::{GameEvent, GameState};
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::vertex::VertexKey;
 use crate::graph::Graph;
-use macroquad::prelude::Color;
+use macroquad::prelude::*;
 use macroquad::rand::{gen_range, ChooseRandom};
 
 const AVG_WAIT: f32 = 2.0;
@@ -51,10 +51,10 @@ impl SpawnManager {
 
     pub fn draw(&self) {
         let radius = 20.0 * 2.0f32.powf(-self.next_spawn_time.max(0.0));
-        let x = macroquad::window::screen_width() - 30.0;
+        let x = screen_width() - 30.0;
         let y = 30.0;
-        macroquad::shapes::draw_circle(x, y, radius, self.next_color);
-        macroquad::shapes::draw_circle_lines(x, y, radius, 2.0, macroquad::prelude::WHITE);
+        draw_circle(x, y, radius, self.next_color);
+        draw_circle_lines(x, y, radius, 2.0, WHITE);
     }
 
     fn spawn(&mut self, graph: &mut Graph) {

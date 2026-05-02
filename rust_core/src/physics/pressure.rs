@@ -1,6 +1,7 @@
 use super::vector::GraphVector;
 use crate::graph::bubble::BubbleKey;
 use crate::graph::Graph;
+use crate::graphics::geometry::Bezier;
 use macroquad::math::Vec2;
 use slotmap::SecondaryMap;
 
@@ -28,14 +29,14 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
     }
 }
 
-fn vertex_pressure_force(b: &crate::graphics::geometry::Bezier) -> Vec2 {
+fn vertex_pressure_force(b: &Bezier) -> Vec2 {
     Vec2::new(
         (-10.0 * b.s.y - 6.0 * b.sc.y - 3.0 * b.ec.y - b.e.y) / 20.0,
         (-10.0 * b.s.x + 6.0 * b.sc.x + 3.0 * b.ec.x + b.e.x) / 20.0,
     )
 }
 
-fn edge_pressure_force(b: &crate::graphics::geometry::Bezier) -> Vec2 {
+fn edge_pressure_force(b: &Bezier) -> Vec2 {
     Vec2::new(
         (6.0 * b.s.y - 3.0 * b.ec.y - 3.0 * b.e.y) / 20.0,
         (-6.0 * b.s.x + 3.0 * b.ec.x + 3.0 * b.e.x) / 20.0,

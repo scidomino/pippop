@@ -1,5 +1,6 @@
 use crate::game::state::GameState;
 use crate::graph::bubble::BubbleStyle;
+use std::collections::HashMap;
 
 const UNNOTICEABLE_AREA: f32 = 100.0; // Slightly larger than Android to be safe with physics
 
@@ -35,7 +36,7 @@ impl ReapManager {
 
                 // If not touching open air, check if it's tiny
                 if bubble.area < UNNOTICEABLE_AREA {
-                    let mut adjacent_count = std::collections::HashMap::new();
+                    let mut adjacent_count = HashMap::new();
                     for &ekey in &bubble.edges {
                         let twin_bubble_key = graph
                             .vertices
