@@ -56,7 +56,7 @@ impl TitleController {
 
         // --- Pass 1: World Space (Background Bubbles) ---
         set_camera(camera);
-        self.world_manager.draw(&self.state.graph, &ctx);
+        self.world_manager.draw(&ctx);
 
         // --- Pass 2: Screen Space (UI) ---
         set_default_camera();

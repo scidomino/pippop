@@ -84,7 +84,7 @@ impl GameController {
         // --- Pass 1: World Space (Bubbles, Managers, UI) ---
         set_camera(camera);
 
-        self.world.draw(&self.state.graph, &ctx);
+        self.world.draw(&ctx);
         self.pop.draw(&ctx);
         self.swap.draw(&ctx);
         self.burst.draw(&ctx);

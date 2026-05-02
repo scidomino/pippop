@@ -1,5 +1,4 @@
-use crate::game::state::GameState;
-use crate::graph::Graph;
+use crate::game::state::{GamePhase, GameState};
 use crate::graphics::{bubble, RenderContext};
 use crate::physics;
 
@@ -27,14 +26,14 @@ impl WorldManager {
     }
 
     /// Draws all bubbles in the graph that are not intercepted by other managers.
-    pub fn draw(&self, graph: &Graph, ctx: &RenderContext) {
-        for (bkey, bubble) in &graph.bubbles {
-            let points = bubble::get_bubble_points(graph, bkey);
+    pub fn draw(&self, ctx: &RenderContext) {
+        for (bkey, bubble) in &ctx.graph.bubbles {
+            let points = bubble::get_bubble_points(ctx.graph, bkey);
             bubble::draw_bubble(&bubble.style, &points, bubble.centroid, ctx.font);
         }
 
         if self.debug_control_points {
-            bubble::draw_debug_points(graph);
+            bubble::draw_debug_points(ctx.graph);
         }
     }
 }
