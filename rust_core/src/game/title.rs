@@ -1,5 +1,5 @@
 use crate::game::slide::SlideManager;
-use crate::game::spawn::{SpawnManager, SpawnTimer};
+use crate::game::spawn::SpawnManager;
 use crate::game::state::{GameState, Interaction, InteractionState};
 use crate::game::world::WorldManager;
 use crate::graph::bubble::BubbleStyle;
@@ -28,13 +28,7 @@ impl TitleController {
             state: GameState::new(graph),
             font: resources.font.clone(),
             world_manager: WorldManager::new(),
-            spawn_manager: SpawnManager::new(
-                colors::get_group(6),
-                SpawnTimer {
-                    starting_wait: 3.0,
-                    doubling_time: 120.0,
-                },
-            ),
+            spawn_manager: SpawnManager::new(colors::get_group(6)),
             slide_manager: SlideManager::new(),
             timer: 0.0,
         }

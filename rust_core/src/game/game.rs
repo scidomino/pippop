@@ -4,7 +4,7 @@ use crate::game::pop::PopManager;
 use crate::game::reap::ReapManager;
 use crate::game::sanity::SanityManager;
 use crate::game::slide::SlideManager;
-use crate::game::spawn::{SpawnManager, SpawnTimer};
+use crate::game::spawn::SpawnManager;
 use crate::game::state::{GameEvent, GameState, Interaction};
 use crate::game::swap::SwapManager;
 use crate::game::world::WorldManager;
@@ -37,13 +37,7 @@ impl GameController {
             )),
             font: resources.font.clone(),
             world: WorldManager::new(),
-            spawn: SpawnManager::new(
-                colors::get_group(6),
-                SpawnTimer {
-                    starting_wait: 2.0,
-                    doubling_time: 120.0,
-                },
-            ),
+            spawn: SpawnManager::new(colors::get_group(6)),
             slide: SlideManager::new(),
             burst: BurstManager::new(1),
             swap: SwapManager::new(),
