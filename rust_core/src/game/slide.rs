@@ -1,9 +1,9 @@
-use crate::game::state::GameState;
+use crate::game::state::{GamePhase, GameState};
 use crate::graph::edge::{EdgeKey, Slot};
 use crate::graph::Graph;
 use std::collections::HashMap;
 
-const TIMEOUT: f32 = 1.0; // 1 second
+const TIMEOUT: f32 = 0.5;
 const MIN_LENGTH: f32 = 10.0;
 
 pub struct SlideManager {
@@ -25,6 +25,9 @@ impl SlideManager {
 
     pub fn update(&mut self, state: &mut GameState, dt: f32) {
         self.prune(dt);
+        if state.phase != GamePhase::Normal {
+            return;
+        }
         if let Some(edge_key) = self.get_first_slidable(&state.graph) {
             state.graph.slide(edge_key);
             self.recently_slid.insert(edge_key, TIMEOUT);
