@@ -103,7 +103,9 @@ impl BurstManager {
             if let BubbleStyle::Swappable { swaps_left, .. } =
                 &mut graph.bubbles[swappable_bkey].style
             {
-                *swaps_left += 1;
+                if *swaps_left < 5 {
+                    *swaps_left += 1;
+                }
             }
         }
     }
@@ -195,7 +197,7 @@ mod tests {
         let swappable_bkey = state.graph.bubbles.get_swappable().unwrap();
         if let BubbleStyle::Swappable { swaps_left, .. } = state.graph.bubbles[swappable_bkey].style
         {
-            assert_eq!(swaps_left, 6);
+            assert_eq!(swaps_left, 5);
         } else {
             panic!("Expected Swappable style");
         }
