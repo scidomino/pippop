@@ -74,8 +74,9 @@ impl GameOverManager {
 
         // Draw "Gioco Concluso" (Game Over)
         let text = "Gioco Concluso";
-        let font_size: u16 = 100;
-        let dims = measure_text(text, Some(ctx.font), font_size, 1.0);
+        let font_size: u16 = 50;
+        let font_scale = 2.0;
+        let dims = measure_text(text, Some(ctx.font), font_size, font_scale);
 
         // Shadow
         draw_text_ex(
@@ -85,6 +86,7 @@ impl GameOverManager {
             TextParams {
                 font: Some(ctx.font),
                 font_size,
+                font_scale,
                 color: colors::WHITE,
                 ..Default::default()
             },
@@ -97,6 +99,7 @@ impl GameOverManager {
             TextParams {
                 font: Some(ctx.font),
                 font_size,
+                font_scale,
                 color: colors::TURQUOISE,
                 ..Default::default()
             },

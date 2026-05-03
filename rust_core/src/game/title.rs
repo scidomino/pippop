@@ -81,8 +81,9 @@ impl TitleController {
 
         // Draw Title "PipPop"
         let title_text = "PipPop";
-        let title_size = 120;
-        let title_dims = measure_text(title_text, Some(&self.font), title_size, 1.0);
+        let title_base = 60;
+        let title_scale = 2.0;
+        let title_dims = measure_text(title_text, Some(&self.font), title_base, title_scale);
 
         // Shadow
         draw_text_ex(
@@ -91,7 +92,8 @@ impl TitleController {
             screen_center_y - 40.0 + 4.0,
             TextParams {
                 font: Some(&self.font),
-                font_size: title_size,
+                font_size: title_base,
+                font_scale: title_scale,
                 color: colors::WHITE,
                 ..Default::default()
             },
@@ -103,7 +105,8 @@ impl TitleController {
             screen_center_y - 40.0,
             TextParams {
                 font: Some(&self.font),
-                font_size: title_size,
+                font_size: title_base,
+                font_scale: title_scale,
                 color: colors::TURQUOISE,
                 ..Default::default()
             },
@@ -112,10 +115,9 @@ impl TitleController {
         // Draw "Gioca!" text with pulsing animation
         let play_text = "Gioca!";
         let play_base_size = 60;
-        let pulse = (self.timer * 3.0).sin() * 0.1 + 1.0; // 0.9 to 1.1 pulse
-        let play_size = (play_base_size as f32 * pulse) as u16;
+        let play_scale = (self.timer * 3.0).sin() * 0.1 + 1.0; // 0.9 to 1.1 pulse
 
-        let play_dims = measure_text(play_text, Some(&self.font), play_size, 1.0);
+        let play_dims = measure_text(play_text, Some(&self.font), play_base_size, play_scale);
 
         // Shadow
         draw_text_ex(
@@ -124,7 +126,8 @@ impl TitleController {
             screen_center_y + 80.0 + 2.0,
             TextParams {
                 font: Some(&self.font),
-                font_size: play_size,
+                font_size: play_base_size,
+                font_scale: play_scale,
                 color: colors::WHITE,
                 ..Default::default()
             },
@@ -136,7 +139,8 @@ impl TitleController {
             screen_center_y + 80.0,
             TextParams {
                 font: Some(&self.font),
-                font_size: play_size,
+                font_size: play_base_size,
+                font_scale: play_scale,
                 color: colors::RED,
                 ..Default::default()
             },

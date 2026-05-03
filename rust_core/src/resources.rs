@@ -17,12 +17,9 @@ pub struct Resources {
 
 impl Resources {
     pub async fn load() -> Self {
-        let mut font =
-            load_ttf_font_from_bytes(include_bytes!("../assets/sniglet_extrabold.ttf")).unwrap();
-        font.set_filter(FilterMode::Nearest);
-
         Self {
-            font,
+            font: load_ttf_font_from_bytes(include_bytes!("../assets/sniglet_extrabold.ttf"))
+                .unwrap(),
             pop_sound: load_sound!("../assets/pop.wav"),
             spawn_sound: load_sound!("../assets/spawn.wav"),
             burst_sound: load_sound!("../assets/burst.wav"),
