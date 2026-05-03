@@ -7,13 +7,13 @@ use rust_core::resources::Resources;
 use std::fs::File;
 use std::io::Write;
 
-enum Screen {
+enum Screen<'a> {
     Title(TitleController),
-    Game(GameController),
+    Game(GameController<'a>),
 }
 
-impl Screen {
-    fn interact(&mut self, resources: &Resources, interaction: Interaction) {
+impl<'a> Screen<'a> {
+    fn interact(&mut self, resources: &'a Resources, interaction: Interaction) {
         let mut next_screen = None;
         match self {
             Screen::Title(c) => {
@@ -32,7 +32,7 @@ impl Screen {
         }
     }
 
-    fn update(&mut self, resources: &Resources, dt: f32) {
+    fn update(&mut self, resources: &'a Resources, dt: f32) {
         match self {
             Screen::Title(c) => c.update(dt),
             Screen::Game(c) => c.update(resources, dt),

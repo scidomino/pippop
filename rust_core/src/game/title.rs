@@ -49,7 +49,7 @@ impl TitleController {
         self.slide_manager.update(&mut ctx);
 
         // Drain events so they don't accumulate
-        self.state.events.clear();
+        self.state.sound_events.clear();
     }
 
     pub fn draw(&self, camera: &Camera2D) {

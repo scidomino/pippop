@@ -6,6 +6,7 @@ pub mod pop;
 pub mod reap;
 pub mod sanity;
 pub mod slide;
+pub mod sound;
 pub mod spawn;
 pub mod state;
 pub mod swap;

@@ -1,4 +1,4 @@
-use crate::game::state::{GameEvent, GamePhase, UpdateContext};
+use crate::game::state::{GamePhase, SoundEvent, UpdateContext};
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
 use macroquad::prelude::*;
@@ -39,7 +39,7 @@ impl SpawnManager {
         if self.next_spawn_time < 0.0 && ctx.state.phase == GamePhase::Normal {
             self.spawn(&mut ctx.state.graph);
             self.next_spawn_time = self.get_next_spawn_time();
-            ctx.state.events.push(GameEvent::Spawn);
+            ctx.state.sound_events.push(SoundEvent::Spawn);
         }
     }
 

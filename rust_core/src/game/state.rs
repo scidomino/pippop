@@ -12,7 +12,7 @@ pub enum GamePhase {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum GameEvent {
+pub enum SoundEvent {
     Pop,
     Spawn,
     Burst,
@@ -24,7 +24,7 @@ pub enum GameEvent {
 pub struct GameState {
     pub graph: Graph,
     pub phase: GamePhase,
-    pub events: Vec<GameEvent>,
+    pub sound_events: Vec<SoundEvent>,
     pub focus_bubble: Option<BubbleKey>,
 }
 
@@ -33,7 +33,7 @@ impl GameState {
         Self {
             graph,
             phase: GamePhase::Normal,
-            events: Vec::new(),
+            sound_events: Vec::new(),
             focus_bubble: None,
         }
     }

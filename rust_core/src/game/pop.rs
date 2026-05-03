@@ -1,4 +1,4 @@
-use crate::game::state::{GameEvent, GamePhase, UpdateContext};
+use crate::game::state::{GamePhase, SoundEvent, UpdateContext};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graphics::{bubble, RenderContext};
 use macroquad::prelude::*;
@@ -120,7 +120,7 @@ impl PopManager {
                             // "Pop" happened. Style target area is now 0.
                             bubble.style = BubbleStyle::Invisible { size: 0 };
                             self.pending_pop = None;
-                            ctx.state.events.push(GameEvent::Pop);
+                            ctx.state.sound_events.push(SoundEvent::Pop);
                             ctx.state.phase = GamePhase::Normal;
                         }
                     } else {

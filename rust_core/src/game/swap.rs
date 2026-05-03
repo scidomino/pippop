@@ -1,4 +1,4 @@
-use crate::game::state::{GameEvent, GamePhase, InteractContext, InteractionState, UpdateContext};
+use crate::game::state::{GamePhase, InteractContext, InteractionState, SoundEvent, UpdateContext};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
@@ -122,7 +122,7 @@ impl SwapManager {
         if let Some(edge_key) = ctx.state.graph.get_closest_swap_candidate(point) {
             self.start_swap(&mut ctx.state.graph, edge_key);
             ctx.state.phase = GamePhase::Swapping;
-            ctx.state.events.push(GameEvent::Swap);
+            ctx.state.sound_events.push(SoundEvent::Swap);
         }
     }
 
