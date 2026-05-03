@@ -79,19 +79,14 @@ impl GameController {
         let ctx = RenderContext {
             graph: &self.state.graph,
             font: &self.font,
+            camera,
         };
-
-        // --- Pass 1: World Space (Bubbles, Managers, UI) ---
-        set_camera(camera);
 
         self.world.draw(&ctx);
         self.pop.draw(&ctx);
         self.swap.draw(&ctx);
         self.burst.draw(&ctx);
         self.highlight.draw(&ctx);
-
-        // --- Pass 2: Screen Space (UI) ---
-        set_default_camera();
-        self.spawn.draw();
+        self.spawn.draw(&ctx);
     }
 }

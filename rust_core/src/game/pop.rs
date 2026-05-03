@@ -1,8 +1,7 @@
 use crate::game::state::{GameEvent, GamePhase, GameState};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graphics::{bubble, RenderContext};
-use macroquad::math::{vec2, Vec2};
-use macroquad::prelude::Color;
+use macroquad::prelude::*;
 use std::f32::consts::PI;
 
 const POPPING_TIME: f32 = 0.5;
@@ -29,6 +28,8 @@ impl PopManager {
     }
 
     pub fn draw(&self, ctx: &RenderContext) {
+        set_camera(ctx.camera);
+
         if let Some(pending) = &self.pending_pop {
             let bubble = &ctx.graph.bubbles[pending.bkey];
             let points = bubble::get_points_for_bubble(ctx.graph, bubble);

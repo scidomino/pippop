@@ -8,4 +8,5 @@ use macroquad::prelude::*;
 pub struct RenderContext<'a> {
     pub graph: &'a Graph,
     pub font: &'a Font,
+    pub camera: &'a Camera2D,
 }

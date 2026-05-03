@@ -3,7 +3,7 @@ use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
 use crate::graphics::{bubble, geometry, RenderContext};
-use macroquad::math::Vec2;
+use macroquad::prelude::*;
 
 const SWAP_TIME: f32 = 0.2;
 
@@ -38,6 +38,8 @@ impl SwapManager {
     }
 
     pub fn draw(&self, ctx: &RenderContext) {
+        set_camera(ctx.camera);
+
         if let Some(swap) = &self.active_swap {
             self.draw_bubbles(ctx, swap);
         }

@@ -31,6 +31,8 @@ impl BurstManager {
     }
 
     pub fn draw(&self, ctx: &RenderContext) {
+        set_camera(ctx.camera);
+
         if let Some(ekey) = self.active_edge {
             let mut points = Vec::with_capacity(12);
             bubble::push_edge_points(ctx.graph, ekey, &mut points);

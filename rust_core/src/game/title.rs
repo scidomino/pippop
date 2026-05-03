@@ -52,10 +52,8 @@ impl TitleController {
         let ctx = RenderContext {
             graph: &self.state.graph,
             font: &self.font,
+            camera,
         };
-
-        // --- Pass 1: World Space (Background Bubbles) ---
-        set_camera(camera);
         self.world_manager.draw(&ctx);
 
         // --- Pass 2: Screen Space (UI) ---

@@ -1,6 +1,7 @@
 use crate::game::state::{GamePhase, GameState};
 use crate::graphics::{bubble, RenderContext};
 use crate::physics;
+use macroquad::prelude::*;
 use std::env;
 
 pub struct WorldManager {
@@ -31,6 +32,8 @@ impl WorldManager {
 
     /// Draws all bubbles in the graph that are not intercepted by other managers.
     pub fn draw(&self, ctx: &RenderContext) {
+        set_camera(ctx.camera);
+
         for (bkey, bubble) in &ctx.graph.bubbles {
             let points = bubble::get_bubble_points(ctx.graph, bkey);
             bubble::draw_bubble(&bubble.style, &points, bubble.centroid, ctx.font);
@@ -40,7 +43,7 @@ impl WorldManager {
             bubble::draw_debug_points(ctx.graph);
 
             // Draw FPS in screen space if debug is enabled
-            macroquad::camera::set_default_camera();
+            set_default_camera();
             macroquad::text::draw_text(
                 &format!("FPS: {:03}", macroquad::time::get_fps()),
                 10.0,
@@ -48,6 +51,9 @@ impl WorldManager {
                 30.0,
                 crate::graphics::colors::WHITE,
             );
+
+            // Restore camera
+            set_camera(ctx.camera);
         }
     }
 }

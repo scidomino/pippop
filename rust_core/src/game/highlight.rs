@@ -29,6 +29,8 @@ impl HighlightManager {
     }
 
     pub fn draw(&self, ctx: &RenderContext) {
+        set_camera(ctx.camera);
+
         let glow_requests = self.get_glow_requests(ctx.graph);
         for (bkey, intensity) in glow_requests {
             let points = bubble::get_bubble_points(ctx.graph, bkey);

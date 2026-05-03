@@ -3,6 +3,7 @@ use crate::game::state::{GameEvent, GameState};
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::vertex::VertexKey;
 use crate::graph::Graph;
+use crate::graphics::RenderContext;
 use macroquad::prelude::*;
 use macroquad::rand::{gen_range, ChooseRandom};
 
@@ -49,7 +50,9 @@ impl SpawnManager {
         }
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&self, _ctx: &RenderContext) {
+        set_default_camera();
+
         let radius = 20.0 * 2.0f32.powf(-self.next_spawn_time.max(0.0));
         let x = screen_width() - 30.0;
         let y = 30.0;
