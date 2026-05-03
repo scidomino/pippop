@@ -1,5 +1,6 @@
 pub mod burst;
 pub mod game;
+pub mod gameover;
 pub mod highlight;
 pub mod pop;
 pub mod reap;

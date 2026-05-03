@@ -35,7 +35,7 @@ impl TitleController {
     }
 
     pub fn interact(&mut self, interaction: Interaction) -> bool {
-        matches!(interaction.state, InteractionState::Pressed)
+        matches!(interaction.state, InteractionState::Released)
     }
 
     pub fn update(&mut self, dt: f32) {

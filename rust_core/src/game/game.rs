@@ -1,4 +1,5 @@
 use crate::game::burst::BurstManager;
+use crate::game::gameover::GameOverManager;
 use crate::game::highlight::HighlightManager;
 use crate::game::pop::PopManager;
 use crate::game::reap::ReapManager;
@@ -25,6 +26,7 @@ pub struct GameController {
     pub pop: PopManager,
     pub reap: ReapManager,
     pub highlight: HighlightManager,
+    pub gameover: GameOverManager,
     pub sanity: SanityManager,
 }
 
@@ -44,13 +46,16 @@ impl GameController {
             pop: PopManager::new(),
             reap: ReapManager::new(),
             highlight: HighlightManager::new(),
+            gameover: GameOverManager::new(),
             sanity: SanityManager::new(),
         }
     }
 
-    pub fn interact(&mut self, interaction: Interaction) {
+    pub fn interact(&mut self, interaction: Interaction) -> bool {
+        let should_exit = self.gameover.interact(&mut self.state, interaction);
         self.swap.interact(&mut self.state, interaction);
         self.highlight.interact(&mut self.state, interaction);
+        should_exit
     }
 
     pub fn update(&mut self, resources: &Resources, dt: f32) {
@@ -62,6 +67,7 @@ impl GameController {
         self.pop.update(&mut self.state, dt);
         self.swap.update(&mut self.state, dt);
         self.burst.update(&mut self.state, dt);
+        self.gameover.update(&mut self.state, dt);
         self.sanity.update(&self.state);
 
         self.play_sounds(resources);
@@ -80,6 +86,7 @@ impl GameController {
         self.burst.draw(&ctx);
         self.highlight.draw(&ctx);
         self.spawn.draw(&ctx);
+        self.gameover.draw(&self.state, &ctx);
     }
 
     fn play_sounds(&mut self, resources: &Resources) {

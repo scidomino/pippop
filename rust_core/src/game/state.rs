@@ -8,6 +8,7 @@ pub enum GamePhase {
     Popping,
     Swapping,
     Bursting,
+    GameOver,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
