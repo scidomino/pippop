@@ -4,6 +4,7 @@ use crate::game::highlight::HighlightManager;
 use crate::game::pop::PopManager;
 use crate::game::reap::ReapManager;
 use crate::game::sanity::SanityManager;
+use crate::game::score::ScoreManager;
 use crate::game::slide::SlideManager;
 use crate::game::sound::SoundManager;
 use crate::game::spawn::SpawnManager;
@@ -26,6 +27,7 @@ pub struct GameController<'a> {
     pub burst: BurstManager,
     pub swap: SwapManager,
     pub pop: PopManager,
+    pub score: ScoreManager,
     pub reap: ReapManager,
     pub highlight: HighlightManager,
     pub gameover: GameOverManager,
@@ -47,6 +49,7 @@ impl<'a> GameController<'a> {
             burst: BurstManager::new(),
             swap: SwapManager::new(),
             pop: PopManager::new(),
+            score: ScoreManager::new(),
             reap: ReapManager::new(),
             highlight: HighlightManager::new(),
             gameover: GameOverManager::new(),
@@ -78,6 +81,7 @@ impl<'a> GameController<'a> {
         self.slide.update(&mut ctx);
         self.highlight.update(&mut ctx);
         self.pop.update(&mut ctx);
+        self.score.update(&mut ctx);
         self.swap.update(&mut ctx);
         self.burst.update(&mut ctx);
         self.gameover.update(&mut ctx);
@@ -99,6 +103,7 @@ impl<'a> GameController<'a> {
         self.swap.draw(&ctx);
         self.burst.draw(&ctx);
         self.highlight.draw(&ctx);
+        self.score.draw(&ctx);
         self.gameover.draw(&ctx);
     }
 }

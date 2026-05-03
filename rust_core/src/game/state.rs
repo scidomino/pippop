@@ -19,12 +19,19 @@ pub enum SoundEvent {
     Swap,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum ScoreEvent {
+    Burst { position: Vec2 },
+    Pop { position: Vec2, size: i32 },
+}
+
 // This struct represents the entire state of the game at any given moment.
 // This is passed to the update method of the managers, which can modify it as needed.
 pub struct GameState {
     pub graph: Graph,
     pub phase: GamePhase,
     pub sound_events: Vec<SoundEvent>,
+    pub score_events: Vec<ScoreEvent>,
     pub focus_bubble: Option<BubbleKey>,
 }
 
@@ -34,6 +41,7 @@ impl GameState {
             graph,
             phase: GamePhase::Normal,
             sound_events: Vec::new(),
+            score_events: Vec::new(),
             focus_bubble: None,
         }
     }

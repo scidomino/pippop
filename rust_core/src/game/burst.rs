@@ -1,4 +1,4 @@
-use crate::game::state::{GamePhase, SoundEvent, UpdateContext};
+use crate::game::state::{GamePhase, ScoreEvent, SoundEvent, UpdateContext};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
@@ -64,8 +64,10 @@ impl BurstManager {
         if let Some(ekey) = self.active_edge {
             self.timer -= ctx.dt;
             if self.timer <= 0.0 {
+                let position = ctx.state.graph.vertices.get_edge(ekey).points[0];
                 self.burst(&mut ctx.state.graph, ekey, ctx.state.focus_bubble);
                 ctx.state.sound_events.push(SoundEvent::Burst);
+                ctx.state.score_events.push(ScoreEvent::Burst { position });
 
                 if self.find_and_set_next_burstable(&ctx.state.graph, ctx.state.focus_bubble) {
                     // Continue bursting

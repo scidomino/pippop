@@ -1,4 +1,4 @@
-use crate::game::state::{GamePhase, SoundEvent, UpdateContext};
+use crate::game::state::{GamePhase, ScoreEvent, SoundEvent, UpdateContext};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graphics::{bubble, RenderContext};
 use macroquad::prelude::*;
@@ -117,6 +117,12 @@ impl PopManager {
                     if let Some(bubble) = ctx.state.graph.bubbles.get_mut(pending.bkey) {
                         pending.timer -= ctx.dt;
                         if pending.timer <= 0.0 {
+                            let position = bubble.centroid;
+                            if let BubbleStyle::Colored { size, .. } = pending.style {
+                                ctx.state
+                                    .score_events
+                                    .push(ScoreEvent::Pop { position, size });
+                            }
                             // "Pop" happened. Style target area is now 0.
                             bubble.style = BubbleStyle::Invisible { size: 0 };
                             self.pending_pop = None;

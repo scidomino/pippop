@@ -74,14 +74,14 @@ impl GameOverManager {
 
         // Draw "Gioco Concluso" (Game Over)
         let text = "Gioco Concluso";
-        let font_size = 100;
+        let font_size: u16 = 100;
         let dims = measure_text(text, Some(ctx.font), font_size, 1.0);
 
         // Shadow
         draw_text_ex(
             text,
-            screen_center_x - dims.width / 2.0 - 4.0,
-            screen_center_y - 40.0 + 4.0,
+            (screen_center_x - dims.width / 2.0).floor() - 4.0,
+            (screen_center_y - 40.0).floor() + 4.0,
             TextParams {
                 font: Some(ctx.font),
                 font_size,
@@ -92,8 +92,8 @@ impl GameOverManager {
         // Foreground
         draw_text_ex(
             text,
-            screen_center_x - dims.width / 2.0,
-            screen_center_y - 40.0,
+            (screen_center_x - dims.width / 2.0).floor(),
+            (screen_center_y - 40.0).floor(),
             TextParams {
                 font: Some(ctx.font),
                 font_size,
@@ -104,12 +104,12 @@ impl GameOverManager {
 
         if self.timer > 2.0 {
             let sub_text = "Tocca per ricominciare";
-            let sub_size = 30;
+            let sub_size: u16 = 30;
             let sub_dims = measure_text(sub_text, Some(ctx.font), sub_size, 1.0);
             draw_text_ex(
                 sub_text,
-                screen_center_x - sub_dims.width / 2.0,
-                screen_center_y + 40.0,
+                (screen_center_x - sub_dims.width / 2.0).floor(),
+                (screen_center_y + 60.0).floor(),
                 TextParams {
                     font: Some(ctx.font),
                     font_size: sub_size,

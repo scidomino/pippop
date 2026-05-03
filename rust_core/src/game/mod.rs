@@ -5,6 +5,7 @@ pub mod highlight;
 pub mod pop;
 pub mod reap;
 pub mod sanity;
+pub mod score;
 pub mod slide;
 pub mod sound;
 pub mod spawn;
