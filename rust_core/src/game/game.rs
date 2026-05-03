@@ -64,15 +64,7 @@ impl GameController {
         self.burst.update(&mut self.state, dt);
         self.sanity.update(&self.state);
 
-        // Handle events (sounds, etc.)
-        for event in self.state.events.drain(..) {
-            match event {
-                GameEvent::Pop => resources.play_pop(),
-                GameEvent::Spawn => resources.play_spawn(),
-                GameEvent::Burst => resources.play_burst(),
-                GameEvent::Swap => resources.play_swap(),
-            }
-        }
+        self.play_sounds(resources);
     }
 
     pub fn draw(&self, camera: &Camera2D) {
@@ -88,5 +80,17 @@ impl GameController {
         self.burst.draw(&ctx);
         self.highlight.draw(&ctx);
         self.spawn.draw(&ctx);
+    }
+
+    fn play_sounds(&mut self, resources: &Resources) {
+        // Handle events (sounds, etc.)
+        for event in self.state.events.drain(..) {
+            match event {
+                GameEvent::Pop => resources.play_pop(),
+                GameEvent::Spawn => resources.play_spawn(),
+                GameEvent::Burst => resources.play_burst(),
+                GameEvent::Swap => resources.play_swap(),
+            }
+        }
     }
 }
