@@ -1,6 +1,11 @@
-use macroquad::audio::{load_sound_from_bytes, play_sound_once, Sound};
+use macroquad::audio::{load_sound_from_bytes, Sound};
 use macroquad::prelude::*;
-use macroquad::rand;
+
+macro_rules! load_sound {
+    ($path:expr) => {
+        load_sound_from_bytes(include_bytes!($path)).await.unwrap()
+    };
+}
 
 pub struct Resources {
     pub font: Font,
@@ -15,56 +20,20 @@ impl Resources {
         let mut font =
             load_ttf_font_from_bytes(include_bytes!("../assets/sniglet_extrabold.ttf")).unwrap();
         font.set_filter(FilterMode::Nearest);
+
         Self {
             font,
-            pop_sound: load_sound_from_bytes(include_bytes!("../assets/pop.wav"))
-                .await
-                .unwrap(),
-            spawn_sound: load_sound_from_bytes(include_bytes!("../assets/spawn.wav"))
-                .await
-                .unwrap(),
-            burst_sound: load_sound_from_bytes(include_bytes!("../assets/burst.wav"))
-                .await
-                .unwrap(),
+            pop_sound: load_sound!("../assets/pop.wav"),
+            spawn_sound: load_sound!("../assets/spawn.wav"),
+            burst_sound: load_sound!("../assets/burst.wav"),
             splash_sounds: vec![
-                load_sound_from_bytes(include_bytes!("../assets/splash1.wav"))
-                    .await
-                    .unwrap(),
-                load_sound_from_bytes(include_bytes!("../assets/splash2.wav"))
-                    .await
-                    .unwrap(),
-                load_sound_from_bytes(include_bytes!("../assets/splash3.wav"))
-                    .await
-                    .unwrap(),
-                load_sound_from_bytes(include_bytes!("../assets/splash4.wav"))
-                    .await
-                    .unwrap(),
-                load_sound_from_bytes(include_bytes!("../assets/splash5.wav"))
-                    .await
-                    .unwrap(),
-                load_sound_from_bytes(include_bytes!("../assets/splash6.wav"))
-                    .await
-                    .unwrap(),
+                load_sound!("../assets/splash1.wav"),
+                load_sound!("../assets/splash2.wav"),
+                load_sound!("../assets/splash3.wav"),
+                load_sound!("../assets/splash4.wav"),
+                load_sound!("../assets/splash5.wav"),
+                load_sound!("../assets/splash6.wav"),
             ],
-        }
-    }
-
-    pub fn play_pop(&self) {
-        play_sound_once(&self.pop_sound);
-    }
-
-    pub fn play_spawn(&self) {
-        play_sound_once(&self.spawn_sound);
-    }
-
-    pub fn play_burst(&self) {
-        play_sound_once(&self.burst_sound);
-    }
-
-    pub fn play_swap(&self) {
-        if !self.splash_sounds.is_empty() {
-            let idx = rand::gen_range(0, self.splash_sounds.len());
-            play_sound_once(&self.splash_sounds[idx]);
         }
     }
 }
