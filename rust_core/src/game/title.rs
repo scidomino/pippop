@@ -1,6 +1,6 @@
 use crate::game::slide::SlideManager;
 use crate::game::spawn::SpawnManager;
-use crate::game::state::{GameState, Interaction, InteractionState};
+use crate::game::state::{GameState, Interaction, InteractionState, UpdateContext};
 use crate::game::world::WorldManager;
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::Graph;
@@ -40,9 +40,13 @@ impl TitleController {
 
     pub fn update(&mut self, dt: f32) {
         self.timer += dt;
-        self.world_manager.update(&mut self.state, dt);
-        self.spawn_manager.update(&mut self.state, dt);
-        self.slide_manager.update(&mut self.state, dt);
+        let mut ctx = UpdateContext {
+            state: &mut self.state,
+            dt,
+        };
+        self.world_manager.update(&mut ctx);
+        self.spawn_manager.update(&mut ctx);
+        self.slide_manager.update(&mut ctx);
 
         // Drain events so they don't accumulate
         self.state.events.clear();

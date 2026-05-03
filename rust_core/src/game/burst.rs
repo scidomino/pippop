@@ -1,4 +1,4 @@
-use crate::game::state::{GameEvent, GamePhase, GameState};
+use crate::game::state::{GameEvent, GamePhase, UpdateContext};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
@@ -46,33 +46,33 @@ impl BurstManager {
         }
     }
 
-    pub fn update(&mut self, state: &mut GameState, dt: f32) {
-        if state.phase != GamePhase::Bursting {
+    pub fn update(&mut self, ctx: &mut UpdateContext) {
+        if ctx.state.phase != GamePhase::Bursting {
             return;
         }
 
         if self.active_edge.is_none() {
-            if self.find_and_set_next_burstable(&state.graph, state.focus_bubble) {
+            if self.find_and_set_next_burstable(&ctx.state.graph, ctx.state.focus_bubble) {
                 // Initial burst setup successful
             } else {
-                state.phase = GamePhase::Normal;
-                state.focus_bubble = None;
+                ctx.state.phase = GamePhase::Normal;
+                ctx.state.focus_bubble = None;
                 return;
             }
         }
 
         if let Some(ekey) = self.active_edge {
-            self.timer -= dt;
+            self.timer -= ctx.dt;
             if self.timer <= 0.0 {
-                self.burst(&mut state.graph, ekey, state.focus_bubble);
-                state.events.push(GameEvent::Burst);
+                self.burst(&mut ctx.state.graph, ekey, ctx.state.focus_bubble);
+                ctx.state.events.push(GameEvent::Burst);
 
-                if self.find_and_set_next_burstable(&state.graph, state.focus_bubble) {
+                if self.find_and_set_next_burstable(&ctx.state.graph, ctx.state.focus_bubble) {
                     // Continue bursting
                 } else {
                     self.active_edge = None;
-                    state.focus_bubble = None;
-                    state.phase = GamePhase::Normal;
+                    ctx.state.focus_bubble = None;
+                    ctx.state.phase = GamePhase::Normal;
                 }
             }
         }
@@ -155,6 +155,7 @@ impl BurstManager {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::game::state::GameState;
     use crate::graphics::colors;
 
     #[test]

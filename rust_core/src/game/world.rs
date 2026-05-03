@@ -1,4 +1,4 @@
-use crate::game::state::{GamePhase, GameState};
+use crate::game::state::{GamePhase, UpdateContext};
 use crate::graphics::{bubble, RenderContext};
 use crate::physics;
 use macroquad::prelude::*;
@@ -19,13 +19,13 @@ impl WorldManager {
     }
 
     /// Advances the physics simulation using a fixed timestep.
-    pub fn update(&mut self, state: &mut GameState, dt: f32) {
-        if state.phase == GamePhase::Bursting {
+    pub fn update(&mut self, ctx: &mut UpdateContext) {
+        if ctx.state.phase == GamePhase::Bursting {
             return;
         }
-        self.physics_accumulator += dt;
+        self.physics_accumulator += ctx.dt;
         while self.physics_accumulator >= 0.016 {
-            physics::advance_frame(&mut state.graph);
+            physics::advance_frame(&mut ctx.state.graph);
             self.physics_accumulator -= 0.016;
         }
     }

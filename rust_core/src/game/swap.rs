@@ -1,4 +1,4 @@
-use crate::game::state::{GameEvent, GamePhase, GameState, Interaction, InteractionState};
+use crate::game::state::{GameEvent, GamePhase, InteractContext, InteractionState, UpdateContext};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
@@ -100,66 +100,66 @@ impl SwapManager {
         );
     }
 
-    pub fn interact(&mut self, state: &mut GameState, interaction: Interaction) {
+    pub fn interact(&mut self, ctx: &mut InteractContext) {
         // Can't swap if already swapping
-        if state.phase != GamePhase::Normal {
+        if ctx.state.phase != GamePhase::Normal {
             return;
         }
 
-        if interaction.state != InteractionState::Released {
+        if ctx.interaction.state != InteractionState::Released {
             return;
         }
 
-        let point = interaction.position;
+        let point = ctx.interaction.position;
 
         // Cannot start a swap if clicking inside the swappable bubble itself
-        if let Some(swappable_bkey) = state.graph.bubbles.get_swappable() {
-            if state.graph.bubbles[swappable_bkey].contains(point, &state.graph) {
+        if let Some(swappable_bkey) = ctx.state.graph.bubbles.get_swappable() {
+            if ctx.state.graph.bubbles[swappable_bkey].contains(point, &ctx.state.graph) {
                 return;
             }
         }
 
-        if let Some(edge_key) = state.graph.get_closest_swap_candidate(point) {
-            self.start_swap(&mut state.graph, edge_key);
-            state.phase = GamePhase::Swapping;
-            state.events.push(GameEvent::Swap);
+        if let Some(edge_key) = ctx.state.graph.get_closest_swap_candidate(point) {
+            self.start_swap(&mut ctx.state.graph, edge_key);
+            ctx.state.phase = GamePhase::Swapping;
+            ctx.state.events.push(GameEvent::Swap);
         }
     }
 
-    pub fn update(&mut self, state: &mut GameState, dt: f32) {
-        if state.phase != GamePhase::Swapping {
+    pub fn update(&mut self, ctx: &mut UpdateContext) {
+        if ctx.state.phase != GamePhase::Swapping {
             return;
         }
 
         if let Some(swap) = &mut self.active_swap {
-            swap.progress += dt / SWAP_TIME;
+            swap.progress += ctx.dt / SWAP_TIME;
 
             let swappable_bkey = swap.swappable_bkey;
             let colored_bkey = swap.colored_bkey;
 
             let p = swap.progress.clamp(0.0, 1.0);
             if let BubbleStyle::Swappable { area, .. } =
-                &mut state.graph.bubbles[colored_bkey].style
+                &mut ctx.state.graph.bubbles[colored_bkey].style
             {
                 *area = swap.start_area + (swap.target_area - swap.start_area) * p;
             }
             if let BubbleStyle::Swappable { area, .. } =
-                &mut state.graph.bubbles[swappable_bkey].style
+                &mut ctx.state.graph.bubbles[swappable_bkey].style
             {
                 *area = swap.target_area + (swap.start_area - swap.target_area) * p;
             }
 
             if swap.progress >= 1.0 {
-                state.graph.bubbles[swappable_bkey].style = swap.colored_style;
+                ctx.state.graph.bubbles[swappable_bkey].style = swap.colored_style;
                 // Ensure the final swappable bubble has the exact target area
                 if let BubbleStyle::Swappable { area, .. } =
-                    &mut state.graph.bubbles[colored_bkey].style
+                    &mut ctx.state.graph.bubbles[colored_bkey].style
                 {
                     *area = swap.target_area;
                 }
 
-                state.focus_bubble = Some(swappable_bkey);
-                state.phase = GamePhase::Bursting;
+                ctx.state.focus_bubble = Some(swappable_bkey);
+                ctx.state.phase = GamePhase::Bursting;
                 self.active_swap = None;
             }
         }

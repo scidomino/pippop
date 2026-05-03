@@ -1,4 +1,4 @@
-use crate::game::state::GameState;
+use crate::game::state::UpdateContext;
 use crate::graph::bubble::BubbleStyle;
 use std::collections::HashMap;
 
@@ -15,8 +15,8 @@ impl ReapManager {
     /// Removes popping bubbles that have finished their animation when they are either:
     /// - deflated enough to be removed without causing noticeable visual artifacts, or
     /// - touching the open air.
-    pub fn update(&self, state: &mut GameState) {
-        let graph = &state.graph;
+    pub fn update(&self, ctx: &mut UpdateContext) {
+        let graph = &ctx.state.graph;
         let to_remove: Vec<_> = graph
             .bubbles
             .iter()
@@ -69,8 +69,8 @@ impl ReapManager {
             .collect();
 
         for ekey in to_remove {
-            if state.graph.vertices.contains_key(ekey.vertex) {
-                state.graph.remove_edge(ekey);
+            if ctx.state.graph.vertices.contains_key(ekey.vertex) {
+                ctx.state.graph.remove_edge(ekey);
             }
         }
     }

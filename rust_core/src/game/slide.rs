@@ -1,4 +1,4 @@
-use crate::game::state::{GamePhase, GameState};
+use crate::game::state::{GamePhase, UpdateContext};
 use crate::graph::edge::{EdgeKey, Slot};
 use crate::graph::Graph;
 use std::collections::HashMap;
@@ -23,13 +23,13 @@ impl SlideManager {
         }
     }
 
-    pub fn update(&mut self, state: &mut GameState, dt: f32) {
-        self.prune(dt);
-        if state.phase != GamePhase::Normal {
+    pub fn update(&mut self, ctx: &mut UpdateContext) {
+        self.prune(ctx.dt);
+        if ctx.state.phase != GamePhase::Normal {
             return;
         }
-        if let Some(edge_key) = self.get_first_slidable(&state.graph) {
-            state.graph.slide(edge_key);
+        if let Some(edge_key) = self.get_first_slidable(&ctx.state.graph) {
+            ctx.state.graph.slide(edge_key);
             self.recently_slid.insert(edge_key, TIMEOUT);
         }
     }

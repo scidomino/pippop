@@ -6,7 +6,7 @@ use crate::game::reap::ReapManager;
 use crate::game::sanity::SanityManager;
 use crate::game::slide::SlideManager;
 use crate::game::spawn::SpawnManager;
-use crate::game::state::{GameEvent, GameState, Interaction};
+use crate::game::state::{GameEvent, GameState, InteractContext, Interaction, UpdateContext};
 use crate::game::swap::SwapManager;
 use crate::game::world::WorldManager;
 use crate::graph::bubble::BubbleStyle;
@@ -18,6 +18,7 @@ use macroquad::prelude::*;
 pub struct GameController {
     pub state: GameState,
     pub font: Font,
+
     pub world: WorldManager,
     pub spawn: SpawnManager,
     pub slide: SlideManager,
@@ -52,22 +53,31 @@ impl GameController {
     }
 
     pub fn interact(&mut self, interaction: Interaction) -> bool {
-        let should_exit = self.gameover.interact(&mut self.state, interaction);
-        self.swap.interact(&mut self.state, interaction);
-        self.highlight.interact(&mut self.state, interaction);
+        let mut ctx = InteractContext {
+            state: &mut self.state,
+            interaction,
+        };
+        let should_exit = self.gameover.interact(&mut ctx);
+        self.swap.interact(&mut ctx);
+        self.highlight.interact(&mut ctx);
         should_exit
     }
 
     pub fn update(&mut self, resources: &Resources, dt: f32) {
-        self.world.update(&mut self.state, dt);
-        self.spawn.update(&mut self.state, dt);
-        self.reap.update(&mut self.state);
-        self.slide.update(&mut self.state, dt);
-        self.highlight.update(dt);
-        self.pop.update(&mut self.state, dt);
-        self.swap.update(&mut self.state, dt);
-        self.burst.update(&mut self.state, dt);
-        self.gameover.update(&mut self.state, dt);
+        let mut ctx = UpdateContext {
+            state: &mut self.state,
+            dt,
+        };
+
+        self.world.update(&mut ctx);
+        self.spawn.update(&mut ctx);
+        self.reap.update(&mut ctx);
+        self.slide.update(&mut ctx);
+        self.highlight.update(&mut ctx);
+        self.pop.update(&mut ctx);
+        self.swap.update(&mut ctx);
+        self.burst.update(&mut ctx);
+        self.gameover.update(&mut ctx);
         self.sanity.update(&self.state);
 
         self.play_sounds(resources);
@@ -91,7 +101,6 @@ impl GameController {
     }
 
     fn play_sounds(&mut self, resources: &Resources) {
-        // Handle events (sounds, etc.)
         for event in self.state.events.drain(..) {
             match event {
                 GameEvent::Pop => resources.play_pop(),

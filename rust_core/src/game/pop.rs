@@ -1,4 +1,4 @@
-use crate::game::state::{GameEvent, GamePhase, GameState};
+use crate::game::state::{GameEvent, GamePhase, UpdateContext};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graphics::{bubble, RenderContext};
 use macroquad::prelude::*;
@@ -85,49 +85,50 @@ impl PopManager {
 
     /// Updates the popping state. If in Normal phase, checks if a bubble is ready to pop.
     /// If in Popping phase, advances the animation timer.
-    pub fn update(&mut self, state: &mut GameState, dt: f32) {
-        match state.phase {
+    pub fn update(&mut self, ctx: &mut UpdateContext) {
+        match ctx.state.phase {
             GamePhase::Normal => {
                 if self.pending_pop.is_some() {
                     return;
                 }
 
-                if let Some(bkey) = state
+                if let Some(bkey) = ctx
+                    .state
                     .graph
                     .bubbles
                     .iter()
                     .find(|(_, b)| b.style.is_poppable())
                     .map(|(k, _)| k)
                 {
-                    let style = state.graph.bubbles[bkey].style;
+                    let style = ctx.state.graph.bubbles[bkey].style;
                     if let BubbleStyle::Colored { size, .. } = style {
-                        state.graph.bubbles[bkey].style = BubbleStyle::Invisible { size };
+                        ctx.state.graph.bubbles[bkey].style = BubbleStyle::Invisible { size };
                         self.pending_pop = Some(PendingPop {
                             bkey,
                             style,
                             timer: POPPING_TIME,
                         });
-                        state.phase = GamePhase::Popping;
+                        ctx.state.phase = GamePhase::Popping;
                     }
                 }
             }
             GamePhase::Popping => {
                 if let Some(pending) = &mut self.pending_pop {
-                    if let Some(bubble) = state.graph.bubbles.get_mut(pending.bkey) {
-                        pending.timer -= dt;
+                    if let Some(bubble) = ctx.state.graph.bubbles.get_mut(pending.bkey) {
+                        pending.timer -= ctx.dt;
                         if pending.timer <= 0.0 {
                             // "Pop" happened. Style target area is now 0.
                             bubble.style = BubbleStyle::Invisible { size: 0 };
                             self.pending_pop = None;
-                            state.events.push(GameEvent::Pop);
-                            state.phase = GamePhase::Normal;
+                            ctx.state.events.push(GameEvent::Pop);
+                            ctx.state.phase = GamePhase::Normal;
                         }
                     } else {
                         self.pending_pop = None;
-                        state.phase = GamePhase::Normal;
+                        ctx.state.phase = GamePhase::Normal;
                     }
                 } else {
-                    state.phase = GamePhase::Normal;
+                    ctx.state.phase = GamePhase::Normal;
                 }
             }
             _ => {}

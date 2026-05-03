@@ -1,4 +1,4 @@
-use crate::game::state::{GamePhase, GameState, Interaction, InteractionState};
+use crate::game::state::{GamePhase, InteractContext, InteractionState, UpdateContext};
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::Graph;
 use crate::graphics::{bubble, colors, geometry, RenderContext};
@@ -45,18 +45,18 @@ impl HighlightManager {
         }
     }
 
-    pub fn update(&mut self, dt: f32) {
-        self.time += dt;
+    pub fn update(&mut self, ctx: &mut UpdateContext) {
+        self.time += ctx.dt;
     }
 
-    pub fn interact(&mut self, state: &mut GameState, interaction: Interaction) {
-        if state.phase != GamePhase::Normal {
+    pub fn interact(&mut self, ctx: &mut InteractContext) {
+        if ctx.state.phase != GamePhase::Normal {
             self.point = None;
             return;
         }
 
-        if matches!(interaction.state, InteractionState::Pressed) {
-            self.point = Some(interaction.position);
+        if matches!(ctx.interaction.state, InteractionState::Pressed) {
+            self.point = Some(ctx.interaction.position);
             self.time = 0.0;
         } else {
             self.point = None;

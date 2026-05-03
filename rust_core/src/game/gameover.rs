@@ -1,4 +1,4 @@
-use crate::game::state::{GamePhase, GameState, Interaction, InteractionState};
+use crate::game::state::{GamePhase, InteractContext, InteractionState, UpdateContext};
 use crate::graphics::{colors, RenderContext};
 use macroquad::prelude::*;
 
@@ -11,17 +11,17 @@ impl GameOverManager {
         Self { timer: 0.0 }
     }
 
-    pub fn update(&mut self, state: &mut GameState, dt: f32) {
-        if state.phase != GamePhase::GameOver {
+    pub fn update(&mut self, ctx: &mut UpdateContext) {
+        if ctx.state.phase != GamePhase::GameOver {
             // Check for game over condition: swappable bubble has 0 swaps
             // and we are in Normal phase (not in the middle of animations)
-            if state.phase == GamePhase::Normal {
-                if let Some(swappable_bkey) = state.graph.bubbles.get_swappable() {
+            if ctx.state.phase == GamePhase::Normal {
+                if let Some(swappable_bkey) = ctx.state.graph.bubbles.get_swappable() {
                     if let crate::graph::bubble::BubbleStyle::Swappable { swaps_left, .. } =
-                        state.graph.bubbles[swappable_bkey].style
+                        ctx.state.graph.bubbles[swappable_bkey].style
                     {
                         if swaps_left <= 0 {
-                            state.phase = GamePhase::GameOver;
+                            ctx.state.phase = GamePhase::GameOver;
                             self.timer = 0.0;
                         }
                     }
@@ -30,15 +30,15 @@ impl GameOverManager {
             return;
         }
 
-        self.timer += dt;
+        self.timer += ctx.dt;
     }
 
-    pub fn interact(&mut self, state: &mut GameState, interaction: Interaction) -> bool {
-        if state.phase != GamePhase::GameOver {
+    pub fn interact(&mut self, ctx: &mut InteractContext) -> bool {
+        if ctx.state.phase != GamePhase::GameOver {
             return false;
         }
         // Return true if we should go back to title screen
-        if self.timer > 2.0 && matches!(interaction.state, InteractionState::Released) {
+        if self.timer > 2.0 && matches!(ctx.interaction.state, InteractionState::Released) {
             return true;
         }
         false

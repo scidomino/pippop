@@ -1,5 +1,4 @@
-use crate::game::state::GamePhase;
-use crate::game::state::{GameEvent, GameState};
+use crate::game::state::{GameEvent, GamePhase, UpdateContext};
 use crate::graph::bubble::BubbleStyle;
 use crate::graph::vertex::VertexKey;
 use crate::graph::Graph;
@@ -28,25 +27,25 @@ impl SpawnManager {
         manager
     }
 
-    pub fn update(&mut self, state: &mut GameState, dt: f32) {
-        if state.graph.bubbles.len() >= MAX_BUBBLES {
+    pub fn update(&mut self, ctx: &mut UpdateContext) {
+        if ctx.state.graph.bubbles.len() >= MAX_BUBBLES {
             return;
         }
 
-        let count = state.graph.bubbles.values().count();
+        let count = ctx.state.graph.bubbles.values().count();
         let multiplier = if count < self.colors.len() * 3 {
             5.0
         } else {
             1.0
         };
 
-        self.next_spawn_time -= dt * multiplier;
+        self.next_spawn_time -= ctx.dt * multiplier;
 
-        if self.next_spawn_time < 0.0 && state.phase == GamePhase::Normal {
-            self.spawn(&mut state.graph);
+        if self.next_spawn_time < 0.0 && ctx.state.phase == GamePhase::Normal {
+            self.spawn(&mut ctx.state.graph);
             self.next_spawn_time = self.get_next_spawn_time();
             self.next_color = *self.colors.choose().expect("colors is non-empty");
-            state.events.push(GameEvent::Spawn);
+            ctx.state.events.push(GameEvent::Spawn);
         }
     }
 
@@ -119,7 +118,10 @@ mod tests {
         manager.next_spawn_time = 100.0;
         let initial_time = manager.next_spawn_time;
         // 2 colored bubbles, 3 colors -> target is 9. Should speed up by 5.0.
-        manager.update(&mut state, 1.0);
+        manager.update(&mut UpdateContext {
+            state: &mut state,
+            dt: 1.0,
+        });
 
         assert_eq!(manager.next_spawn_time, initial_time - 5.0);
     }
@@ -140,7 +142,10 @@ mod tests {
 
         let mut state = GameState::new(graph);
         manager.next_spawn_time = 100.0;
-        manager.update(&mut state, 1.0);
+        manager.update(&mut UpdateContext {
+            state: &mut state,
+            dt: 1.0,
+        });
 
         // Should NOT have decremented next_spawn_time because it returns early
         assert_eq!(manager.next_spawn_time, 100.0);

@@ -39,6 +39,16 @@ impl GameState {
     }
 }
 
+pub struct UpdateContext<'a> {
+    pub state: &'a mut GameState,
+    pub dt: f32,
+}
+
+pub struct InteractContext<'a> {
+    pub state: &'a mut GameState,
+    pub interaction: Interaction,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InteractionState {
     Hover,
