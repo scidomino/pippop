@@ -93,12 +93,5 @@ impl GameController {
         // --- Pass 2: Screen Space (UI) ---
         set_default_camera();
         self.spawn.draw();
-        draw_text(
-            &format!("FPS: {:03}", get_fps()),
-            10.0,
-            30.0,
-            30.0,
-            colors::WHITE,
-        );
     }
 }
