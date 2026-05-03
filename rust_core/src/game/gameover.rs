@@ -44,8 +44,8 @@ impl GameOverManager {
         false
     }
 
-    pub fn draw(&self, state: &GameState, ctx: &RenderContext) {
-        if state.phase != GamePhase::GameOver {
+    pub fn draw(&self, ctx: &RenderContext) {
+        if !matches!(ctx.phase, GamePhase::GameOver) {
             return;
         }
 

@@ -50,7 +50,10 @@ impl SpawnManager {
         }
     }
 
-    pub fn draw(&self, _ctx: &RenderContext) {
+    pub fn draw(&self, ctx: &RenderContext) {
+        if matches!(ctx.phase, GamePhase::GameOver) {
+            return;
+        }
         set_default_camera();
 
         let radius = 20.0 * 2.0f32.powf(-self.next_spawn_time.max(0.0));

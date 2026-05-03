@@ -76,6 +76,7 @@ impl GameController {
     pub fn draw(&self, camera: &Camera2D) {
         let ctx = RenderContext {
             graph: &self.state.graph,
+            phase: &self.state.phase,
             font: &self.font,
             camera,
         };
@@ -86,7 +87,7 @@ impl GameController {
         self.burst.draw(&ctx);
         self.highlight.draw(&ctx);
         self.spawn.draw(&ctx);
-        self.gameover.draw(&self.state, &ctx);
+        self.gameover.draw(&ctx);
     }
 
     fn play_sounds(&mut self, resources: &Resources) {

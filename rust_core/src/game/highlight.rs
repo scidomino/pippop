@@ -29,6 +29,9 @@ impl HighlightManager {
     }
 
     pub fn draw(&self, ctx: &RenderContext) {
+        if !matches!(ctx.phase, GamePhase::Normal) {
+            return;
+        }
         set_camera(ctx.camera);
 
         let glow_requests = self.get_glow_requests(ctx.graph);
