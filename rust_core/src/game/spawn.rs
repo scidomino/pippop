@@ -1,8 +1,6 @@
 use crate::game::state::{GameEvent, GamePhase, UpdateContext};
 use crate::graph::bubble::BubbleStyle;
-use crate::graph::vertex::VertexKey;
 use crate::graph::Graph;
-use crate::graphics::RenderContext;
 use macroquad::prelude::*;
 use macroquad::rand::{gen_range, ChooseRandom};
 
@@ -12,16 +10,13 @@ const MAX_BUBBLES: usize = 40;
 pub struct SpawnManager {
     pub colors: Vec<Color>,
     pub next_spawn_time: f32,
-    pub next_color: Color,
 }
 
 impl SpawnManager {
     pub fn new(colors: Vec<Color>) -> Self {
-        let next_color = *colors.choose().expect("colors is non-empty");
         let mut manager = Self {
             colors,
             next_spawn_time: 0.0,
-            next_color,
         };
         manager.next_spawn_time = manager.get_next_spawn_time();
         manager
@@ -44,53 +39,33 @@ impl SpawnManager {
         if self.next_spawn_time < 0.0 && ctx.state.phase == GamePhase::Normal {
             self.spawn(&mut ctx.state.graph);
             self.next_spawn_time = self.get_next_spawn_time();
-            self.next_color = *self.colors.choose().expect("colors is non-empty");
             ctx.state.events.push(GameEvent::Spawn);
         }
     }
 
-    pub fn draw(&self, ctx: &RenderContext) {
-        if matches!(ctx.phase, GamePhase::GameOver) {
-            return;
-        }
-        set_default_camera();
-
-        let radius = 20.0 * 2.0f32.powf(-self.next_spawn_time.max(0.0));
-        let x = screen_width() - 30.0;
-        let y = 30.0;
-        draw_circle(x, y, radius, self.next_color);
-        draw_circle_lines(x, y, radius, 2.0, WHITE);
-    }
-
     fn spawn(&mut self, graph: &mut Graph) {
         let open_air_vertices = graph.get_open_air_vertices();
-
         if open_air_vertices.is_empty() {
             return;
         }
 
-        let color = self.next_color;
+        let vkey = *open_air_vertices.choose().expect("open air has vertices");
 
-        let vkey = *open_air_vertices
-            .iter()
-            .filter(|&&vkey| !self.vertex_borders_color(graph, vkey, color))
-            .copied()
-            .collect::<Vec<VertexKey>>()
-            .choose()
-            .unwrap_or_else(|| open_air_vertices.choose().expect("open air has vertices"));
-
-        graph.spawn(vkey, BubbleStyle::colored(color));
-    }
-
-    fn vertex_borders_color(&self, graph: &Graph, vkey: VertexKey, target_color: Color) -> bool {
-        (&graph.vertices[vkey])
+        let adjacent_colors: Vec<Color> = graph.vertices[vkey]
             .edges
             .iter()
-            .filter_map(|e| graph.bubbles.get(e.bubble))
-            .any(|bubble| match bubble.style {
-                BubbleStyle::Colored { color, .. } => color == target_color,
-                _ => false,
+            .filter_map(|edge| match graph.bubbles[edge.bubble].style {
+                BubbleStyle::Colored { color, .. } => Some(color),
+                _ => None,
             })
+            .collect();
+
+        let mut valid_colors = self.colors.clone();
+        valid_colors.retain(|c| !adjacent_colors.contains(c));
+
+        let color = valid_colors.choose().expect("some colors to choose from");
+
+        graph.spawn(vkey, BubbleStyle::colored(*color));
     }
 
     fn get_next_spawn_time(&self) -> f32 {

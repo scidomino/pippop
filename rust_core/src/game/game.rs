@@ -96,7 +96,6 @@ impl GameController {
         self.swap.draw(&ctx);
         self.burst.draw(&ctx);
         self.highlight.draw(&ctx);
-        self.spawn.draw(&ctx);
         self.gameover.draw(&ctx);
     }
 
