@@ -72,38 +72,47 @@ impl GameOverManager {
         let screen_center_x = screen_width / 2.0;
         let screen_center_y = screen_height / 2.0;
 
-        // Draw "Gioco Concluso" (Game Over)
-        let text = "Gioco Concluso";
-        let font_size: u16 = 50;
-        let font_scale = 2.0;
-        let dims = measure_text(text, Some(ctx.font), font_size, font_scale);
+        // Draw "GAME OVER"
+        let line1 = "GAME";
+        let line2 = "OVER";
+        let font_size: u16 = 80;
+        let font_scale = 1.5;
+        let dims1 = measure_text(line1, Some(ctx.font), font_size, font_scale);
+        let dims2 = measure_text(line2, Some(ctx.font), font_size, font_scale);
 
-        // Shadow
-        draw_text_ex(
-            text,
-            (screen_center_x - dims.width / 2.0).floor() - 4.0,
-            (screen_center_y - 40.0).floor() + 4.0,
-            TextParams {
-                font: Some(ctx.font),
-                font_size,
-                font_scale,
-                color: colors::WHITE,
-                ..Default::default()
-            },
-        );
-        // Foreground
-        draw_text_ex(
-            text,
-            (screen_center_x - dims.width / 2.0).floor(),
-            (screen_center_y - 40.0).floor(),
-            TextParams {
-                font: Some(ctx.font),
-                font_size,
-                font_scale,
-                color: colors::TURQUOISE,
-                ..Default::default()
-            },
-        );
+        let x1 = (screen_center_x - dims1.width / 2.0).floor();
+        let y1 = (screen_center_y - 50.0).floor();
+        let x2 = (screen_center_x - dims2.width / 2.0).floor();
+        let y2 = (screen_center_y + 70.0).floor();
+
+        for (text, x, y) in [(line1, x1, y1), (line2, x2, y2)] {
+            // Shadow
+            draw_text_ex(
+                text,
+                x - 4.0,
+                y + 4.0,
+                TextParams {
+                    font: Some(ctx.font),
+                    font_size,
+                    font_scale,
+                    color: colors::WHITE,
+                    ..Default::default()
+                },
+            );
+            // Foreground
+            draw_text_ex(
+                text,
+                x,
+                y,
+                TextParams {
+                    font: Some(ctx.font),
+                    font_size,
+                    font_scale,
+                    color: colors::TURQUOISE,
+                    ..Default::default()
+                },
+            );
+        }
 
         if self.timer > 2.0 {
             let sub_text = "Tocca per ricominciare";
@@ -112,7 +121,7 @@ impl GameOverManager {
             draw_text_ex(
                 sub_text,
                 (screen_center_x - sub_dims.width / 2.0).floor(),
-                (screen_center_y + 60.0).floor(),
+                (screen_center_y + 160.0).floor(),
                 TextParams {
                     font: Some(ctx.font),
                     font_size: sub_size,
