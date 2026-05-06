@@ -88,13 +88,7 @@ fn accelerate(graph: &mut Graph, accels: &GraphVector) {
 const MAX_VELOCITY: f32 = 20.0;
 
 fn accelerate_point(point: &mut Point, accel: Vec2) {
-    point.velocity = point.velocity * FRICTION + accel;
-
     // Cap velocity to prevent instability.
-    let speed_sq = point.velocity.length_squared();
-    if speed_sq > MAX_VELOCITY * MAX_VELOCITY {
-        point.velocity = point.velocity.normalize_or_zero() * MAX_VELOCITY;
-    }
-
+    point.velocity = (point.velocity * FRICTION + accel).clamp_length_max(MAX_VELOCITY);
     point.position += point.velocity;
 }

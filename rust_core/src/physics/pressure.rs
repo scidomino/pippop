@@ -30,17 +30,11 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
 }
 
 fn vertex_pressure_force(b: &Bezier) -> Vec2 {
-    Vec2::new(
-        (-10.0 * b.s.y - 6.0 * b.sc.y - 3.0 * b.ec.y - b.e.y) / 20.0,
-        (-10.0 * b.s.x + 6.0 * b.sc.x + 3.0 * b.ec.x + b.e.x) / 20.0,
-    )
+    (10.0 * b.s + 6.0 * b.sc + 3.0 * b.ec + b.e).perp() / 20.0
 }
 
 fn edge_pressure_force(b: &Bezier) -> Vec2 {
-    Vec2::new(
-        (6.0 * b.s.y - 3.0 * b.ec.y - 3.0 * b.e.y) / 20.0,
-        (-6.0 * b.s.x + 3.0 * b.ec.x + 3.0 * b.e.x) / 20.0,
-    )
+    (-6.0 * b.s + 3.0 * b.ec + 3.0 * b.e).perp() / 20.0
 }
 
 fn get_bubble_to_pressure(graph: &Graph) -> SecondaryMap<BubbleKey, f32> {

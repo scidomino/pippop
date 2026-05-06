@@ -27,7 +27,7 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
     }
 }
 
-fn vertex_surface_force(bez: &Bezier) -> Vec2 {
+fn integrate_surface_force(bez: &Bezier, derivative: impl Fn(f32) -> f32) -> Vec2 {
     let a = 3.0 * (bez.e - 3.0 * bez.ec + 3.0 * bez.sc - bez.s);
     let b = 6.0 * (bez.ec - 2.0 * bez.sc + bez.s);
     let c = 3.0 * (bez.sc - bez.s);
@@ -36,23 +36,15 @@ fn vertex_surface_force(bez: &Bezier) -> Vec2 {
         .iter()
         .map(|&(w, p)| {
             let vel = c + p * (b + p * a);
-            let der_v = -3.0 * (1.0 - p).powi(2);
-            w * der_v * vel.normalize_or_zero()
+            w * derivative(p) * vel.normalize_or_zero()
         })
         .sum()
 }
 
-fn edge_surface_force(bez: &Bezier) -> Vec2 {
-    let a = 3.0 * (bez.e - 3.0 * bez.ec + 3.0 * bez.sc - bez.s);
-    let b = 6.0 * (bez.ec - 2.0 * bez.sc + bez.s);
-    let c = 3.0 * (bez.sc - bez.s);
+fn vertex_surface_force(bez: &Bezier) -> Vec2 {
+    integrate_surface_force(bez, |p| -3.0 * (1.0 - p).powi(2))
+}
 
-    LEGENDRE_GAUSS_POINTS
-        .iter()
-        .map(|&(w, p)| {
-            let vel = c + p * (b + p * a);
-            let der_sc = 3.0 * (1.0 - p) * (1.0 - 3.0 * p);
-            w * der_sc * vel.normalize_or_zero()
-        })
-        .sum()
+fn edge_surface_force(bez: &Bezier) -> Vec2 {
+    integrate_surface_force(bez, |p| 3.0 * (1.0 - p) * (1.0 - 3.0 * p))
 }

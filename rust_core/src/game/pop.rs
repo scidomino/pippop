@@ -70,15 +70,14 @@ impl PopManager {
 
         let n = points.len();
         let morph_ratio = progress.powi(2);
-        let inv_morph = 1.0 - morph_ratio;
 
         points
             .iter()
             .enumerate()
             .map(|(i, &p)| {
                 let angle = start_angle - (2.0 * PI) * (i as f32 / n as f32);
-                let circle_p = centroid + vec2(angle.cos() * radius, angle.sin() * radius);
-                p * morph_ratio + circle_p * inv_morph
+                let circle_p = centroid + Vec2::from_angle(angle) * radius;
+                circle_p.lerp(p, morph_ratio)
             })
             .collect()
     }

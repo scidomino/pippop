@@ -111,10 +111,11 @@ impl ScoreManager {
                 // Draw text with shadow
                 let draw_pos = vec2(rp.position.x - text_dims.width / 2.0, rp.position.y - rise);
 
+                let shadow_pos = draw_pos + 2.0;
                 draw_text_ex(
                     &rp.text,
-                    draw_pos.x + 2.0,
-                    draw_pos.y + 2.0,
+                    shadow_pos.x,
+                    shadow_pos.y,
                     TextParams {
                         font: Some(ctx.font),
                         font_size: 32,

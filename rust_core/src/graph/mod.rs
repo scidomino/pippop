@@ -153,7 +153,7 @@ impl Graph {
     fn average_control_points(&mut self, target: EdgeKey, source: EdgeKey) {
         let p1 = self.vertices.get_edge(target).point.position;
         let p2 = self.vertices.get_edge(source).point.position;
-        self.vertices.get_edge_mut(target).point.position = (p1 + p2) / 2.0;
+        self.vertices.get_edge_mut(target).point.position = p1.midpoint(p2);
     }
 
     /// When a wall gets too short, We change its orientation: moving its
@@ -395,10 +395,10 @@ impl Graph {
 
         let new_vkey1 = self
             .vertices
-            .insert(Vertex::new(Point::from_vec2((vpoint + epoint1) / 2.0)));
+            .insert(Vertex::new(Point::from_vec2(vpoint.midpoint(epoint1))));
         let new_vkey2 = self
             .vertices
-            .insert(Vertex::new(Point::from_vec2((vpoint + epoint2) / 2.0)));
+            .insert(Vertex::new(Point::from_vec2(vpoint.midpoint(epoint2))));
 
         let new_ekeys1 = new_vkey1.edge_keys();
         let new_ekeys2 = new_vkey2.edge_keys();

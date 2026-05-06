@@ -32,17 +32,10 @@ impl Bezier {
     }
 
     pub fn centroid_contribution(&self) -> Vec2 {
-        let cx = calculate_half_partial_centroid(
-            self.s.x, self.s.y, self.sc.x, self.sc.y, self.ec.x, self.ec.y, self.e.x, self.e.y,
-        ) - calculate_half_partial_centroid(
-            self.e.x, self.e.y, self.ec.x, self.ec.y, self.sc.x, self.sc.y, self.s.x, self.s.y,
-        );
-        let cy = calculate_half_partial_centroid(
-            self.s.y, self.s.x, self.sc.y, self.sc.x, self.ec.y, self.ec.x, self.e.y, self.e.x,
-        ) - calculate_half_partial_centroid(
-            self.e.y, self.e.x, self.ec.y, self.ec.x, self.sc.y, self.sc.x, self.s.y, self.s.x,
-        );
-        Vec2::new(cx, -cy)
+        let c_start = calculate_half_partial_centroid(self.s, self.sc, self.ec, self.e);
+        let c_end = calculate_half_partial_centroid(self.e, self.ec, self.sc, self.s);
+        let c = c_start - c_end;
+        Vec2::new(c.x, -c.y)
     }
 
     pub fn flatten(&self, points: &mut Vec<Vec2>) {
@@ -63,23 +56,22 @@ fn flatten_bezier_recursive(
     p4: Vec2,
     depth: u32,
 ) {
-    let dx = p4.x - p1.x;
-    let dy = p4.y - p1.y;
-    let d2 = ((p2.x - p4.x) * dy - (p2.y - p4.y) * dx).abs();
-    let d3 = ((p3.x - p4.x) * dy - (p3.y - p4.y) * dx).abs();
+    let d = p4 - p1;
+    let d2 = (p2 - p4).perp_dot(d).abs();
+    let d3 = (p3 - p4).perp_dot(d).abs();
 
-    if depth >= MAX_DEPTH || (d2 + d3) * (d2 + d3) <= FLATNESS * (dx * dx + dy * dy) {
+    if depth >= MAX_DEPTH || (d2 + d3) * (d2 + d3) <= FLATNESS * d.length_squared() {
         points.push(p1);
         return;
     }
 
     // Split in two by De Casteljau's Algorithm
-    let p12 = (p1 + p2) / 2.0;
-    let p23 = (p2 + p3) / 2.0;
-    let p34 = (p3 + p4) / 2.0;
-    let p123 = (p12 + p23) / 2.0;
-    let p234 = (p23 + p34) / 2.0;
-    let p1234 = (p123 + p234) / 2.0;
+    let p12 = p1.midpoint(p2);
+    let p23 = p2.midpoint(p3);
+    let p34 = p3.midpoint(p4);
+    let p123 = p12.midpoint(p23);
+    let p234 = p23.midpoint(p34);
+    let p1234 = p123.midpoint(p234);
 
     flatten_bezier_recursive(points, p1, p12, p123, p1234, depth + 1);
     flatten_bezier_recursive(points, p1234, p234, p34, p4, depth + 1);
@@ -112,8 +104,7 @@ pub fn tween_points(a: &[Vec2], b: &[Vec2], progress: f32) -> Vec<Vec2> {
             let f = i as f32 * ratio;
             let i_low = f.floor() as usize;
             let i_high = (i_low + 1).min(small.len() - 1);
-            let t = f - i_low as f32;
-            let p2 = small[i_low].lerp(small[i_high], t);
+            let p2 = small[i_low].lerp(small[i_high], f.fract());
             p1.lerp(p2, morph)
         })
         .collect()
@@ -340,23 +331,19 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
     }
 }
 
-fn calculate_half_partial_centroid(
-    sx: f32,
-    sy: f32,
-    scx: f32,
-    scy: f32,
-    ecx: f32,
-    ecy: f32,
-    ex: f32,
-    ey: f32,
-) -> f32 {
-    (scx * ecx * (45.0 * sy + 27.0 * scy)
-        + scx * ex * (12.0 * sy + 18.0 * scy)
-        + sx * scx * (105.0 * sy - 45.0 * scy - 45.0 * ecy - 15.0 * ey)
-        + sx * ecx * (30.0 * sy)
-        + sx * ex * (5.0 * sy + 3.0 * scy)
-        + scx * scx * (45.0 * sy - 27.0 * ecy - 18.0 * ey)
-        + sx * sx * (-280.0 * sy - 105.0 * scy - 30.0 * ecy - 5.0 * ey))
+fn calculate_half_partial_centroid(s: Vec2, sc: Vec2, ec: Vec2, e: Vec2) -> Vec2 {
+    let syx = vec2(s.y, s.x);
+    let scyx = vec2(sc.y, sc.x);
+    let ecyx = vec2(ec.y, ec.x);
+    let eyx = vec2(e.y, e.x);
+
+    (sc * ec * (45.0 * syx + 27.0 * scyx)
+        + sc * e * (12.0 * syx + 18.0 * scyx)
+        + s * sc * (105.0 * syx - 45.0 * scyx - 45.0 * ecyx - 15.0 * eyx)
+        + s * ec * (30.0 * syx)
+        + s * e * (5.0 * syx + 3.0 * scyx)
+        + sc * sc * (45.0 * syx - 27.0 * ecyx - 18.0 * eyx)
+        + s * s * (-280.0 * syx - 105.0 * scyx - 30.0 * ecyx - 5.0 * eyx))
         / 840.0
 }
 
@@ -452,23 +439,12 @@ pub fn triangulate(points: &[Vec2]) -> Vec<(Vec2, Vec2, Vec2)> {
 }
 
 fn point_in_triangle(p: Vec2, a: Vec2, b: Vec2, c: Vec2) -> bool {
-    let v0 = c - a;
-    let v1 = b - a;
-    let v2 = p - a;
+    let d1 = (p - b).perp_dot(a - b);
+    let d2 = (p - c).perp_dot(b - c);
+    let d3 = (p - a).perp_dot(c - a);
 
-    let dot00 = v0.dot(v0);
-    let dot01 = v0.dot(v1);
-    let dot02 = v0.dot(v2);
-    let dot11 = v1.dot(v1);
-    let dot12 = v1.dot(v2);
+    let has_neg = (d1 < 0.0) || (d2 < 0.0) || (d3 < 0.0);
+    let has_pos = (d1 > 0.0) || (d2 > 0.0) || (d3 > 0.0);
 
-    let denom = dot00 * dot11 - dot01 * dot01;
-    if denom.abs() < 1e-6 {
-        return false;
-    }
-    let inv_denom = 1.0 / denom;
-    let u = (dot11 * dot02 - dot01 * dot12) * inv_denom;
-    let v = (dot00 * dot12 - dot01 * dot02) * inv_denom;
-
-    (u >= 0.0) && (v >= 0.0) && (u + v <= 1.0)
+    !(has_neg && has_pos)
 }
