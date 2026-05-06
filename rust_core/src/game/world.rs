@@ -9,6 +9,8 @@ pub struct WorldManager {
     pub debug_control_points: bool,
 }
 
+const PHYSICS_TIMESTEP: f32 = 0.016;
+
 impl WorldManager {
     pub fn new() -> Self {
         let debug_control_points = env::var("DEBUG").is_ok();
@@ -24,9 +26,9 @@ impl WorldManager {
             return;
         }
         self.physics_accumulator += ctx.dt;
-        while self.physics_accumulator >= 0.016 {
+        while self.physics_accumulator >= PHYSICS_TIMESTEP {
             physics::advance_frame(&mut ctx.state.graph);
-            self.physics_accumulator -= 0.016;
+            self.physics_accumulator -= PHYSICS_TIMESTEP;
         }
     }
 
