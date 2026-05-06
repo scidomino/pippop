@@ -4,6 +4,10 @@ use super::vertex::VertexKey;
 use macroquad::math::Vec2;
 use std::ops::{Index, IndexMut};
 
+/// An identifier for one of the three outgoing half-edges from a `Vertex`.
+///
+/// Because the graph is strictly trivalent, every vertex has exactly three slots.
+/// Ordering is typically clockwise.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum Slot {

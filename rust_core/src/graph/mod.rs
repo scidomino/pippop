@@ -1,3 +1,9 @@
+//! Topological Data Structures
+//!
+//! This module implements a highly specialized Half-Edge data structure to represent
+//! the planar graph of the bubbles. It ensures that the graph remains mathematically
+//! sound during complex topological changes (like merging or sliding).
+
 pub mod bubble;
 pub mod edge;
 pub mod point;

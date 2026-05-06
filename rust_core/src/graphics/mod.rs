@@ -1,3 +1,9 @@
+//! Rendering and Visual Effects
+//!
+//! This module provides the tools necessary to translate the logical `Graph` into
+//! visual elements. It includes custom triangulation for the fluid bubble shapes
+//! and mesh generation for glowing boundaries and ribbons.
+
 pub mod bubble;
 pub mod colors;
 pub mod geometry;

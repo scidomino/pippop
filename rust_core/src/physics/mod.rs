@@ -1,3 +1,13 @@
+//! Custom Physics Engine
+//!
+//! This module is responsible for the movement and fluid-like behavior of the bubbles.
+//! It applies forces based on internal pressure, surface tension (using Bezier curves),
+//! and a global centering gravity.
+//!
+//! The simulation uses a custom solver to calculate acceleration for both the vertices
+//! (junctions) and the control points of the edges, ensuring smooth, non-intersecting
+//! relaxation of the graph.
+
 pub mod gravity;
 pub mod pressure;
 pub mod surface;

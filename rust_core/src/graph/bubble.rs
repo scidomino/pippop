@@ -8,9 +8,13 @@ use std::ops::{Deref, DerefMut};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BubbleStyle {
+    /// A standard colored bubble. Multiple colored bubbles can merge to increase their `size`.
     Colored { size: i32, color: Color },
+    /// The unique player-controlled bubble. It has a limited number of swaps before game over.
     Swappable { swaps_left: i32, area: f32 },
+    /// The unique infinite bubble representing the outside world.
     OpenAir,
+    /// A temporary state used during the popping animation before the bubble is reaped.
     Invisible { size: i32 },
 }
 
