@@ -127,7 +127,7 @@ impl SanityManager {
             }
         }
 
-        // 4. Topology Invariants (Honeycomb)
+        // 4. Topology Invariants
         let v_count = graph.vertices.len();
         let b_count = graph.bubbles.len();
 

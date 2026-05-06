@@ -18,7 +18,9 @@ A 2-D bubble-swapping puzzle game without a grid! Join 5 bubbles of the same col
 
 - Click a bubble bordering the empty space to swap it in.
 - If the newly swapped bubble touches a like-colored bubble, they merge.
+- **Every merge grants you an extra swap (up to a maximum of 5)!**
 - Merge 5 or more bubbles together and they pop!
+- String together multiple merges or pops to trigger chain bonuses.
 - You lose if you run out of swaps.
 
 # History

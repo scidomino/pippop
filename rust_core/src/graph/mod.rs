@@ -13,7 +13,7 @@ use crate::graph::point::Point;
 
 /// A Half-Edge data structure representing the planar graph of bubbles.
 ///
-/// This graph enforces a trivalent (honeycomb) topology, meaning every
+/// This graph enforces a trivalent topology, meaning every
 /// vertex is connected to exactly three edges. The graph is planar and always
 /// connected, with a single "open air" bubble representing the outside.
 ///

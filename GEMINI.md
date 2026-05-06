@@ -9,11 +9,12 @@ A high-performance bubble physics game ported from Android to a pure Rust archit
 
 ## Core Architecture
 - `rust_core/`: The main Rust crate containing:
-  - `graph/`: Honeycomb topology management.
-  - `physics/`: Custom Bezier-based pressure and surface tension simulation.
-  - `managers/`: Game logic, state, and encapsulated asset management.
-  - `graphics/`: Rendering logic and effects.
-  - `main.rs`: The Macroquad game loop and entry point.
+  - `src/graph/`: Trivalent foam topology management.
+  - `src/physics/`: Custom Bezier-based pressure and surface tension simulation.
+  - `src/game/`: Game logic, state, and "manager" structs for individual systems.
+  - `src/graphics/`: Rendering logic and effects.
+  - `src/resources.rs`: Encapsulated asset loading and management.
+  - `src/main.rs`: The Macroquad game loop and entry point.
 
 ## Development Workflow
 
