@@ -16,13 +16,9 @@ impl Bezier {
         Self { s, sc, ec, e }
     }
 
-    pub fn half_area_contribution(&self) -> f32 {
-        self.half_area(self.s, self.sc, self.ec, self.e)
-    }
-
-    fn half_area(&self, s: Vec2, sc: Vec2, ec: Vec2, e: Vec2) -> f32 {
-        (s.x * (-10.0 * s.y - 6.0 * sc.y - 3.0 * ec.y - e.y)
-            + sc.x * (6.0 * s.y - 3.0 * ec.y - 3.0 * e.y))
+    pub fn half_area(&self) -> f32 {
+        (self.s.x * (-10.0 * self.s.y - 6.0 * self.sc.y - 3.0 * self.ec.y - self.e.y)
+            + self.sc.x * (6.0 * self.s.y - 3.0 * self.ec.y - 3.0 * self.e.y))
             / 20.0
     }
 

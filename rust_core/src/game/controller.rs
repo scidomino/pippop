@@ -69,7 +69,7 @@ impl<'a> GameController<'a> {
         should_exit
     }
 
-    pub fn update(&mut self, _resources: &Resources, dt: f32) {
+    pub fn update(&mut self, dt: f32) {
         let mut ctx = UpdateContext {
             state: &mut self.state,
             dt,

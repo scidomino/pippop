@@ -41,11 +41,11 @@ impl SwapManager {
         set_camera(ctx.camera);
 
         if let Some(swap) = &self.active_swap {
-            self.draw_bubbles(ctx, swap);
+            Self::draw_bubbles(ctx, swap);
         }
     }
 
-    fn draw_bubbles(&self, ctx: &RenderContext, swap: &ActiveSwap) {
+    fn draw_bubbles(ctx: &RenderContext, swap: &ActiveSwap) {
         let twin = ctx.graph.vertices.get_edge(swap.edge).twin;
 
         // 1. Get the shared edge points (wall) from the swappable's perspective

@@ -32,10 +32,10 @@ impl<'a> Screen<'a> {
         }
     }
 
-    fn update(&mut self, resources: &'a Resources, dt: f32) {
+    fn update(&mut self, dt: f32) {
         match self {
             Screen::Title(c) => c.update(dt),
-            Screen::Game(c) => c.update(resources, dt),
+            Screen::Game(c) => c.update(dt),
         }
     }
 
@@ -67,7 +67,7 @@ async fn main() {
         let camera = get_camera();
 
         screen.interact(&resources, get_interaction(&camera));
-        screen.update(&resources, get_frame_time());
+        screen.update(get_frame_time());
         screen.draw(&camera);
 
         if is_key_pressed(KeyCode::D) {

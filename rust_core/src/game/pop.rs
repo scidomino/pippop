@@ -39,7 +39,8 @@ impl PopManager {
 
             if let BubbleStyle::Colored { size, color } = pending.style {
                 let progress = (pending.timer / POPPING_TIME).clamp(0.0, 1.0);
-                let morphed_points = self.apply_pop_morph(&points, bubble.centroid, size, progress);
+                let morphed_points =
+                    Self::apply_pop_morph(&points, bubble.centroid, size, progress);
 
                 // Create a temporary Colored style with the faded color to use for rendering
                 bubble::draw_bubble(
@@ -55,13 +56,7 @@ impl PopManager {
         }
     }
 
-    fn apply_pop_morph(
-        &self,
-        points: &[Vec2],
-        centroid: Vec2,
-        size: i32,
-        progress: f32,
-    ) -> Vec<Vec2> {
+    fn apply_pop_morph(points: &[Vec2], centroid: Vec2, size: i32, progress: f32) -> Vec<Vec2> {
         let target_area = 3000.0 * (size as f32).sqrt();
         let radius = 5.0 * (target_area / PI).sqrt();
 

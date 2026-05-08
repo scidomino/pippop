@@ -234,12 +234,9 @@ impl Graph {
             for slot in Slot::all() {
                 let ekey = EdgeKey::new(vkey, slot);
                 let bezier = vertices.get_bezier(ekey);
-                let half_area = bezier.half_area_contribution();
-                let centroid_contribution = bezier.centroid_contribution();
-
                 let edge = vertices.get_edge_mut(ekey);
-                edge.half_area = half_area;
-                edge.centroid_contribution = centroid_contribution;
+                edge.half_area = bezier.half_area();
+                edge.centroid_contribution = bezier.centroid_contribution();
                 edge.points.clear();
                 bezier.flatten(&mut edge.points);
             }

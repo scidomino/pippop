@@ -18,7 +18,7 @@ impl SpawnManager {
             colors,
             next_spawn_time: 0.0,
         };
-        manager.next_spawn_time = manager.get_next_spawn_time();
+        manager.next_spawn_time = Self::get_next_spawn_time();
         manager
     }
 
@@ -38,7 +38,7 @@ impl SpawnManager {
 
         if self.next_spawn_time < 0.0 && ctx.state.phase == GamePhase::Normal {
             self.spawn(&mut ctx.state.graph);
-            self.next_spawn_time = self.get_next_spawn_time();
+            self.next_spawn_time = Self::get_next_spawn_time();
             ctx.state.sound_events.push(SoundEvent::Spawn);
         }
     }
@@ -68,7 +68,7 @@ impl SpawnManager {
         graph.spawn(vkey, BubbleStyle::colored(*color));
     }
 
-    fn get_next_spawn_time(&self) -> f32 {
+    fn get_next_spawn_time() -> f32 {
         // Exponential distribution: -log(U) * average
         let u: f32 = gen_range(0.0001, 1.0);
         -u.ln() * AVG_WAIT
