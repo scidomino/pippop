@@ -8,9 +8,10 @@ use std::ops::{Index, IndexMut};
 ///
 /// Because the graph is strictly trivalent, every vertex has exactly three slots.
 /// Ordering is typically clockwise.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 #[repr(u8)]
 pub enum Slot {
+    #[default]
     A = 0,
     B = 1,
     C = 2,
@@ -35,12 +36,6 @@ impl Slot {
             Slot::B => Slot::A,
             Slot::C => Slot::B,
         }
-    }
-}
-
-impl Default for Slot {
-    fn default() -> Self {
-        Slot::A
     }
 }
 

@@ -4,11 +4,20 @@
 //! and breaks down distinct behaviors (like spawning new bubbles, handling user
 //! interactions, or calculating scores) into separate "Manager" structs.
 //!
-//! The [`game::GameController`] acts as the central hub, routing `update`, `draw`,
+//! The [`controller::GameController`] acts as the central hub, routing `update`, `draw`,
 //! and `interact` calls to the various managers based on the current phase of the game.
 
+use std::sync::OnceLock;
+
+/// Returns true if the DEBUG environment variable is set.
+/// The result is cached for efficiency.
+pub fn is_debug() -> bool {
+    static DEBUG_MODE: OnceLock<bool> = OnceLock::new();
+    *DEBUG_MODE.get_or_init(|| std::env::var("DEBUG").is_ok())
+}
+
 pub mod burst;
-pub mod game;
+pub mod controller;
 pub mod gameover;
 pub mod highlight;
 pub mod pop;

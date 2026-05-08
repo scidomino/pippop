@@ -7,19 +7,13 @@ const POINT_DISPLAY_TIME: f32 = 1.0;
 const POINT_MAX_HEIGHT: f32 = 150.0;
 const WALL_BURST_POINTS: i64 = 10;
 
+#[derive(Default)]
 struct ChainTimer {
     timer: f32,
     count: i32,
 }
 
 impl ChainTimer {
-    fn new() -> Self {
-        Self {
-            timer: 0.0,
-            count: 0,
-        }
-    }
-
     fn re_up(&mut self) {
         if self.timer > 0.0 {
             self.count += 1;
@@ -48,6 +42,7 @@ struct RisingPoint {
     timer: f32,
 }
 
+#[derive(Default)]
 pub struct ScoreManager {
     burst_chain: ChainTimer,
     pop_chain: ChainTimer,
@@ -57,12 +52,7 @@ pub struct ScoreManager {
 
 impl ScoreManager {
     pub fn new() -> Self {
-        Self {
-            burst_chain: ChainTimer::new(),
-            pop_chain: ChainTimer::new(),
-            rising_points: Vec::new(),
-            score: 0,
-        }
+        Self::default()
     }
 
     pub fn update(&mut self, ctx: &mut UpdateContext) {
@@ -94,7 +84,7 @@ impl ScoreManager {
     fn add_points(&mut self, position: Vec2, points: i64) {
         self.score += points;
         self.rising_points.push(RisingPoint {
-            text: format!("{}", points),
+            text: format!("{points}"),
             position,
             timer: 0.0,
         });
@@ -140,7 +130,7 @@ impl ScoreManager {
         // 2. Draw Total Score and Chains (in Screen Space)
         set_default_camera();
 
-        let score_text = format!("{}", self.score);
+        let score_text = format!("{score}", score = self.score);
         let score_dims = measure_text(&score_text, Some(ctx.font), 40, 1.0);
 
         // Draw score at the top right
@@ -160,7 +150,7 @@ impl ScoreManager {
         let burst_chain_count = self.burst_chain.get_count();
 
         if pop_chain_count > 1 {
-            let chain_text = format!("{} Scatti Concatenati!", pop_chain_count);
+            let chain_text = format!("{pop_chain_count} Scatti Concatenati!");
             let chain_dims = measure_text(&chain_text, Some(ctx.font), 30, 1.0);
             draw_text_ex(
                 &chain_text,
@@ -174,7 +164,7 @@ impl ScoreManager {
                 },
             );
         } else if burst_chain_count > 1 {
-            let chain_text = format!("{} Concatenati!", burst_chain_count);
+            let chain_text = format!("{burst_chain_count} Concatenati!");
             let chain_dims = measure_text(&chain_text, Some(ctx.font), 30, 1.0);
             draw_text_ex(
                 &chain_text,

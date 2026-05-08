@@ -2,13 +2,14 @@ use crate::game::state::{GamePhase, InteractContext, InteractionState, UpdateCon
 use crate::graphics::{colors, RenderContext};
 use macroquad::prelude::*;
 
+#[derive(Default)]
 pub struct GameOverManager {
     pub timer: f32,
 }
 
 impl GameOverManager {
     pub fn new() -> Self {
-        Self { timer: 0.0 }
+        Self::default()
     }
 
     pub fn update(&mut self, ctx: &mut UpdateContext) {

@@ -2,22 +2,17 @@ use crate::game::state::{GamePhase, UpdateContext};
 use crate::graphics::{bubble, RenderContext};
 use crate::physics;
 use macroquad::prelude::*;
-use std::env;
 
+#[derive(Default)]
 pub struct WorldManager {
     pub physics_accumulator: f32,
-    pub debug_control_points: bool,
 }
 
 const PHYSICS_TIMESTEP: f32 = 0.016;
 
 impl WorldManager {
     pub fn new() -> Self {
-        let debug_control_points = env::var("DEBUG").is_ok();
-        Self {
-            physics_accumulator: 0.0,
-            debug_control_points,
-        }
+        Self::default()
     }
 
     /// Advances the physics simulation using a fixed timestep.
@@ -41,7 +36,7 @@ impl WorldManager {
             bubble::draw_bubble(&bubble.style, &points, bubble.centroid, ctx.font);
         }
 
-        if self.debug_control_points {
+        if crate::game::is_debug() {
             bubble::draw_debug_points(ctx.graph);
 
             // Draw FPS in screen space if debug is enabled

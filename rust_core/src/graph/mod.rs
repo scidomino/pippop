@@ -222,10 +222,7 @@ impl Graph {
             }
         }
 
-        panic!(
-            "Infinite loop detected in rebubble for bubble {:?}. Started at edge {:?}",
-            bkey, ekey
-        );
+        panic!("Infinite loop detected in rebubble for bubble {bkey:?}. Started at edge {ekey:?}");
     }
 
     pub fn update_cache(&mut self) {
@@ -301,29 +298,33 @@ impl Graph {
         let mut dump = String::new();
         dump.push_str("--- Graph State Dump ---\n");
 
-        dump.push_str(&format!("Vertices: {}\n", self.vertices.len()));
+        dump.push_str(&format!("Vertices: {len}\n", len = self.vertices.len()));
         for (vkey, vertex) in &self.vertices.inner {
-            dump.push_str(&format!(
-                "  Vertex {:?}: pos={:?}, vel={:?}\n",
-                vkey, vertex.point.position, vertex.point.velocity
-            ));
+            let pos = vertex.point.position;
+            let vel = vertex.point.velocity;
+            dump.push_str(&format!("  Vertex {vkey:?}: pos={pos:?}, vel={vel:?}\n"));
             for slot in Slot::all() {
                 let edge = &vertex.edges[slot];
+                let twin = edge.twin;
+                let bubble = edge.bubble;
+                let c_pos = edge.point.position;
+                let c_vel = edge.point.velocity;
                 dump.push_str(&format!(
-                    "    Edge {:?}: twin={:?}, bubble={:?}, ctrl_pos={:?}, ctrl_vel={:?}\n",
-                    slot, edge.twin, edge.bubble, edge.point.position, edge.point.velocity
+                    "    Edge {slot:?}: twin={twin:?}, bubble={bubble:?}, ctrl_pos={c_pos:?}, ctrl_vel={c_vel:?}\n"
                 ));
             }
         }
 
-        dump.push_str(&format!("\nBubbles: {}\n", self.bubbles.len()));
+        dump.push_str(&format!("\nBubbles: {len}\n", len = self.bubbles.len()));
         for (bkey, bubble) in &self.bubbles.inner {
             let pressure = bubble.get_pressure();
+            let style = &bubble.style;
+            let area = bubble.area;
             dump.push_str(&format!(
-                "  Bubble {:?}: style={:?}, area={:.2}, pressure={:.2}\n",
-                bkey, bubble.style, bubble.area, pressure
+                "  Bubble {bkey:?}: style={style:?}, area={area:.2}, pressure={pressure:.2}\n"
             ));
-            dump.push_str(&format!("    Edges: {:?}\n", bubble.edges));
+            let edges = &bubble.edges;
+            dump.push_str(&format!("    Edges: {edges:?}\n"));
         }
 
         dump.push_str("--- End Dump ---\n");

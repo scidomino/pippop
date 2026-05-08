@@ -7,13 +7,8 @@ use std::collections::HashSet;
 use std::fs::File;
 use std::io::Write;
 
+#[derive(Default)]
 pub struct SanityManager;
-
-impl Default for SanityManager {
-    fn default() -> Self {
-        Self::new()
-    }
-}
 
 impl SanityManager {
     pub fn new() -> Self {
@@ -30,7 +25,7 @@ impl SanityManager {
                 }
             }
             log::error!("Graph State Dumped to sanity_fail_dump.txt");
-            panic!("Graph Invariant Failure: {}", e);
+            panic!("Graph Invariant Failure: {e}");
         }
     }
 
@@ -46,15 +41,14 @@ impl SanityManager {
             }
 
             if bubble.edges.is_empty() {
-                return Err(format!("Bubble {:?} has no edges", bkey));
+                return Err(format!("Bubble {bkey:?} has no edges"));
             }
 
             for (i, &ekey) in bubble.edges.iter().enumerate() {
                 // Check vertex existence
                 if !graph.vertices.contains_key(ekey.vertex) {
                     return Err(format!(
-                        "Edge {:?} in bubble {:?} points to non-existent vertex",
-                        ekey, bkey
+                        "Edge {ekey:?} in bubble {bkey:?} points to non-existent vertex"
                     ));
                 }
 
@@ -63,8 +57,8 @@ impl SanityManager {
                 // Check bubble ownership
                 if edge.bubble != bkey {
                     return Err(format!(
-                        "Edge {:?} in bubble {:?} thinks it belongs to bubble {:?}",
-                        ekey, bkey, edge.bubble
+                        "Edge {ekey:?} in bubble {bkey:?} thinks it belongs to bubble {bubble_owner:?}",
+                        bubble_owner = edge.bubble
                     ));
                 }
 
@@ -72,17 +66,13 @@ impl SanityManager {
                 let tkey = edge.twin;
                 if !graph.vertices.contains_key(tkey.vertex) {
                     return Err(format!(
-                        "Edge {:?} in bubble {:?} has twin {:?} pointing to non-existent vertex",
-                        ekey, bkey, tkey
+                        "Edge {ekey:?} in bubble {bkey:?} has twin {tkey:?} pointing to non-existent vertex"
                     ));
                 }
                 if graph.vertices.get_edge(tkey).twin != ekey {
                     return Err(format!(
-                        "Twin inconsistency: {:?}.twin = {:?}, but {:?}.twin = {:?}",
-                        ekey,
-                        tkey,
-                        tkey,
-                        graph.vertices.get_edge(tkey).twin
+                        "Twin inconsistency: {ekey:?}.twin = {tkey:?}, but {tkey:?}.twin = {twin_of_twin:?}",
+                        twin_of_twin = graph.vertices.get_edge(tkey).twin
                     ));
                 }
 
@@ -91,15 +81,13 @@ impl SanityManager {
                 let expected_next = bubble.edges[(i + 1) % bubble.edges.len()];
                 if next_ekey != expected_next {
                     return Err(format!(
-                        "Continuity error in bubble {:?}: edge {:?} is followed by {:?} in list, but next_on_bubble is {:?}",
-                        bkey, ekey, expected_next, next_ekey
+                        "Continuity error in bubble {bkey:?}: edge {ekey:?} is followed by {expected_next:?} in list, but next_on_bubble is {next_ekey:?}"
                     ));
                 }
 
                 if !seen_edges.insert(ekey) {
                     return Err(format!(
-                        "Edge {:?} appears in more than one bubble (or twice in one)",
-                        ekey
+                        "Edge {ekey:?} appears in more than one bubble (or twice in one)"
                     ));
                 }
             }
@@ -108,8 +96,7 @@ impl SanityManager {
         // 2. Check Open Air
         if open_air_count != 1 {
             return Err(format!(
-                "Expected exactly 1 OpenAir bubble, found {}",
-                open_air_count
+                "Expected exactly 1 OpenAir bubble, found {open_air_count}"
             ));
         }
 
@@ -121,7 +108,7 @@ impl SanityManager {
                 for slot in Slot::all() {
                     let ekey = EdgeKey::new(vkey, slot);
                     if !seen_edges.contains(&ekey) {
-                        return Err(format!("Edge {:?} is not owned by any bubble", ekey));
+                        return Err(format!("Edge {ekey:?} is not owned by any bubble"));
                     }
                 }
             }
@@ -133,15 +120,13 @@ impl SanityManager {
 
         if v_count != (b_count - 2) * 2 {
             return Err(format!(
-                "Topology invariant failed: vertices({}) != (bubbles({}) - 2) * 2",
-                v_count, b_count
+                "Topology invariant failed: vertices({v_count}) != (bubbles({b_count}) - 2) * 2"
             ));
         }
 
         if total_half_edges != 6 * (b_count - 2) {
             return Err(format!(
-                "Topology invariant failed: half_edges({}) != 6 * (bubbles({}) - 2)",
-                total_half_edges, b_count
+                "Topology invariant failed: half_edges({total_half_edges}) != 6 * (bubbles({b_count}) - 2)"
             ));
         }
 

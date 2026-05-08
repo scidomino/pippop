@@ -43,15 +43,14 @@ impl Vertex {
     }
 }
 
+#[derive(Default)]
 pub struct VertexSet {
     pub inner: SlotMap<VertexKey, Vertex>,
 }
 
 impl VertexSet {
     pub fn new() -> Self {
-        Self {
-            inner: SlotMap::with_key(),
-        }
+        Self::default()
     }
 
     pub fn get_edge(&self, key: EdgeKey) -> &Edge {

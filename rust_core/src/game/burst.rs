@@ -7,6 +7,7 @@ use macroquad::prelude::*;
 
 const FREEZE_DURATION: f32 = 0.5;
 
+#[derive(Default)]
 pub struct BurstManager {
     /// The edge currently being "frozen" for the burst animation.
     pub active_edge: Option<EdgeKey>,
@@ -15,10 +16,7 @@ pub struct BurstManager {
 
 impl BurstManager {
     pub fn new() -> Self {
-        Self {
-            active_edge: None,
-            timer: 0.0,
-        }
+        Self::default()
     }
 
     pub fn draw(&self, ctx: &RenderContext) {

@@ -267,8 +267,8 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
         let n_start = Vec2::new(-t_start.y, t_start.x);
         let start_angle = n_start.y.atan2(n_start.x);
 
-        let center_idx = 1 as u16;
-        let mut prev_idx = 0 as u16; // outer1 at i=0
+        let center_idx = 1_u16;
+        let mut prev_idx = 0_u16; // outer1 at i=0
 
         for s in 1..cap_segments {
             let a = start_angle + (s as f32 / cap_segments as f32) * PI;
@@ -283,7 +283,7 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
             indices.extend_from_slice(&[center_idx, prev_idx, new_idx]);
             prev_idx = new_idx;
         }
-        let outer2_idx = 2 as u16;
+        let outer2_idx = 2_u16;
         indices.extend_from_slice(&[center_idx, prev_idx, outer2_idx]);
 
         // End Cap
@@ -295,7 +295,7 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
 
         let base = (last_i * 3) as u16;
         let center_idx = base + 1;
-        let mut prev_idx = base + 0; // outer1
+        let mut prev_idx = base; // outer1
 
         for s in 1..cap_segments {
             let a = end_angle - (s as f32 / cap_segments as f32) * PI;

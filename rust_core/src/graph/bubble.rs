@@ -46,7 +46,7 @@ impl BubbleStyle {
                     color: *color,
                 }
             }
-            _ => self.clone(),
+            _ => *self,
         }
     }
 
@@ -118,15 +118,14 @@ impl Bubble {
     }
 }
 
+#[derive(Default)]
 pub struct BubbleSet {
     pub inner: SlotMap<BubbleKey, Bubble>,
 }
 
 impl BubbleSet {
     pub fn new() -> Self {
-        Self {
-            inner: SlotMap::with_key(),
-        }
+        Self::default()
     }
 
     pub fn get_swappable(&self) -> Option<BubbleKey> {
