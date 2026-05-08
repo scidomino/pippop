@@ -236,7 +236,7 @@ impl Graph {
                 let bezier = vertices.get_bezier(ekey);
                 let edge = vertices.get_edge_mut(ekey);
                 edge.half_area = bezier.half_area();
-                edge.centroid_contribution = bezier.centroid_contribution();
+                edge.half_centroid = bezier.half_centroid();
                 edge.points.clear();
                 bezier.flatten(&mut edge.points);
             }
@@ -253,7 +253,7 @@ impl Graph {
                         let twin_edge = vertices.get_edge(edge.twin);
                         (
                             acc_area + (edge.half_area - twin_edge.half_area),
-                            acc_centroid + edge.centroid_contribution,
+                            acc_centroid + (edge.half_centroid - twin_edge.half_centroid),
                         )
                     });
 

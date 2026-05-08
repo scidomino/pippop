@@ -110,8 +110,8 @@ pub struct Edge {
     /// Subtracting the twin's half_area from this yields the net area under the curve segment.
     pub half_area: f32,
     /// The cached partial centroid contribution of this directed edge's Bezier curve.
-    /// Summed over all edges of a bubble and divided by total area to compute the true centroid.
-    pub centroid_contribution: Vec2,
+    /// Subtracting the twin's half_centroid from this yields the net centroid contribution.
+    pub half_centroid: Vec2,
     /// The flattened points of the Bezier curve (start-inclusive, end-exclusive).
     pub points: Vec<Vec2>,
 }
@@ -123,7 +123,7 @@ impl Edge {
             twin: EdgeKey::default(),
             bubble: BubbleKey::default(),
             half_area: 0.0,
-            centroid_contribution: Vec2::ZERO,
+            half_centroid: Vec2::ZERO,
             points: Vec::new(),
         }
     }

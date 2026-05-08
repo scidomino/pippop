@@ -26,14 +26,25 @@ impl Bezier {
         (self.x.x * self.y.dot(AREA_ROW0) + self.x.y * self.y.dot(AREA_ROW1)) / 20.0
     }
 
-    pub fn centroid_contribution(&self) -> Vec2 {
-        let x_rev = Vec4::new(self.x.w, self.x.z, self.x.y, self.x.x);
-        let y_rev = Vec4::new(self.y.w, self.y.z, self.y.y, self.y.x);
+    pub fn half_centroid(&self) -> Vec2 {
+        const M0: Mat4 = Mat4::from_cols(
+            Vec4::new(-280.0, -105.0, -30.0, -5.0),
+            Vec4::new(105.0, -45.0, -45.0, -15.0),
+            Vec4::new(30.0, 0.0, 0.0, 0.0),
+            Vec4::new(5.0, 3.0, 0.0, 0.0),
+        );
 
-        let c_start = Self::calculate_half_partial_centroid(self.x, self.y);
-        let c_end = Self::calculate_half_partial_centroid(x_rev, y_rev);
-        let c = c_start - c_end;
-        Vec2::new(c.x, -c.y)
+        const M1: Mat4 = Mat4::from_cols(
+            Vec4::new(0.0, 0.0, 0.0, 0.0),
+            Vec4::new(45.0, 0.0, -27.0, -18.0),
+            Vec4::new(45.0, 27.0, 0.0, 0.0),
+            Vec4::new(12.0, 18.0, 0.0, 0.0),
+        );
+
+        let v_x = (M0 * self.x) * self.x.x + (M1 * self.x) * self.x.y;
+        let v_y = (M0 * self.y) * self.y.x + (M1 * self.y) * self.y.y;
+
+        vec2(v_x.dot(self.y), -v_y.dot(self.x)) / 840.0
     }
 
     pub fn flatten(&self, points: &mut Vec<Vec2>) {
@@ -70,27 +81,6 @@ impl Bezier {
 
         Self::flatten_bezier_recursive(points, p1, p12, p123, p1234, depth + 1);
         Self::flatten_bezier_recursive(points, p1234, p234, p34, p4, depth + 1);
-    }
-
-    fn calculate_half_partial_centroid(x: Vec4, y: Vec4) -> Vec2 {
-        const M0: Mat4 = Mat4::from_cols(
-            Vec4::new(-280.0, -105.0, -30.0, -5.0),
-            Vec4::new(105.0, -45.0, -45.0, -15.0),
-            Vec4::new(30.0, 0.0, 0.0, 0.0),
-            Vec4::new(5.0, 3.0, 0.0, 0.0),
-        );
-
-        const M1: Mat4 = Mat4::from_cols(
-            Vec4::new(0.0, 0.0, 0.0, 0.0),
-            Vec4::new(45.0, 0.0, -27.0, -18.0),
-            Vec4::new(45.0, 27.0, 0.0, 0.0),
-            Vec4::new(12.0, 18.0, 0.0, 0.0),
-        );
-
-        let v_x = (M0 * x) * x.x + (M1 * x) * x.y;
-        let v_y = (M0 * y) * y.x + (M1 * y) * y.y;
-
-        vec2(v_x.dot(y), v_y.dot(x)) / 840.0
     }
 }
 
