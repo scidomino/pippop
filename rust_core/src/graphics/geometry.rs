@@ -16,11 +16,6 @@ impl Bezier {
         Self { s, sc, ec, e }
     }
 
-    pub fn area(&self) -> f32 {
-        self.half_area(self.s, self.sc, self.ec, self.e)
-            - self.half_area(self.e, self.ec, self.sc, self.s)
-    }
-
     pub fn half_area_contribution(&self) -> f32 {
         self.half_area(self.s, self.sc, self.ec, self.e)
     }
@@ -75,11 +70,6 @@ fn flatten_bezier_recursive(
 
     flatten_bezier_recursive(points, p1, p12, p123, p1234, depth + 1);
     flatten_bezier_recursive(points, p1234, p234, p34, p4, depth + 1);
-}
-
-pub fn rotate_points(points: &[Vec2], pivot: Vec2, angle: f32) -> Vec<Vec2> {
-    let mat = Mat2::from_angle(angle);
-    points.iter().map(|&p| mat * (p - pivot) + pivot).collect()
 }
 
 pub fn tween_points(a: &[Vec2], b: &[Vec2], progress: f32) -> Vec<Vec2> {

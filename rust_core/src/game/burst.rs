@@ -7,15 +7,6 @@ use macroquad::prelude::*;
 
 const FREEZE_DURATION: f32 = 0.5;
 
-pub enum BurstResult {
-    /// Still playing the burst freeze animation
-    Waiting,
-    /// The timer finished and a burst occurred
-    DidBurst,
-    /// The active burst sequence is completely finished
-    Finished,
-}
-
 pub struct BurstManager {
     /// The edge currently being "frozen" for the burst animation.
     pub active_edge: Option<EdgeKey>,

@@ -44,10 +44,6 @@ impl GraphVector {
     pub fn add_edge(&mut self, key: EdgeKey, value: Vec2) {
         self.get_mut(key.vertex).edges[key.slot] += value;
     }
-
-    pub fn clear(&mut self) {
-        self.vertex_to_value.clear();
-    }
 }
 
 #[cfg(test)]
@@ -124,24 +120,5 @@ mod tests {
         let edge_result = gv.get_edge(e1);
 
         assert_eq!(edge_result, Vec2::new(6.5, 8.5));
-    }
-
-    #[test]
-    fn test_clear() {
-        let mut gv = GraphVector::new();
-        let mut sm: SlotMap<VertexKey, Vertex> = SlotMap::with_key();
-        let v1 = sm.insert(Vertex::new(Point::default()));
-        let e1 = v1.slot(Slot::A);
-
-        gv.add_vertex(v1, Vec2::new(1.0, 2.0));
-        gv.add_edge(e1, Vec2::new(3.0, 4.0));
-
-        gv.clear();
-
-        assert!(gv.vertex_to_value.is_empty());
-
-        let vertex_result = gv.get_vertex(v1);
-
-        assert_eq!(vertex_result, Vec2::ZERO);
     }
 }
