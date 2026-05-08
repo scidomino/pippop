@@ -16,6 +16,9 @@ impl Bezier {
         Self { s, sc, ec, e }
     }
 
+    /// Calculates area contribution from the start vertex and first control point only.
+    /// In the half-edge graph, (edge.half_area - twin_edge.half_area) completes
+    /// the total area integral for the Bezier curve.
     pub fn half_area(&self) -> f32 {
         (self.s.x * (-10.0 * self.s.y - 6.0 * self.sc.y - 3.0 * self.ec.y - self.e.y)
             + self.sc.x * (6.0 * self.s.y - 3.0 * self.ec.y - 3.0 * self.e.y))
