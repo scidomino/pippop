@@ -5,70 +5,93 @@ const FLATNESS: f32 = 0.5;
 const MAX_DEPTH: u32 = 10;
 
 pub struct Bezier {
-    pub s: Vec2,
-    pub sc: Vec2,
-    pub ec: Vec2,
-    pub e: Vec2,
+    pub x: Vec4,
+    pub y: Vec4,
 }
 
 impl Bezier {
     pub fn from_points(s: Vec2, sc: Vec2, ec: Vec2, e: Vec2) -> Self {
-        Self { s, sc, ec, e }
+        Self {
+            x: Vec4::new(s.x, sc.x, ec.x, e.x),
+            y: Vec4::new(s.y, sc.y, ec.y, e.y),
+        }
     }
 
     /// Calculates area contribution from the start vertex and first control point only.
     /// In the half-edge graph, (edge.half_area - twin_edge.half_area) completes
     /// the total area integral for the Bezier curve.
     pub fn half_area(&self) -> f32 {
-        (self.s.x * (-10.0 * self.s.y - 6.0 * self.sc.y - 3.0 * self.ec.y - self.e.y)
-            + self.sc.x * (6.0 * self.s.y - 3.0 * self.ec.y - 3.0 * self.e.y))
-            / 20.0
+        const AREA_ROW0: Vec4 = Vec4::new(-10.0, -6.0, -3.0, -1.0);
+        const AREA_ROW1: Vec4 = Vec4::new(6.0, 0.0, -3.0, -3.0);
+        (self.x.x * self.y.dot(AREA_ROW0) + self.x.y * self.y.dot(AREA_ROW1)) / 20.0
     }
 
     pub fn centroid_contribution(&self) -> Vec2 {
-        let c_start = calculate_half_partial_centroid(self.s, self.sc, self.ec, self.e);
-        let c_end = calculate_half_partial_centroid(self.e, self.ec, self.sc, self.s);
+        let x_rev = Vec4::new(self.x.w, self.x.z, self.x.y, self.x.x);
+        let y_rev = Vec4::new(self.y.w, self.y.z, self.y.y, self.y.x);
+
+        let c_start = Self::calculate_half_partial_centroid(self.x, self.y);
+        let c_end = Self::calculate_half_partial_centroid(x_rev, y_rev);
         let c = c_start - c_end;
         Vec2::new(c.x, -c.y)
     }
 
     pub fn flatten(&self, points: &mut Vec<Vec2>) {
-        flatten_bezier(points, self.s, self.sc, self.ec, self.e);
-    }
-}
-
-/// Flatten a cubic Bezier curve into a sequence of points.
-pub fn flatten_bezier(points: &mut Vec<Vec2>, p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2) {
-    flatten_bezier_recursive(points, p1, p2, p3, p4, 0);
-}
-
-fn flatten_bezier_recursive(
-    points: &mut Vec<Vec2>,
-    p1: Vec2,
-    p2: Vec2,
-    p3: Vec2,
-    p4: Vec2,
-    depth: u32,
-) {
-    let d = p4 - p1;
-    let d2 = (p2 - p4).perp_dot(d).abs();
-    let d3 = (p3 - p4).perp_dot(d).abs();
-
-    if depth >= MAX_DEPTH || (d2 + d3) * (d2 + d3) <= FLATNESS * d.length_squared() {
-        points.push(p1);
-        return;
+        let s = vec2(self.x.x, self.y.x);
+        let sc = vec2(self.x.y, self.y.y);
+        let ec = vec2(self.x.z, self.y.z);
+        let e = vec2(self.x.w, self.y.w);
+        Self::flatten_bezier_recursive(points, s, sc, ec, e, 0);
     }
 
-    // Split in two by De Casteljau's Algorithm
-    let p12 = p1.midpoint(p2);
-    let p23 = p2.midpoint(p3);
-    let p34 = p3.midpoint(p4);
-    let p123 = p12.midpoint(p23);
-    let p234 = p23.midpoint(p34);
-    let p1234 = p123.midpoint(p234);
+    fn flatten_bezier_recursive(
+        points: &mut Vec<Vec2>,
+        p1: Vec2,
+        p2: Vec2,
+        p3: Vec2,
+        p4: Vec2,
+        depth: u32,
+    ) {
+        let d = p4 - p1;
+        let d2 = (p2 - p4).perp_dot(d).abs();
+        let d3 = (p3 - p4).perp_dot(d).abs();
 
-    flatten_bezier_recursive(points, p1, p12, p123, p1234, depth + 1);
-    flatten_bezier_recursive(points, p1234, p234, p34, p4, depth + 1);
+        if depth >= MAX_DEPTH || (d2 + d3) * (d2 + d3) <= FLATNESS * d.length_squared() {
+            points.push(p1);
+            return;
+        }
+
+        let p12 = p1.midpoint(p2);
+        let p23 = p2.midpoint(p3);
+        let p34 = p3.midpoint(p4);
+        let p123 = p12.midpoint(p23);
+        let p234 = p23.midpoint(p34);
+        let p1234 = p123.midpoint(p234);
+
+        Self::flatten_bezier_recursive(points, p1, p12, p123, p1234, depth + 1);
+        Self::flatten_bezier_recursive(points, p1234, p234, p34, p4, depth + 1);
+    }
+
+    fn calculate_half_partial_centroid(x: Vec4, y: Vec4) -> Vec2 {
+        const M0: Mat4 = Mat4::from_cols(
+            Vec4::new(-280.0, -105.0, -30.0, -5.0),
+            Vec4::new(105.0, -45.0, -45.0, -15.0),
+            Vec4::new(30.0, 0.0, 0.0, 0.0),
+            Vec4::new(5.0, 3.0, 0.0, 0.0),
+        );
+
+        const M1: Mat4 = Mat4::from_cols(
+            Vec4::new(0.0, 0.0, 0.0, 0.0),
+            Vec4::new(45.0, 0.0, -27.0, -18.0),
+            Vec4::new(45.0, 27.0, 0.0, 0.0),
+            Vec4::new(12.0, 18.0, 0.0, 0.0),
+        );
+
+        let v_x = (M0 * x) * x.x + (M1 * x) * x.y;
+        let v_y = (M0 * y) * y.x + (M1 * y) * y.y;
+
+        vec2(v_x.dot(y), v_y.dot(x)) / 840.0
+    }
 }
 
 pub fn tween_points(a: &[Vec2], b: &[Vec2], progress: f32) -> Vec<Vec2> {
@@ -318,22 +341,6 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
         indices,
         texture: None,
     }
-}
-
-fn calculate_half_partial_centroid(s: Vec2, sc: Vec2, ec: Vec2, e: Vec2) -> Vec2 {
-    let syx = vec2(s.y, s.x);
-    let scyx = vec2(sc.y, sc.x);
-    let ecyx = vec2(ec.y, ec.x);
-    let eyx = vec2(e.y, e.x);
-
-    (sc * ec * (45.0 * syx + 27.0 * scyx)
-        + sc * e * (12.0 * syx + 18.0 * scyx)
-        + s * sc * (105.0 * syx - 45.0 * scyx - 45.0 * ecyx - 15.0 * eyx)
-        + s * ec * (30.0 * syx)
-        + s * e * (5.0 * syx + 3.0 * scyx)
-        + sc * sc * (45.0 * syx - 27.0 * ecyx - 18.0 * eyx)
-        + s * s * (-280.0 * syx - 105.0 * scyx - 30.0 * ecyx - 5.0 * eyx))
-        / 840.0
 }
 
 pub fn triangulate(points: &[Vec2]) -> Vec<(Vec2, Vec2, Vec2)> {

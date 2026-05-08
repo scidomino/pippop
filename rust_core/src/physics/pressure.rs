@@ -1,7 +1,7 @@
 use super::vector::GraphVector;
 use crate::graph::Graph;
 use crate::graphics::geometry::Bezier;
-use macroquad::math::Vec2;
+use macroquad::prelude::{vec2, Vec2, Vec4};
 
 const PRESSURE_TENSION: f32 = 0.04;
 
@@ -36,7 +36,8 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
 /// This formula is derived analytically from the gradient of the curve's area
 /// integral with respect to the start point (`b.s`).
 fn vertex_pressure_force(b: &Bezier) -> Vec2 {
-    (10.0 * b.s + 6.0 * b.sc + 3.0 * b.ec + b.e).perp() / 20.0
+    const VERTEX_WEIGHTS: Vec4 = Vec4::new(10.0, 6.0, 3.0, 1.0);
+    vec2(b.x.dot(VERTEX_WEIGHTS), b.y.dot(VERTEX_WEIGHTS)).perp() / 20.0
 }
 
 /// Calculates the pressure force applied to the first control point of a Bezier curve.
@@ -44,5 +45,6 @@ fn vertex_pressure_force(b: &Bezier) -> Vec2 {
 /// This formula is derived analytically from the gradient of the curve's area
 /// integral with respect to the first control point (`b.sc`).
 fn edge_pressure_force(b: &Bezier) -> Vec2 {
-    (-6.0 * b.s + 3.0 * b.ec + 3.0 * b.e).perp() / 20.0
+    const EDGE_WEIGHTS: Vec4 = Vec4::new(-6.0, 0.0, 3.0, 3.0);
+    vec2(b.x.dot(EDGE_WEIGHTS), b.y.dot(EDGE_WEIGHTS)).perp() / 20.0
 }

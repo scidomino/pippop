@@ -1,7 +1,7 @@
 use super::vector::GraphVector;
 use crate::graph::Graph;
 use crate::graphics::geometry::Bezier;
-use macroquad::math::Vec2;
+use macroquad::prelude::{vec2, Vec2, Vec4};
 
 const SURFACE_TENSION: f32 = 0.3;
 
@@ -39,9 +39,13 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
 /// gradient of the arc length. `derivative` is the partial derivative of the
 /// cubic Bezier polynomial with respect to the target control point.
 fn integrate_surface_force(bez: &Bezier, derivative: impl Fn(f32) -> f32) -> Vec2 {
-    let a = 3.0 * (bez.e - 3.0 * bez.ec + 3.0 * bez.sc - bez.s);
-    let b = 6.0 * (bez.ec - 2.0 * bez.sc + bez.s);
-    let c = 3.0 * (bez.sc - bez.s);
+    const A_WEIGHTS: Vec4 = Vec4::new(-3.0, 9.0, -9.0, 3.0);
+    const B_WEIGHTS: Vec4 = Vec4::new(6.0, -12.0, 6.0, 0.0);
+    const C_WEIGHTS: Vec4 = Vec4::new(-3.0, 3.0, 0.0, 0.0);
+
+    let a = vec2(bez.x.dot(A_WEIGHTS), bez.y.dot(A_WEIGHTS));
+    let b = vec2(bez.x.dot(B_WEIGHTS), bez.y.dot(B_WEIGHTS));
+    let c = vec2(bez.x.dot(C_WEIGHTS), bez.y.dot(C_WEIGHTS));
 
     LEGENDRE_GAUSS_POINTS
         .iter()
