@@ -9,23 +9,15 @@ use std::f32::consts::PI;
 const TEASER_DELAY: f32 = 4.0;
 const TEASER_THROB: f32 = 1.0;
 
+#[derive(Default)]
 pub struct HighlightManager {
     pub point: Option<Vec2>,
     pub time: f32,
 }
 
-impl Default for HighlightManager {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl HighlightManager {
     pub fn new() -> Self {
-        Self {
-            point: None,
-            time: 0.0,
-        }
+        Self::default()
     }
 
     pub fn draw(&self, ctx: &RenderContext) {

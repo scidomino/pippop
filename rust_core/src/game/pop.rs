@@ -20,7 +20,7 @@ pub struct PopManager {
 
 impl PopManager {
     pub fn new() -> Self {
-        Self { pending_pop: None }
+        Self::default()
     }
 
     pub fn is_handling(&self, bkey: BubbleKey) -> bool {

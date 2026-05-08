@@ -6,21 +6,14 @@ use std::collections::HashMap;
 const TIMEOUT: f32 = 0.5;
 const MIN_LENGTH: f32 = 10.0;
 
+#[derive(Default)]
 pub struct SlideManager {
     recently_slid: HashMap<EdgeKey, f32>,
 }
 
-impl Default for SlideManager {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl SlideManager {
     pub fn new() -> Self {
-        Self {
-            recently_slid: HashMap::new(),
-        }
+        Self::default()
     }
 
     pub fn update(&mut self, ctx: &mut UpdateContext) {

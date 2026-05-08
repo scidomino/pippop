@@ -16,9 +16,7 @@ pub struct GraphVector {
 
 impl GraphVector {
     pub fn new() -> Self {
-        Self {
-            vertex_to_value: SecondaryMap::new(),
-        }
+        Self::default()
     }
 
     pub fn get_vertex(&self, key: VertexKey) -> Vec2 {

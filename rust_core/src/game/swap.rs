@@ -27,7 +27,7 @@ pub struct SwapManager {
 
 impl SwapManager {
     pub fn new() -> Self {
-        Self { active_swap: None }
+        Self::default()
     }
 
     pub fn is_handling(&self, bkey: BubbleKey) -> bool {
