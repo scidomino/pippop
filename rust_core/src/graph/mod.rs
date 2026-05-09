@@ -291,6 +291,21 @@ impl Graph {
             .map(|(ekey, _)| ekey)
     }
 
+    pub fn get_swap_candidate_at_point(&self, point: Vec2) -> Option<BubbleKey> {
+        let swappable_bkey = self.bubbles.get_swappable()?;
+        for &ekey in &self.bubbles[swappable_bkey].edges {
+            let twin_ekey = self.vertices.get_edge(ekey).twin;
+            let bkey = self.vertices.get_edge(twin_ekey).bubble;
+
+            if let BubbleStyle::Colored { .. } = self.bubbles[bkey].style {
+                if self.bubbles[bkey].contains(point, self) {
+                    return Some(bkey);
+                }
+            }
+        }
+        None
+    }
+
     pub fn dump_state(&self) -> String {
         let mut dump = String::new();
         dump.push_str("--- Graph State Dump ---\n");

@@ -2,7 +2,6 @@ use crate::game::state::{GamePhase, InteractContext, InteractionState, UpdateCon
 use crate::graph::bubble::{BubbleKey, BubbleStyle};
 use crate::graph::Graph;
 use crate::graphics::{bubble, colors, geometry, RenderContext};
-use macroquad::math::Vec2;
 use macroquad::prelude::*;
 use std::f32::consts::PI;
 
@@ -11,7 +10,7 @@ const TEASER_THROB: f32 = 1.0;
 
 #[derive(Default)]
 pub struct HighlightManager {
-    pub point: Option<Vec2>,
+    pub manual_highlight: Option<BubbleKey>,
     pub time: f32,
 }
 
@@ -45,24 +44,47 @@ impl HighlightManager {
 
     pub fn interact(&mut self, ctx: &mut InteractContext) {
         if ctx.state.phase != GamePhase::Normal {
-            self.point = None;
+            self.manual_highlight = None;
             return;
         }
 
-        if matches!(ctx.interaction.state, InteractionState::Pressed) {
-            self.point = Some(ctx.interaction.position);
-            self.time = 0.0;
-        } else {
-            self.point = None;
+        match ctx.interaction.state {
+            InteractionState::Pressed => {
+                if let Some(ekey) = ctx
+                    .state
+                    .graph
+                    .get_closest_swap_candidate(ctx.interaction.position)
+                {
+                    let bkey = ctx.state.graph.vertices.get_edge(ekey).bubble;
+                    self.manual_highlight = Some(bkey);
+                    self.time = 0.0;
+                } else {
+                    self.manual_highlight = None;
+                }
+            }
+            InteractionState::Hover => {
+                if let Some(bkey) = ctx
+                    .state
+                    .graph
+                    .get_swap_candidate_at_point(ctx.interaction.position)
+                {
+                    self.manual_highlight = Some(bkey);
+                    self.time = 0.0;
+                } else {
+                    self.manual_highlight = None;
+                }
+            }
+            _ => {
+                self.manual_highlight = None;
+            }
         }
     }
 
     pub fn get_glow_requests(&self, graph: &Graph) -> Vec<(BubbleKey, f32)> {
         let mut requests = Vec::new();
 
-        if let Some(p) = self.point {
-            if let Some(ekey) = graph.get_closest_swap_candidate(p) {
-                let bkey = graph.vertices.get_edge(ekey).bubble;
+        if let Some(bkey) = self.manual_highlight {
+            if graph.bubbles.contains_key(bkey) {
                 requests.push((bkey, 1.0));
             }
         } else {
