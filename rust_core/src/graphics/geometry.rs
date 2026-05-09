@@ -246,15 +246,14 @@ pub fn generate_edge_glow_mesh(points: &[Vec2], width: f32, color: Color) -> Mes
         // Start Cap
         let p_start = points[0];
         let t_start = (points[1] - points[0]).normalize_or_zero();
-        let n_start = Vec2::new(-t_start.y, t_start.x);
-        let start_angle = n_start.y.atan2(n_start.x);
+        let n_start = t_start.perp();
 
         let center_idx = 1_u16;
         let mut prev_idx = 0_u16; // outer1 at i=0
 
         for s in 1..cap_segments {
-            let a = start_angle + (s as f32 / cap_segments as f32) * PI;
-            let pos = p_start + Vec2::new(a.cos(), a.sin()) * (width * 0.5);
+            let rotation = (s as f32 / cap_segments as f32) * PI;
+            let pos = p_start + Vec2::from_angle(rotation).rotate(n_start) * (width * 0.5);
             let new_idx = vertices.len() as u16;
             vertices.push(Vertex::new2(
                 vec3(pos.x, pos.y, 0.0),
@@ -272,16 +271,15 @@ pub fn generate_edge_glow_mesh(points: &[Vec2], width: f32, color: Color) -> Mes
         let last_i = points.len() - 1;
         let p_end = points[last_i];
         let t_end = (p_end - points[last_i - 1]).normalize_or_zero();
-        let n_end = Vec2::new(-t_end.y, t_end.x);
-        let end_angle = n_end.y.atan2(n_end.x);
+        let n_end = t_end.perp();
 
         let base = (last_i * 3) as u16;
         let center_idx = base + 1;
         let mut prev_idx = base; // outer1
 
         for s in 1..cap_segments {
-            let a = end_angle - (s as f32 / cap_segments as f32) * PI;
-            let pos = p_end + Vec2::new(a.cos(), a.sin()) * (width * 0.5);
+            let rotation = -(s as f32 / cap_segments as f32) * PI;
+            let pos = p_end + Vec2::from_angle(rotation).rotate(n_end) * (width * 0.5);
             let new_idx = vertices.len() as u16;
             vertices.push(Vertex::new2(
                 vec3(pos.x, pos.y, 0.0),
