@@ -208,8 +208,8 @@ pub fn generate_ribbon_mesh(points: &[Vec2], width: f32, color: Color, closed: b
     }
 }
 
-/// Generates a glow mesh (thick line with alpha falloff) from a sequence of points.
-pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: bool) -> Mesh {
+/// Generates a glow mesh for an open edge with rounded caps.
+pub fn generate_edge_glow_mesh(points: &[Vec2], width: f32, color: Color) -> Mesh {
     let mut vertices = Vec::with_capacity(points.len() * 3);
     let mut indices = Vec::with_capacity(points.len() * 12);
 
@@ -217,7 +217,7 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
     let outer_color = Color::new(color.r, color.g, color.b, 0.0);
 
     for i in 0..points.len() {
-        let miter = calculate_miter(points, i, width, closed);
+        let miter = calculate_miter(points, i, width, false);
         let p_outer1 = miter.center + miter.normal * miter.length;
         let p_inner = miter.center;
         let p_outer2 = miter.center - miter.normal * miter.length;
@@ -254,23 +254,7 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
         }
     }
 
-    if closed && points.len() > 1 {
-        let base = ((points.len() - 1) * 3) as u16;
-        indices.extend_from_slice(&[
-            base,
-            base + 1,
-            0,
-            0,
-            base + 1,
-            1,
-            base + 1,
-            base + 2,
-            1,
-            1,
-            base + 2,
-            2,
-        ]);
-    } else if !closed && points.len() > 1 {
+    if points.len() > 1 {
         let cap_segments = 10;
 
         // Start Cap
@@ -324,6 +308,54 @@ pub fn generate_glow_mesh(points: &[Vec2], width: f32, color: Color, closed: boo
         }
         let outer2_idx = base + 2;
         indices.extend_from_slice(&[center_idx, outer2_idx, prev_idx]);
+    }
+
+    Mesh {
+        vertices,
+        indices,
+        texture: None,
+    }
+}
+
+/// Generates a glow mesh for a closed bubble using radial extrusion from a centroid.
+/// This matches the algorithm used in the Android version.
+pub fn generate_bubble_glow_mesh(
+    points: &[Vec2],
+    centroid: Vec2,
+    width: f32,
+    color: Color,
+) -> Mesh {
+    let mut vertices = Vec::with_capacity(points.len() * 2);
+    let mut indices = Vec::with_capacity(points.len() * 6);
+
+    let inner_color = color;
+    let outer_color = Color::new(color.r, color.g, color.b, 0.0);
+
+    for (i, &p) in points.iter().enumerate() {
+        let dir = (p - centroid).normalize_or_zero();
+        let p_outer = p + dir * width;
+
+        let base = (i * 2) as u16;
+        vertices.push(Vertex::new2(
+            vec3(p.x, p.y, 0.0),
+            vec2(0.0, 0.0),
+            inner_color,
+        ));
+        vertices.push(Vertex::new2(
+            vec3(p_outer.x, p_outer.y, 0.0),
+            vec2(0.0, 0.0),
+            outer_color,
+        ));
+
+        if i < points.len() - 1 {
+            indices.extend_from_slice(&[base, base + 1, base + 2, base + 2, base + 1, base + 3]);
+        }
+    }
+
+    // Close the loop
+    if points.len() > 1 {
+        let base = ((points.len() - 1) * 2) as u16;
+        indices.extend_from_slice(&[base, base + 1, 0, 0, base + 1, 1]);
     }
 
     Mesh {

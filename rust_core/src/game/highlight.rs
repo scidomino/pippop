@@ -30,8 +30,10 @@ impl HighlightManager {
         for (bkey, intensity) in glow_requests {
             let points = bubble::get_bubble_points(ctx.graph, bkey);
             if !points.is_empty() {
+                let centroid = ctx.graph.bubbles[bkey].centroid;
                 let width = 20.0 * intensity;
-                let glow_mesh = geometry::generate_glow_mesh(&points, width, colors::WHITE, true);
+                let glow_mesh =
+                    geometry::generate_bubble_glow_mesh(&points, centroid, width, colors::WHITE);
                 draw_mesh(&glow_mesh);
             }
         }

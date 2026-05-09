@@ -30,7 +30,7 @@ impl BurstManager {
 
             let progress = 1.0 - (self.timer / FREEZE_DURATION).clamp(0.0, 1.0);
             let width = 40.0 * progress;
-            let glow_mesh = geometry::generate_glow_mesh(&points, width, colors::WHITE, false);
+            let glow_mesh = geometry::generate_edge_glow_mesh(&points, width, colors::WHITE);
             draw_mesh(&glow_mesh);
         }
     }
