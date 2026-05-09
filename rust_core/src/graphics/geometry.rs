@@ -113,9 +113,9 @@ pub fn tween_points(a: &[Vec2], b: &[Vec2], progress: f32) -> Vec<Vec2> {
 }
 
 struct MiterPoint {
-    center: Vec2,
-    normal: Vec2,
-    length: f32,
+    p1: Vec3,
+    p2: Vec3,
+    center: Vec3,
 }
 
 fn calculate_miter(points: &[Vec2], i: usize, width: f32, closed: bool) -> MiterPoint {
@@ -170,10 +170,13 @@ fn calculate_miter(points: &[Vec2], i: usize, width: f32, closed: bool) -> Miter
     // Limit the miter length to avoid huge spikes at very sharp angles
     let length = (width * 0.5 / dot).min(width * 4.0);
 
+    let p1 = p + miter_normal * length;
+    let p2 = p - miter_normal * length;
+
     MiterPoint {
-        center: p,
-        normal: miter_normal,
-        length,
+        p1: vec3(p1.x, p1.y, 0.0),
+        p2: vec3(p2.x, p2.y, 0.0),
+        center: vec3(p.x, p.y, 0.0),
     }
 }
 
@@ -184,11 +187,9 @@ pub fn generate_ribbon_mesh(points: &[Vec2], width: f32, color: Color, closed: b
 
     for i in 0..points.len() {
         let miter = calculate_miter(points, i, width, closed);
-        let p1 = miter.center + miter.normal * miter.length;
-        let p2 = miter.center - miter.normal * miter.length;
 
-        vertices.push(Vertex::new2(vec3(p1.x, p1.y, 0.0), vec2(0.0, 0.0), color));
-        vertices.push(Vertex::new2(vec3(p2.x, p2.y, 0.0), vec2(0.0, 0.0), color));
+        vertices.push(Vertex::new2(miter.p1, Vec2::ZERO, color));
+        vertices.push(Vertex::new2(miter.p2, Vec2::ZERO, color));
 
         if i < points.len() - 1 {
             let base = (i * 2) as u16;
@@ -218,25 +219,10 @@ pub fn generate_edge_glow_mesh(points: &[Vec2], width: f32, color: Color) -> Mes
 
     for i in 0..points.len() {
         let miter = calculate_miter(points, i, width, false);
-        let p_outer1 = miter.center + miter.normal * miter.length;
-        let p_inner = miter.center;
-        let p_outer2 = miter.center - miter.normal * miter.length;
 
-        vertices.push(Vertex::new2(
-            vec3(p_outer1.x, p_outer1.y, 0.0),
-            vec2(0.0, 0.0),
-            outer_color,
-        ));
-        vertices.push(Vertex::new2(
-            vec3(p_inner.x, p_inner.y, 0.0),
-            vec2(0.0, 0.0),
-            inner_color,
-        ));
-        vertices.push(Vertex::new2(
-            vec3(p_outer2.x, p_outer2.y, 0.0),
-            vec2(0.0, 0.0),
-            outer_color,
-        ));
+        vertices.push(Vertex::new2(miter.p1, Vec2::ZERO, outer_color));
+        vertices.push(Vertex::new2(miter.center, Vec2::ZERO, inner_color));
+        vertices.push(Vertex::new2(miter.p2, Vec2::ZERO, outer_color));
 
         if i < points.len() - 1 {
             let base = (i * 3) as u16;
@@ -272,7 +258,7 @@ pub fn generate_edge_glow_mesh(points: &[Vec2], width: f32, color: Color) -> Mes
             let new_idx = vertices.len() as u16;
             vertices.push(Vertex::new2(
                 vec3(pos.x, pos.y, 0.0),
-                vec2(0.0, 0.0),
+                Vec2::ZERO,
                 outer_color,
             ));
 
@@ -299,7 +285,7 @@ pub fn generate_edge_glow_mesh(points: &[Vec2], width: f32, color: Color) -> Mes
             let new_idx = vertices.len() as u16;
             vertices.push(Vertex::new2(
                 vec3(pos.x, pos.y, 0.0),
-                vec2(0.0, 0.0),
+                Vec2::ZERO,
                 outer_color,
             ));
 
@@ -336,14 +322,10 @@ pub fn generate_bubble_glow_mesh(
         let p_outer = p + dir * width;
 
         let base = (i * 2) as u16;
-        vertices.push(Vertex::new2(
-            vec3(p.x, p.y, 0.0),
-            vec2(0.0, 0.0),
-            inner_color,
-        ));
+        vertices.push(Vertex::new2(vec3(p.x, p.y, 0.0), Vec2::ZERO, inner_color));
         vertices.push(Vertex::new2(
             vec3(p_outer.x, p_outer.y, 0.0),
-            vec2(0.0, 0.0),
+            Vec2::ZERO,
             outer_color,
         ));
 
