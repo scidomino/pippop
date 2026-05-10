@@ -73,11 +73,11 @@ impl GameOverManager {
         let screen_center_x = screen_width / 2.0;
         let screen_center_y = screen_height / 2.0;
 
-        // Draw "GAME OVER"
-        let line1 = "GAME";
-        let line2 = "OVER";
-        let font_size: u16 = 80;
-        let font_scale = 1.5;
+        // Draw "Game Over"
+        let line1 = "Game";
+        let line2 = "Over";
+        let font_size: u16 = 64;
+        let font_scale = 2.0;
         let dims1 = measure_text(line1, Some(ctx.font), font_size, font_scale);
         let dims2 = measure_text(line2, Some(ctx.font), font_size, font_scale);
 
@@ -117,7 +117,7 @@ impl GameOverManager {
 
         if self.timer > 2.0 {
             let sub_text = "Tocca per ricominciare";
-            let sub_size: u16 = 30;
+            let sub_size: u16 = 32;
             let sub_dims = measure_text(sub_text, Some(ctx.font), sub_size, 1.0);
             draw_text_ex(
                 sub_text,

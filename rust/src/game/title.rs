@@ -81,7 +81,7 @@ impl TitleController {
 
         // Draw Title "PipPop"
         let title_text = "PipPop";
-        let title_base = 60;
+        let title_base = 64;
         let title_scale = 2.0;
         let title_dims = measure_text(title_text, Some(&self.font), title_base, title_scale);
 
@@ -114,7 +114,7 @@ impl TitleController {
 
         // Draw "Gioca!" text with pulsing animation
         let play_text = "Gioca!";
-        let play_base_size = 60;
+        let play_base_size = 64;
         let play_scale = (self.timer * 3.0).sin() * 0.1 + 1.0; // 0.9 to 1.1 pulse
 
         let play_dims = measure_text(play_text, Some(&self.font), play_base_size, play_scale);

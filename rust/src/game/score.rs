@@ -131,7 +131,7 @@ impl ScoreManager {
         set_default_camera();
 
         let score_text = format!("{score}", score = self.score);
-        let score_dims = measure_text(&score_text, Some(ctx.font), 40, 1.0);
+        let score_dims = measure_text(&score_text, Some(ctx.font), 32, 1.0);
 
         // Draw score at the top right
         draw_text_ex(
@@ -140,7 +140,7 @@ impl ScoreManager {
             40.0,
             TextParams {
                 font: Some(ctx.font),
-                font_size: 40,
+                font_size: 32,
                 color: colors::WHITE,
                 ..Default::default()
             },
@@ -151,28 +151,28 @@ impl ScoreManager {
 
         if pop_chain_count > 1 {
             let chain_text = format!("{pop_chain_count} Scatti Concatenati!");
-            let chain_dims = measure_text(&chain_text, Some(ctx.font), 30, 1.0);
+            let chain_dims = measure_text(&chain_text, Some(ctx.font), 32, 1.0);
             draw_text_ex(
                 &chain_text,
                 (screen_width() / 2.0 - chain_dims.width / 2.0).floor(),
                 80.0,
                 TextParams {
                     font: Some(ctx.font),
-                    font_size: 30,
+                    font_size: 32,
                     color: colors::WHITE,
                     ..Default::default()
                 },
             );
         } else if burst_chain_count > 1 {
             let chain_text = format!("{burst_chain_count} Concatenati!");
-            let chain_dims = measure_text(&chain_text, Some(ctx.font), 30, 1.0);
+            let chain_dims = measure_text(&chain_text, Some(ctx.font), 32, 1.0);
             draw_text_ex(
                 &chain_text,
                 (screen_width() / 2.0 - chain_dims.width / 2.0).floor(),
                 80.0,
                 TextParams {
                     font: Some(ctx.font),
-                    font_size: 30,
+                    font_size: 32,
                     color: colors::WHITE,
                     ..Default::default()
                 },

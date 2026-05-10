@@ -52,7 +52,7 @@ pub fn draw_bubble(style: &BubbleStyle, points: &[Vec2], centroid: Vec2, font: &
         _ => return,
     };
 
-    let text_dims = measure_text(&label, Some(font), 64, 0.4);
+    let text_dims = measure_text(&label, Some(font), 32, 1.0);
 
     draw_text_ex(
         &label,
@@ -60,8 +60,8 @@ pub fn draw_bubble(style: &BubbleStyle, points: &[Vec2], centroid: Vec2, font: &
         centroid.y + text_dims.height / 2.0,
         TextParams {
             font: Some(font),
-            font_size: 64,
-            font_scale: 0.5,
+            font_size: 32,
+            font_scale: 1.0,
             color: colors::WHITE,
             ..Default::default()
         },
