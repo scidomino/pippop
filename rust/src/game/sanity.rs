@@ -16,6 +16,9 @@ impl SanityManager {
     }
 
     pub fn update(&self, state: &GameState) {
+        if !crate::game::is_debug() {
+            return;
+        }
         if let Err(e) = self.check(state) {
             let dump = state.graph.dump_state();
             #[cfg(not(target_arch = "wasm32"))]
