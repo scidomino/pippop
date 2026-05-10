@@ -24,3 +24,5 @@ android/build/
 # Rider IDE
 .idea/
 web_dist/
+
+.gemini/
