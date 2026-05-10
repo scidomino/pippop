@@ -26,3 +26,5 @@ android/build/
 web_dist/
 
 .gemini/
+
+**/.DS_Store
