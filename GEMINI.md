@@ -5,7 +5,6 @@ A high-performance bubble physics game ported from Android to a pure Rust archit
 ## Project Vision
 - **Single Source of Truth:** All game logic, physics, and rendering are handled in Rust.
 - **Cross-Platform:** Targets Native (Desktop), Web (WebAssembly), and Android (via Macroquad/miniquad).
-- **Historical Context:** The `android/` directory is kept for historical reference only and should not be modified.
 
 ## Core Architecture
 - `rust/`: The main Rust crate containing:
