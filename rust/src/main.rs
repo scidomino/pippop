@@ -50,6 +50,7 @@ impl<'a> Screen<'a> {
 fn window_conf() -> Conf {
     Conf {
         window_title: "PipPop".to_owned(),
+        high_dpi: true,
         sample_count: 4,
         ..Default::default()
     }
