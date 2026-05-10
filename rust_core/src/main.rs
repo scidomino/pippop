@@ -113,10 +113,21 @@ fn get_interaction(camera: &Camera2D) -> Interaction {
 }
 
 fn get_camera() -> Camera2D {
-    let aspect = screen_width() / screen_height();
+    let width = screen_width();
+    let height = screen_height();
+    let aspect = width / height;
+
+    let target_radius = 200.0;
+
+    let (zoom_x, zoom_y) = if width < height {
+        (1.0 / target_radius, aspect / target_radius)
+    } else {
+        (1.0 / (target_radius * aspect), 1.0 / target_radius)
+    };
+
     Camera2D {
         target: vec2(0.0, 0.0),
-        zoom: vec2(1.0 / 300.0, aspect / 300.0),
+        zoom: vec2(zoom_x, zoom_y),
         ..Default::default()
     }
 }
