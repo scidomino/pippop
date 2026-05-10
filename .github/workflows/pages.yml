@@ -28,7 +28,7 @@ jobs:
 
       - name: Build Web
         run: |
-          cd rust_core
+          cd rust
           chmod +x build_web.sh
           ./build_web.sh
 

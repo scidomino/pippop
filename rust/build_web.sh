@@ -13,7 +13,7 @@ mkdir -p ../web_dist
 rm -f ../web_dist/*
 
 # 3. Copy the binary
-cp target/wasm32-unknown-unknown/release/rust_core.wasm ../web_dist/pippop.wasm
+cp target/wasm32-unknown-unknown/release/rust.wasm ../web_dist/pippop.wasm
 
 # 4. Copy the HTML wrapper
 cp index.html ../web_dist/index.html

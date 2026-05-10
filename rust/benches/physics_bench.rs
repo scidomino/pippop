@@ -1,8 +1,8 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use rust_core::graph::bubble::BubbleStyle;
-use rust_core::graph::Graph;
-use rust_core::graphics::colors;
-use rust_core::physics;
+use rust::graph::bubble::BubbleStyle;
+use rust::graph::Graph;
+use rust::graphics::colors;
+use rust::physics;
 use std::hint::black_box;
 
 fn bench_physics(c: &mut Criterion) {

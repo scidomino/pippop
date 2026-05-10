@@ -1,9 +1,9 @@
 use macroquad::prelude::*;
-use rust_core::game::controller::GameController;
-use rust_core::game::state::{Interaction, InteractionState};
-use rust_core::game::title::TitleController;
-use rust_core::graph::Graph;
-use rust_core::resources::Resources;
+use rust::game::controller::GameController;
+use rust::game::state::{Interaction, InteractionState};
+use rust::game::title::TitleController;
+use rust::graph::Graph;
+use rust::resources::Resources;
 use std::fs::File;
 use std::io::Write;
 
