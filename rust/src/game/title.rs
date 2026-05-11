@@ -53,6 +53,29 @@ impl TitleController {
     }
 
     pub fn draw(&self, camera: &Camera2D) {
+        // --- HACK: Font Atlas Priming ---
+        // On macOS (Apple Silicon), macroquad's dynamic font atlas resizing can cause
+        // an OpenGL driver crash ("texture unloadable") if it happens mid-game.
+        // We force the atlas to allocate and resize immediately on the title screen
+        // by drawing all digits and common characters at all used sizes (32, 64).
+        if self.timer < 0.5 {
+            let chars = "0123456789GameOverTccapricmntz!S";
+            let sizes = [32, 64];
+            for &size in &sizes {
+                draw_text_ex(
+                    chars,
+                    -1000.0,
+                    -1000.0, // Draw off-screen
+                    TextParams {
+                        font: Some(&self.font),
+                        font_size: size,
+                        color: Color::new(0.0, 0.0, 0.0, 0.0), // Fully transparent
+                        ..Default::default()
+                    },
+                );
+            }
+        }
+
         let ctx = RenderContext {
             graph: &self.state.graph,
             phase: &self.state.phase,
