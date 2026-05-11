@@ -15,8 +15,9 @@ rm -f ../web_dist/*
 # 3. Copy the binary
 cp target/wasm32-unknown-unknown/release/rust.wasm ../web_dist/pippop.wasm
 
-# 4. Copy the HTML wrapper
+# 4. Copy the HTML wrapper and assets
 cp index.html ../web_dist/index.html
+cp assets/icon.png ../web_dist/favicon.png
 
 # 5. Download the JS glue code
 echo "Fetching JS bundle..."
