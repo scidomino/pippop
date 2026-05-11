@@ -34,3 +34,48 @@ Ultimately, I'm pretty sure the reason it took so long was that I made the class
 ## Gameplay
 
 Previous iterations have had different rules. Most allowed you to swap any two bubbles. Swapping any adjacent items is a popular mechanic in lots of games (like Bejeweled) but it doesn't work well in a bubble graph since by default they form hex grids which are much more connected than square ones. Joining like-colored bubbles and popping has been a feature almost from the beginning because it looks cool.
+
+# Building
+
+## Prerequisites
+Before building for any platform, ensure you have the Rust toolchain installed (version 1.91+ is recommended). You can install it via [rustup](https://rustup.rs/).
+
+## Running Locally (Desktop)
+To run the game natively on macOS, Windows, or Linux, run the following command from the root of the repository:
+```bash
+cargo run --manifest-path rust/Cargo.toml --release
+```
+*(Using `--release` ensures the physics and rendering run at maximum performance).*
+
+## Building for Android
+Building the installable `.apk` requires setting up the Android build environment.
+
+**1. Install Rust Mobile Targets**
+Add the cross-compilation targets for Android:
+```bash
+rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+```
+
+**2. Install the Android SDK & NDK**
+You must install the Android SDK and the **NDK (Side by side)**. The easiest way to get these is by downloading Android Studio and using the built-in SDK Manager.
+
+**3. Configure Environment Variables**
+Export the paths to your SDK and NDK in your terminal. (The paths below are typical for macOS; adjust the NDK version to match your installation):
+```bash
+export ANDROID_HOME=$HOME/Library/Android/sdk
+export NDK_HOME=$ANDROID_HOME/ndk/YOUR_NDK_VERSION
+```
+
+**4. Install the Packaging Tool**
+Install the latest version of `cargo-quad-apk` directly from GitHub to ensure compatibility with modern Cargo lockfiles:
+```bash
+cargo install --git https://github.com/not-fl3/cargo-quad-apk --force
+```
+
+**5. Build the APK**
+Navigate into the `rust` directory and run the build:
+```bash
+cd rust
+cargo quad-apk build --release
+```
+The final `.apk` will be located at `rust/target/android-artifacts/release/apk/rust.apk`.
