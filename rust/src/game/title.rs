@@ -77,8 +77,7 @@ impl TitleController {
         }
 
         let ctx = RenderContext {
-            graph: &self.state.graph,
-            phase: &self.state.phase,
+            state: &self.state,
             font: &self.font,
             camera,
         };

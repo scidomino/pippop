@@ -31,8 +31,8 @@ impl PopManager {
         set_camera(ctx.camera);
 
         if let Some(pending) = &self.pending_pop {
-            let bubble = &ctx.graph.bubbles[pending.bkey];
-            let points = bubble::get_points_for_bubble(ctx.graph, bubble);
+            let bubble = &ctx.state.graph.bubbles[pending.bkey];
+            let points = bubble::get_points_for_bubble(&ctx.state.graph, bubble);
             if points.is_empty() {
                 return;
             }

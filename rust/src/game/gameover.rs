@@ -46,7 +46,7 @@ impl GameOverManager {
     }
 
     pub fn draw(&self, ctx: &RenderContext) {
-        if !matches!(ctx.phase, GamePhase::GameOver) {
+        if !matches!(&ctx.state.phase, GamePhase::GameOver) {
             return;
         }
 
@@ -115,6 +115,35 @@ impl GameOverManager {
             );
         }
 
+        let score_text = format!("Punteggio: {}", ctx.state.keeper.score);
+        let score_size: u16 = 32;
+        let score_dims = measure_text(&score_text, Some(ctx.font), score_size, 1.0);
+        draw_text_ex(
+            &score_text,
+            (screen_center_x - score_dims.width / 2.0).floor(),
+            (screen_center_y + 150.0).floor(),
+            TextParams {
+                font: Some(ctx.font),
+                font_size: score_size,
+                color: colors::WHITE,
+                ..Default::default()
+            },
+        );
+
+        let high_score_text = format!("Migliore: {}", ctx.state.keeper.high_score);
+        let high_score_dims = measure_text(&high_score_text, Some(ctx.font), score_size, 1.0);
+        draw_text_ex(
+            &high_score_text,
+            (screen_center_x - high_score_dims.width / 2.0).floor(),
+            (screen_center_y + 190.0).floor(),
+            TextParams {
+                font: Some(ctx.font),
+                font_size: score_size,
+                color: colors::WHITE,
+                ..Default::default()
+            },
+        );
+
         if self.timer > 2.0 {
             let sub_text = "Tocca per ricominciare";
             let sub_size: u16 = 32;
@@ -122,7 +151,7 @@ impl GameOverManager {
             draw_text_ex(
                 sub_text,
                 (screen_center_x - sub_dims.width / 2.0).floor(),
-                (screen_center_y + 160.0).floor(),
+                (screen_center_y + 230.0).floor(),
                 TextParams {
                     font: Some(ctx.font),
                     font_size: sub_size,

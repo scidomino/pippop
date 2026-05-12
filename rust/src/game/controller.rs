@@ -92,8 +92,7 @@ impl<'a> GameController<'a> {
 
     pub fn draw(&self, camera: &Camera2D) {
         let ctx = RenderContext {
-            graph: &self.state.graph,
-            phase: &self.state.phase,
+            state: &self.state,
             font: &self.font,
             camera,
         };

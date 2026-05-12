@@ -31,13 +31,13 @@ impl WorldManager {
     pub fn draw(&self, ctx: &RenderContext) {
         set_camera(ctx.camera);
 
-        for (bkey, bubble) in &ctx.graph.bubbles {
-            let points = bubble::get_bubble_points(ctx.graph, bkey);
+        for (bkey, bubble) in &ctx.state.graph.bubbles {
+            let points = bubble::get_bubble_points(&ctx.state.graph, bkey);
             bubble::draw_bubble(&bubble.style, &points, bubble.centroid, ctx.font);
         }
 
         if crate::game::is_debug() {
-            bubble::draw_debug_points(ctx.graph);
+            bubble::draw_debug_points(&ctx.state.graph);
 
             // Draw FPS in screen space if debug is enabled
             set_default_camera();

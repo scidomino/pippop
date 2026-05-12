@@ -24,9 +24,9 @@ impl BurstManager {
 
         if let Some(ekey) = self.active_edge {
             let mut points = Vec::with_capacity(12);
-            bubble::push_edge_points(ctx.graph, ekey, &mut points);
-            let twin_key = ctx.graph.vertices.get_edge(ekey).twin;
-            points.push(ctx.graph.vertices[twin_key.vertex].point.position);
+            bubble::push_edge_points(&ctx.state.graph, ekey, &mut points);
+            let twin_key = &ctx.state.graph.vertices.get_edge(ekey).twin;
+            points.push(ctx.state.graph.vertices[twin_key.vertex].point.position);
 
             let progress = 1.0 - (self.timer / FREEZE_DURATION).clamp(0.0, 1.0);
             let width = 40.0 * progress;

@@ -1,6 +1,38 @@
 use crate::graph::bubble::BubbleKey;
 use crate::graph::Graph;
 use macroquad::math::Vec2;
+use quad_storage::STORAGE;
+
+/// Tracks current and high scores, handling persistence.
+pub struct ScoreKeeper {
+    pub score: i64,
+    pub high_score: i64,
+}
+
+impl ScoreKeeper {
+    pub fn new() -> Self {
+        let mut keeper = Self {
+            score: 0,
+            high_score: 0,
+        };
+        let storage = STORAGE.lock().unwrap();
+        if let Some(saved) = storage.get("high_score") {
+            if let Ok(score) = saved.parse() {
+                keeper.high_score = score;
+            }
+        }
+        keeper
+    }
+
+    pub fn add_points(&mut self, points: i64) {
+        self.score += points;
+        if self.score > self.high_score {
+            self.high_score = self.score;
+            let mut storage = STORAGE.lock().unwrap();
+            storage.set("high_score", &self.high_score.to_string());
+        }
+    }
+}
 
 /// Represents the high-level state machine of the gameplay loop.
 ///
@@ -61,6 +93,7 @@ pub struct GameState {
     /// Used primarily during the `Bursting` phase to track which bubble
     /// initiated the sequence and should be preserved during topological merges.
     pub focus_bubble: Option<BubbleKey>,
+    pub keeper: ScoreKeeper,
 }
 
 impl GameState {
@@ -71,6 +104,7 @@ impl GameState {
             sound_events: Vec::new(),
             score_events: Vec::new(),
             focus_bubble: None,
+            keeper: ScoreKeeper::new(),
         }
     }
 }

@@ -46,32 +46,34 @@ impl SwapManager {
     }
 
     fn draw_bubbles(ctx: &RenderContext, swap: &ActiveSwap) {
-        let twin = ctx.graph.vertices.get_edge(swap.edge).twin;
+        let twin = &ctx.state.graph.vertices.get_edge(swap.edge).twin;
 
         // 1. Get the shared edge points (wall) from the swappable's perspective
         // Since we rebubbled, the first edge in the bubble's edge list is the shared wall.
-        let mut e_points = ctx.graph.vertices.get_edge(swap.edge).points.clone();
-        e_points.push(ctx.graph.vertices[twin.vertex].point.position);
+        let e_points = ctx.state.graph.vertices.get_edge(swap.edge).points.clone();
+        let mut e_points = e_points;
+        e_points.push(ctx.state.graph.vertices[twin.vertex].point.position);
 
-        let mut t_points = ctx.graph.vertices.get_edge(twin).points.clone();
-        t_points.push(ctx.graph.vertices[swap.edge.vertex].point.position);
+        let t_points = ctx.state.graph.vertices.get_edge(*twin).points.clone();
+        let mut t_points = t_points;
+        t_points.push(ctx.state.graph.vertices[swap.edge.vertex].point.position);
 
         // 2. Get full points for both
-        let mut s_points = ctx.graph.bubbles[swap.colored_bkey]
+        let mut s_points = ctx.state.graph.bubbles[swap.colored_bkey]
             .edges
             .iter()
             .skip(1)
-            .flat_map(|&ekey| ctx.graph.vertices.get_edge(ekey).points.clone())
+            .flat_map(|&ekey| ctx.state.graph.vertices.get_edge(ekey).points.clone())
             .collect::<Vec<Vec2>>();
-        s_points.push(ctx.graph.vertices[swap.edge.vertex].point.position);
+        s_points.push(ctx.state.graph.vertices[swap.edge.vertex].point.position);
 
-        let mut p_points = ctx.graph.bubbles[swap.swappable_bkey]
+        let mut p_points = ctx.state.graph.bubbles[swap.swappable_bkey]
             .edges
             .iter()
             .skip(1)
-            .flat_map(|&ekey| ctx.graph.vertices.get_edge(ekey).points.clone())
+            .flat_map(|&ekey| ctx.state.graph.vertices.get_edge(ekey).points.clone())
             .collect::<Vec<Vec2>>();
-        p_points.push(ctx.graph.vertices[twin.vertex].point.position);
+        p_points.push(ctx.state.graph.vertices[twin.vertex].point.position);
 
         if e_points.is_empty() || s_points.is_empty() || p_points.is_empty() {
             return;
@@ -88,8 +90,8 @@ impl SwapManager {
         combined_points.extend(part1);
 
         // 5. Calculate a centroid for the label (interpolation of centroids)
-        let s_centroid = ctx.graph.bubbles[swap.colored_bkey].centroid;
-        let p_centroid = ctx.graph.bubbles[swap.swappable_bkey].centroid;
+        let s_centroid = ctx.state.graph.bubbles[swap.colored_bkey].centroid;
+        let p_centroid = ctx.state.graph.bubbles[swap.swappable_bkey].centroid;
         let combined_centroid = s_centroid.lerp(p_centroid, swap.progress);
 
         bubble::draw_bubble(

@@ -20,16 +20,16 @@ impl HighlightManager {
     }
 
     pub fn draw(&self, ctx: &RenderContext) {
-        if !matches!(ctx.phase, GamePhase::Normal) {
+        if !matches!(&ctx.state.phase, GamePhase::Normal) {
             return;
         }
         set_camera(ctx.camera);
 
-        let glow_requests = self.get_glow_requests(ctx.graph);
+        let glow_requests = self.get_glow_requests(&ctx.state.graph);
         for (bkey, intensity) in glow_requests {
-            let points = bubble::get_bubble_points(ctx.graph, bkey);
+            let points = bubble::get_bubble_points(&ctx.state.graph, bkey);
             if !points.is_empty() {
-                let centroid = ctx.graph.bubbles[bkey].centroid;
+                let centroid = ctx.state.graph.bubbles[bkey].centroid;
                 let width = 20.0 * intensity;
                 let glow_mesh =
                     geometry::generate_bubble_glow_mesh(&points, centroid, width, colors::WHITE);

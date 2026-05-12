@@ -47,7 +47,6 @@ pub struct ScoreManager {
     burst_chain: ChainTimer,
     pop_chain: ChainTimer,
     rising_points: Vec<RisingPoint>,
-    score: i64,
 }
 
 impl ScoreManager {
@@ -59,34 +58,43 @@ impl ScoreManager {
         self.burst_chain.update(ctx.dt);
         self.pop_chain.update(ctx.dt);
 
+        let mut total_points = 0;
+        let mut new_rising_points = Vec::new();
+
         for event in ctx.state.score_events.drain(..) {
             match event {
                 ScoreEvent::Burst { position } => {
                     self.burst_chain.re_up();
                     let points = WALL_BURST_POINTS * self.burst_chain.get_count() as i64;
-                    self.add_points(position, points);
+                    total_points += points;
+                    new_rising_points.push(RisingPoint {
+                        text: format!("{points}"),
+                        position,
+                        timer: 0.0,
+                    });
                 }
                 ScoreEvent::Pop { position, size } => {
                     self.pop_chain.re_up();
                     let points =
                         WALL_BURST_POINTS * size as i64 * self.pop_chain.get_count() as i64;
-                    self.add_points(position, points);
+                    total_points += points;
+                    new_rising_points.push(RisingPoint {
+                        text: format!("{points}"),
+                        position,
+                        timer: 0.0,
+                    });
                 }
             }
+        }
+
+        if total_points > 0 {
+            ctx.state.keeper.add_points(total_points);
+            self.rising_points.extend(new_rising_points);
         }
 
         self.rising_points.retain_mut(|rp| {
             rp.timer += ctx.dt;
             rp.timer < POINT_DISPLAY_TIME
-        });
-    }
-
-    fn add_points(&mut self, position: Vec2, points: i64) {
-        self.score += points;
-        self.rising_points.push(RisingPoint {
-            text: format!("{points}"),
-            position,
-            timer: 0.0,
         });
     }
 
@@ -130,7 +138,7 @@ impl ScoreManager {
         // 2. Draw Total Score and Chains (in Screen Space)
         set_default_camera();
 
-        let score_text = format!("{score}", score = self.score);
+        let score_text = format!("{score}", score = ctx.state.keeper.score);
         let score_dims = measure_text(&score_text, Some(ctx.font), 32, 1.0);
 
         // Draw score at the top right

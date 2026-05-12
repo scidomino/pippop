@@ -23,6 +23,8 @@ cp assets/og-image.png ../web_dist/og-image.png
 # 5. Download the JS glue code
 echo "Fetching JS bundle..."
 curl -L https://not-fl3.github.io/miniquad-samples/mq_js_bundle.js -o ../web_dist/mq_js_bundle.js
+curl -L https://raw.githubusercontent.com/not-fl3/sapp-jsutils/master/js/sapp_jsutils.js -o ../web_dist/sapp_jsutils.js
+curl -L https://raw.githubusercontent.com/optozorax/quad-storage/master/js/quad-storage.js -o ../web_dist/quad-storage.js
 
 echo "----------------------------------------"
 echo "Build complete! Files are in 'web_dist/'"
