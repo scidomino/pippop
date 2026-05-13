@@ -13,6 +13,10 @@
     <meta property="og:site_name" content="PipPop">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         html, body, canvas {
             margin: 0px;
@@ -22,6 +26,7 @@
             overflow: hidden;
             background: black;
             z-index: 0;
+            touch-action: none;
         }
     </style>
 </head>
@@ -32,6 +37,22 @@
     <script src="quad-storage.js"></script>
     <script>
         load("pippop.wasm");
+
+        // Fullscreen on double tap
+        let lastTap = 0;
+        document.addEventListener('touchend', function (event) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 500 && tapLength > 0) {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+                    });
+                }
+                event.preventDefault();
+            }
+            lastTap = currentTime;
+        });
     </script>
 </body>
 </html>
