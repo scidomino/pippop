@@ -9,6 +9,12 @@ pub struct ScoreKeeper {
     pub high_score: i64,
 }
 
+impl Default for ScoreKeeper {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ScoreKeeper {
     pub fn new() -> Self {
         let mut keeper = Self {
