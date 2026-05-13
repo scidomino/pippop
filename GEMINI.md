@@ -1,10 +1,10 @@
 # PipPop (Rust + Macroquad)
 
-A high-performance bubble physics game ported from Android to a pure Rust architecture.
+A high-performance bubble physics game.
 
 ## Project Vision
 - **Single Source of Truth:** All game logic, physics, and rendering are handled in Rust.
-- **Cross-Platform:** Targets Native (Desktop), Web (WebAssembly), and Android (via Macroquad/miniquad).
+- **Cross-Platform:** Targets Native (Desktop) and Web (WebAssembly).
 
 ## Core Architecture
 - `rust/`: The main Rust crate containing:
@@ -31,9 +31,6 @@ cd rust
 ./build_web.sh
 ```
 The built files will be output to `../web_dist`.
-
-### Build for Android
-Macroquad uses `miniquad` to handle Android lifecycle. Refer to Macroquad's documentation for NDK integration.
 
 ## Constraints
 - Prioritize `rust` stability and performance.

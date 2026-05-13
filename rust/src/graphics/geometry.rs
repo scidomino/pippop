@@ -302,7 +302,7 @@ pub fn generate_edge_glow_mesh(points: &[Vec2], width: f32, color: Color) -> Mes
 }
 
 /// Generates a glow mesh for a closed bubble using radial extrusion from a centroid.
-/// This matches the algorithm used in the Android version.
+/// Optimized triangulation algorithm for bubble mesh generation.
 pub fn generate_bubble_glow_mesh(
     points: &[Vec2],
     centroid: Vec2,

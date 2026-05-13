@@ -2,7 +2,7 @@ use crate::game::state::UpdateContext;
 use crate::graph::bubble::BubbleStyle;
 use std::collections::HashMap;
 
-const UNNOTICEABLE_AREA: f32 = 100.0; // Slightly larger than Android to be safe with physics
+const UNNOTICEABLE_AREA: f32 = 100.0; // Area threshold for removing tiny bubbles
 
 #[derive(Default)]
 pub struct ReapManager;

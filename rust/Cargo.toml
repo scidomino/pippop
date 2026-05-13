@@ -16,10 +16,3 @@ criterion = "0.8.2"
 [[bench]]
 name = "physics_bench"
 harness = false
-
-[package.metadata.android]
-label = "PipPop"
-package_name = "com.sciortino.pippop"
-res = "android_res"
-icon = "@mipmap/ic_launcher"
-fullscreen = true
