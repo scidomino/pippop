@@ -7,23 +7,23 @@ use rust::resources::Resources;
 use std::fs::File;
 use std::io::Write;
 
-enum Screen<'a> {
+enum Screen {
     Title(TitleController),
-    Game(GameController<'a>),
+    Game(GameController),
 }
 
-impl<'a> Screen<'a> {
-    fn interact(&mut self, resources: &'a Resources, interaction: Interaction) {
+impl Screen {
+    fn interact(&mut self, resources: &Resources, interaction: Interaction) {
         let mut next_screen = None;
         match self {
             Screen::Title(c) => {
                 if c.interact(interaction) {
-                    next_screen = Some(Screen::Game(GameController::new(resources)));
+                    next_screen = Some(Screen::Game(GameController::new()));
                 }
             }
             Screen::Game(c) => {
-                if c.interact(interaction) {
-                    next_screen = Some(Screen::Title(TitleController::new(resources)));
+                if c.interact(resources, interaction) {
+                    next_screen = Some(Screen::Title(TitleController::new()));
                 }
             }
         }
@@ -32,17 +32,17 @@ impl<'a> Screen<'a> {
         }
     }
 
-    fn update(&mut self, dt: f32) {
+    fn update(&mut self, resources: &Resources, dt: f32) {
         match self {
-            Screen::Title(c) => c.update(dt),
-            Screen::Game(c) => c.update(dt),
+            Screen::Title(c) => c.update(resources, dt),
+            Screen::Game(c) => c.update(resources, dt),
         }
     }
 
-    fn draw(&self, camera: &Camera2D) {
+    fn draw(&self, resources: &Resources, camera: &Camera2D) {
         match self {
-            Screen::Title(c) => c.draw(camera),
-            Screen::Game(c) => c.draw(camera),
+            Screen::Title(c) => c.draw(resources, camera),
+            Screen::Game(c) => c.draw(resources, camera),
         }
     }
 }
@@ -62,14 +62,14 @@ async fn main() {
 
     let resources = Resources::load().await;
 
-    let mut screen = Screen::Title(TitleController::new(&resources));
+    let mut screen = Screen::Title(TitleController::new());
 
     loop {
         let camera = get_camera();
 
         screen.interact(&resources, get_interaction(&camera));
-        screen.update(get_frame_time());
-        screen.draw(&camera);
+        screen.update(&resources, get_frame_time());
+        screen.draw(&resources, &camera);
 
         if is_key_pressed(KeyCode::D) {
             if let Screen::Game(c) = &screen {

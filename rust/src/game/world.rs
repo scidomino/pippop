@@ -33,7 +33,7 @@ impl WorldManager {
 
         for (bkey, bubble) in &ctx.state.graph.bubbles {
             let points = bubble::get_bubble_points(&ctx.state.graph, bkey);
-            bubble::draw_bubble(&bubble.style, &points, bubble.centroid, ctx.font);
+            bubble::draw_bubble(&bubble.style, &points, bubble.centroid, &ctx.resources.font);
         }
 
         if crate::game::is_debug() {

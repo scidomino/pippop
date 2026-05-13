@@ -1,50 +1,38 @@
 use crate::game::state::{SoundEvent, UpdateContext};
-use crate::resources::Resources;
 use macroquad::audio::{play_sound, play_sound_once, PlaySoundParams};
-use macroquad::rand;
+use macroquad::rand::ChooseRandom;
 
-pub struct SoundManager<'a> {
-    resources: &'a Resources,
-}
+#[derive(Default)]
+pub struct SoundManager;
 
-impl<'a> SoundManager<'a> {
-    pub fn new(resources: &'a Resources) -> Self {
-        Self { resources }
-    }
-
-    pub fn play_pop(&self) {
-        play_sound_once(&self.resources.pop_sound);
-    }
-
-    pub fn play_spawn(&self) {
-        play_sound_once(&self.resources.spawn_sound);
-    }
-
-    pub fn play_burst(&self) {
-        play_sound_once(&self.resources.burst_sound);
-    }
-
-    pub fn play_swap(&self) {
-        if !self.resources.splash_sounds.is_empty() {
-            let idx = rand::gen_range(0, self.resources.splash_sounds.len());
-            play_sound(
-                &self.resources.splash_sounds[idx],
-                PlaySoundParams {
-                    looped: false,
-                    volume: 0.4,
-                },
-            );
-        }
+impl SoundManager {
+    pub fn new() -> Self {
+        Self
     }
 
     pub fn update(&self, ctx: &mut UpdateContext) {
-        for event in ctx.state.sound_events.drain(..) {
-            match event {
-                SoundEvent::Pop => self.play_pop(),
-                SoundEvent::Spawn => self.play_spawn(),
-                SoundEvent::Burst => self.play_burst(),
-                SoundEvent::Swap => self.play_swap(),
+        if let Some(resources) = ctx.resources {
+            for event in ctx.state.sound_events.drain(..) {
+                match event {
+                    SoundEvent::Pop => play_sound_once(&resources.pop_sound),
+                    SoundEvent::Spawn => play_sound_once(&resources.spawn_sound),
+                    SoundEvent::Burst => play_sound_once(&resources.burst_sound),
+                    SoundEvent::Swap => {
+                        play_sound(
+                            resources
+                                .splash_sounds
+                                .choose()
+                                .expect("has at least one splash noise"),
+                            PlaySoundParams {
+                                looped: false,
+                                volume: 0.4,
+                            },
+                        );
+                    }
+                }
             }
+        } else {
+            ctx.state.sound_events.clear();
         }
     }
 }

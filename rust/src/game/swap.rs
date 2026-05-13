@@ -98,7 +98,7 @@ impl SwapManager {
             &swap.colored_style,
             &combined_points,
             combined_centroid,
-            ctx.font,
+            &ctx.resources.font,
         );
     }
 

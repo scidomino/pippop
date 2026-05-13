@@ -95,6 +95,7 @@ mod tests {
         // 2 colored bubbles, 3 colors -> target is 9. Should speed up by 5.0.
         manager.update(&mut UpdateContext {
             state: &mut state,
+            resources: None,
             dt: 1.0,
         });
 
@@ -119,6 +120,7 @@ mod tests {
         manager.next_spawn_time = 100.0;
         manager.update(&mut UpdateContext {
             state: &mut state,
+            resources: None,
             dt: 1.0,
         });
 

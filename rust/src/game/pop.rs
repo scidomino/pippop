@@ -50,7 +50,7 @@ impl PopManager {
                     },
                     &morphed_points,
                     bubble.centroid,
-                    ctx.font,
+                    &ctx.resources.font,
                 );
             }
         }

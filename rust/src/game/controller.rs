@@ -17,9 +17,8 @@ use crate::graphics::{colors, RenderContext};
 use crate::resources::Resources;
 use macroquad::prelude::*;
 
-pub struct GameController<'a> {
+pub struct GameController {
     pub state: GameState,
-    pub font: Font,
 
     pub world: WorldManager,
     pub spawn: SpawnManager,
@@ -32,17 +31,16 @@ pub struct GameController<'a> {
     pub highlight: HighlightManager,
     pub gameover: GameOverManager,
     pub sanity: SanityManager,
-    pub sound: SoundManager<'a>,
+    pub sound: SoundManager,
 }
 
-impl<'a> GameController<'a> {
-    pub fn new(resources: &'a Resources) -> Self {
+impl GameController {
+    pub fn new() -> Self {
         Self {
             state: GameState::new(Graph::new(
                 BubbleStyle::swappable(5),
                 BubbleStyle::colored(colors::TURQUOISE),
             )),
-            font: resources.font.clone(),
             world: WorldManager::new(),
             spawn: SpawnManager::new(colors::get_group(6)),
             slide: SlideManager::new(),
@@ -54,13 +52,22 @@ impl<'a> GameController<'a> {
             highlight: HighlightManager::new(),
             gameover: GameOverManager::new(),
             sanity: SanityManager::new(),
-            sound: SoundManager::new(resources),
+            sound: SoundManager::new(),
         }
     }
+}
 
-    pub fn interact(&mut self, interaction: Interaction) -> bool {
+impl Default for GameController {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl GameController {
+    pub fn interact(&mut self, resources: &Resources, interaction: Interaction) -> bool {
         let mut ctx = InteractContext {
             state: &mut self.state,
+            resources: Some(resources),
             interaction,
         };
         let should_exit = self.gameover.interact(&mut ctx);
@@ -69,9 +76,10 @@ impl<'a> GameController<'a> {
         should_exit
     }
 
-    pub fn update(&mut self, dt: f32) {
+    pub fn update(&mut self, resources: &Resources, dt: f32) {
         let mut ctx = UpdateContext {
             state: &mut self.state,
+            resources: Some(resources),
             dt,
         };
 
@@ -90,10 +98,10 @@ impl<'a> GameController<'a> {
         self.sanity.update(&self.state);
     }
 
-    pub fn draw(&self, camera: &Camera2D) {
+    pub fn draw(&self, resources: &Resources, camera: &Camera2D) {
         let ctx = RenderContext {
             state: &self.state,
-            font: &self.font,
+            resources,
             camera,
         };
 

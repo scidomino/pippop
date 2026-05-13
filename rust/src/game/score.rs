@@ -104,7 +104,7 @@ impl ScoreManager {
             set_camera(ctx.camera);
             for rp in &self.rising_points {
                 let rise = (rp.timer / POINT_DISPLAY_TIME) * POINT_MAX_HEIGHT;
-                let text_dims = measure_text(&rp.text, Some(ctx.font), 32, 1.0);
+                let text_dims = measure_text(&rp.text, Some(&ctx.resources.font), 32, 1.0);
 
                 // Draw text with shadow
                 let draw_pos = vec2(rp.position.x - text_dims.width / 2.0, rp.position.y - rise);
@@ -115,7 +115,7 @@ impl ScoreManager {
                     shadow_pos.x,
                     shadow_pos.y,
                     TextParams {
-                        font: Some(ctx.font),
+                        font: Some(&ctx.resources.font),
                         font_size: 32,
                         color: colors::BLACK,
                         ..Default::default()
@@ -126,7 +126,7 @@ impl ScoreManager {
                     draw_pos.x,
                     draw_pos.y,
                     TextParams {
-                        font: Some(ctx.font),
+                        font: Some(&ctx.resources.font),
                         font_size: 32,
                         color: colors::WHITE,
                         ..Default::default()
@@ -139,7 +139,7 @@ impl ScoreManager {
         set_default_camera();
 
         let score_text = format!("{score}", score = ctx.state.keeper.score);
-        let score_dims = measure_text(&score_text, Some(ctx.font), 32, 1.0);
+        let score_dims = measure_text(&score_text, Some(&ctx.resources.font), 32, 1.0);
 
         // Draw score at the top right
         draw_text_ex(
@@ -147,7 +147,7 @@ impl ScoreManager {
             (screen_width() - score_dims.width - 20.0).floor(),
             40.0,
             TextParams {
-                font: Some(ctx.font),
+                font: Some(&ctx.resources.font),
                 font_size: 32,
                 color: colors::WHITE,
                 ..Default::default()
@@ -159,13 +159,13 @@ impl ScoreManager {
 
         if pop_chain_count > 1 {
             let chain_text = format!("{pop_chain_count} Scatti Concatenati!");
-            let chain_dims = measure_text(&chain_text, Some(ctx.font), 32, 1.0);
+            let chain_dims = measure_text(&chain_text, Some(&ctx.resources.font), 32, 1.0);
             draw_text_ex(
                 &chain_text,
                 (screen_width() / 2.0 - chain_dims.width / 2.0).floor(),
                 80.0,
                 TextParams {
-                    font: Some(ctx.font),
+                    font: Some(&ctx.resources.font),
                     font_size: 32,
                     color: colors::WHITE,
                     ..Default::default()
@@ -173,13 +173,13 @@ impl ScoreManager {
             );
         } else if burst_chain_count > 1 {
             let chain_text = format!("{burst_chain_count} Concatenati!");
-            let chain_dims = measure_text(&chain_text, Some(ctx.font), 32, 1.0);
+            let chain_dims = measure_text(&chain_text, Some(&ctx.resources.font), 32, 1.0);
             draw_text_ex(
                 &chain_text,
                 (screen_width() / 2.0 - chain_dims.width / 2.0).floor(),
                 80.0,
                 TextParams {
-                    font: Some(ctx.font),
+                    font: Some(&ctx.resources.font),
                     font_size: 32,
                     color: colors::WHITE,
                     ..Default::default()

@@ -9,10 +9,11 @@ pub mod colors;
 pub mod geometry;
 
 use crate::game::state::GameState;
+use crate::resources::Resources;
 use macroquad::prelude::*;
 
 pub struct RenderContext<'a> {
     pub state: &'a GameState,
-    pub font: &'a Font,
+    pub resources: &'a Resources,
     pub camera: &'a Camera2D,
 }

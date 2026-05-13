@@ -1,5 +1,6 @@
 use crate::graph::bubble::BubbleKey;
 use crate::graph::Graph;
+use crate::resources::Resources;
 use macroquad::math::Vec2;
 use quad_storage::STORAGE;
 
@@ -118,6 +119,7 @@ impl GameState {
 /// Context provided to managers during the update (tick) phase.
 pub struct UpdateContext<'a> {
     pub state: &'a mut GameState,
+    pub resources: Option<&'a Resources>,
     /// The time delta in seconds since the last frame.
     pub dt: f32,
 }
@@ -125,6 +127,7 @@ pub struct UpdateContext<'a> {
 /// Context provided to managers when processing user input.
 pub struct InteractContext<'a> {
     pub state: &'a mut GameState,
+    pub resources: Option<&'a Resources>,
     pub interaction: Interaction,
 }
 
