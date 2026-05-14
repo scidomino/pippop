@@ -3,7 +3,7 @@ use crate::physics::vector::GraphVector;
 use macroquad::math::{vec2, Vec2};
 
 const GRAVITY_STRENGTH: f32 = 0.001;
-const EXPANSION_STRENGTH: f32 = 0.0001;
+const EXPANSION_STRENGTH: f32 = 0.001;
 const GRAVITY_TARGET: Vec2 = vec2(0.0, 0.0);
 
 /// Updates the centering and expansion forces.
