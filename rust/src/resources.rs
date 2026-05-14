@@ -1,5 +1,6 @@
 use macroquad::audio::{load_sound_from_bytes, Sound};
 use macroquad::prelude::*;
+use macroquad::window::miniquad::{BlendFactor, BlendState, BlendValue, Equation};
 
 macro_rules! load_sound {
     ($path:expr) => {
@@ -13,10 +14,31 @@ pub struct Resources {
     pub spawn_sound: Sound,
     pub burst_sound: Sound,
     pub splash_sounds: Vec<Sound>,
+    pub bubble_material: Material,
 }
 
 impl Resources {
     pub async fn load() -> Self {
+        let bubble_material = load_material(
+            ShaderSource::Glsl {
+                vertex: include_str!("graphics/shaders/bubble.vert"),
+                fragment: include_str!("graphics/shaders/bubble.frag"),
+            },
+            MaterialParams {
+                pipeline_params: PipelineParams {
+                    color_blend: Some(BlendState::new(
+                        Equation::Add,
+                        BlendFactor::Value(BlendValue::SourceAlpha),
+                        BlendFactor::OneMinusValue(BlendValue::SourceAlpha),
+                    )),
+                    ..Default::default()
+                },
+                uniforms: vec![],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+
         Self {
             font: load_ttf_font_from_bytes(include_bytes!("../assets/sniglet_extrabold.ttf"))
                 .unwrap(),
@@ -31,6 +53,7 @@ impl Resources {
                 load_sound!("../assets/splash5.wav"),
                 load_sound!("../assets/splash6.wav"),
             ],
+            bubble_material,
         }
     }
 }

@@ -44,13 +44,13 @@ impl PopManager {
 
                 // Create a temporary Colored style with the faded color to use for rendering
                 bubble::draw_bubble(
+                    ctx.resources,
                     &BubbleStyle::Colored {
                         size,
                         color: Color::new(color.r, color.g, color.b, progress),
                     },
                     &morphed_points,
                     bubble.centroid,
-                    &ctx.resources.font,
                 );
             }
         }

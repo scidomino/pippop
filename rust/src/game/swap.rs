@@ -95,10 +95,10 @@ impl SwapManager {
         let combined_centroid = s_centroid.lerp(p_centroid, swap.progress);
 
         bubble::draw_bubble(
+            ctx.resources,
             &swap.colored_style,
             &combined_points,
             combined_centroid,
-            &ctx.resources.font,
         );
     }
 

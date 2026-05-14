@@ -3,6 +3,7 @@ use macroquad::prelude::Color;
 pub const WHITE: Color = Color::new(1.0, 1.0, 1.0, 1.0);
 pub const TRANSPARENT: Color = Color::new(1.0, 1.0, 1.0, 0.0);
 pub const BLACK: Color = Color::new(0.0, 0.0, 0.0, 1.0);
+pub const DARK_GRAY: Color = Color::new(0.3, 0.3, 0.3, 1.0);
 
 // Game Colors
 pub const TURQUOISE: Color = Color::new(85.0 / 255.0, 196.0 / 255.0, 200.0 / 255.0, 1.0);
