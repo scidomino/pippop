@@ -34,12 +34,3 @@ Ultimately, I'm pretty sure the reason it took so long was that I made the class
 ## Gameplay
 
 Previous iterations have had different rules. Most allowed you to swap any two bubbles. Swapping any adjacent items is a popular mechanic in lots of games (like Bejeweled) but it doesn't work well in a bubble graph since by default they form hex grids which are much more connected than square ones. Joining like-colored bubbles and popping has been a feature almost from the beginning because it looks cool.
-
-# Building
-
-
-To run the game natively on macOS, Windows, or Linux, run the following command from the root of the repository:
-```bash
-cargo run --manifest-path rust/Cargo.toml --release
-```
-*(Using `--release` ensures the physics and rendering run at maximum performance).*
