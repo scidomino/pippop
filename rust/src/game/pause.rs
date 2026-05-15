@@ -12,10 +12,10 @@ impl PauseManager {
     }
 
     pub fn interact(&self, ctx: &mut InteractContext) {
-        if let Some(c) = ctx.interaction.char_pressed {
-            if c == ' ' || c == 'p' {
-                self.toggle_pause(ctx);
-            }
+        if ctx.interaction.keys_pressed.contains(&KeyCode::Space)
+            || ctx.interaction.keys_pressed.contains(&KeyCode::P)
+        {
+            self.toggle_pause(ctx);
         }
     }
 

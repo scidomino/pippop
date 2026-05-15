@@ -4,6 +4,7 @@ use crate::graph::{
     edge::{EdgeKey, Slot},
     Graph,
 };
+use macroquad::prelude::KeyCode;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::Write;
@@ -17,7 +18,7 @@ impl SanityManager {
     }
 
     pub fn interact(&self, ctx: &mut InteractContext) {
-        if let Some('d') = ctx.interaction.char_pressed {
+        if ctx.interaction.keys_pressed.contains(&KeyCode::D) {
             self.dump(&ctx.state.graph);
         }
     }

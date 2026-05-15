@@ -86,7 +86,7 @@ fn get_interaction(camera: &Camera2D) -> Interaction {
         } else {
             InteractionState::Hover
         },
-        char_pressed: get_char_pressed(),
+        keys_pressed: get_keys_pressed(),
     }
 }
 

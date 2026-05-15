@@ -1,8 +1,9 @@
 use crate::graph::bubble::BubbleKey;
 use crate::graph::Graph;
 use crate::resources::Resources;
-use macroquad::math::Vec2;
+use macroquad::prelude::*;
 use quad_storage::STORAGE;
+use std::collections::HashSet;
 
 /// Tracks current and high scores, handling persistence.
 pub struct ScoreKeeper {
@@ -143,12 +144,12 @@ pub enum InteractionState {
 
 /// A unified representation of a pointer interaction, abstracting away
 /// the difference between mouse and touch inputs.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Interaction {
     /// The location of the interaction in world space.
     pub position: Vec2,
     /// The current state of the pointer.
     pub state: InteractionState,
-    /// The character pressed during this frame, if any.
-    pub char_pressed: Option<char>,
+    /// The keys pressed during this frame.
+    pub keys_pressed: HashSet<KeyCode>,
 }
