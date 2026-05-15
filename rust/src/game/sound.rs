@@ -1,4 +1,4 @@
-use crate::game::state::{SoundEvent, UpdateContext};
+use crate::game::state::{GamePhase, SoundEvent, UpdateContext};
 use macroquad::audio::{play_sound, play_sound_once, PlaySoundParams};
 use macroquad::rand::ChooseRandom;
 
@@ -11,6 +11,9 @@ impl SoundManager {
     }
 
     pub fn update(&self, ctx: &mut UpdateContext) {
+        if matches!(ctx.state.phase, GamePhase::Paused(_)) {
+            return;
+        }
         if let Some(resources) = ctx.resources {
             for event in ctx.state.sound_events.drain(..) {
                 match event {

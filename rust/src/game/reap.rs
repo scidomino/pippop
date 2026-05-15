@@ -1,4 +1,4 @@
-use crate::game::state::UpdateContext;
+use crate::game::state::{GamePhase, UpdateContext};
 use crate::graph::bubble::BubbleStyle;
 use std::collections::HashMap;
 
@@ -16,6 +16,9 @@ impl ReapManager {
     /// - deflated enough to be removed without causing noticeable visual artifacts, or
     /// - touching the open air.
     pub fn update(&self, ctx: &mut UpdateContext) {
+        if matches!(ctx.state.phase, GamePhase::Paused(_)) {
+            return;
+        }
         let graph = &ctx.state.graph;
         let to_remove: Vec<_> = graph
             .bubbles

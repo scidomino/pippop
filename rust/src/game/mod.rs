@@ -20,6 +20,7 @@ pub mod burst;
 pub mod controller;
 pub mod gameover;
 pub mod highlight;
+pub mod pause;
 pub mod pop;
 pub mod reap;
 pub mod sanity;

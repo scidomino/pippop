@@ -104,7 +104,7 @@ impl SwapManager {
 
     pub fn interact(&mut self, ctx: &mut InteractContext) {
         // Can't swap if already swapping
-        if ctx.state.phase != GamePhase::Normal {
+        if !matches!(ctx.state.phase, GamePhase::Normal) {
             return;
         }
 
@@ -129,7 +129,7 @@ impl SwapManager {
     }
 
     pub fn update(&mut self, ctx: &mut UpdateContext) {
-        if ctx.state.phase != GamePhase::Swapping {
+        if !matches!(ctx.state.phase, GamePhase::Swapping) {
             return;
         }
 

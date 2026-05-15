@@ -1,6 +1,7 @@
 use crate::game::burst::BurstManager;
 use crate::game::gameover::GameOverManager;
 use crate::game::highlight::HighlightManager;
+use crate::game::pause::PauseManager;
 use crate::game::pop::PopManager;
 use crate::game::reap::ReapManager;
 use crate::game::sanity::SanityManager;
@@ -32,6 +33,7 @@ pub struct GameController {
     pub gameover: GameOverManager,
     pub sanity: SanityManager,
     pub sound: SoundManager,
+    pub pause: PauseManager,
 }
 
 impl GameController {
@@ -53,6 +55,7 @@ impl GameController {
             gameover: GameOverManager::new(),
             sanity: SanityManager::new(),
             sound: SoundManager::new(),
+            pause: PauseManager::new(),
         }
     }
 }
@@ -70,6 +73,7 @@ impl GameController {
             resources: Some(resources),
             interaction,
         };
+        self.pause.interact(&mut ctx);
         self.sanity.interact(&mut ctx);
         let should_exit = self.gameover.interact(&mut ctx);
         self.swap.interact(&mut ctx);
@@ -113,5 +117,6 @@ impl GameController {
         self.highlight.draw(&ctx);
         self.score.draw(&ctx);
         self.gameover.draw(&ctx);
+        self.pause.draw(&ctx);
     }
 }

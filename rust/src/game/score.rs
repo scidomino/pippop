@@ -1,4 +1,4 @@
-use crate::game::state::{ScoreEvent, UpdateContext};
+use crate::game::state::{GamePhase, ScoreEvent, UpdateContext};
 use crate::graphics::{colors, RenderContext};
 use macroquad::prelude::*;
 
@@ -55,6 +55,9 @@ impl ScoreManager {
     }
 
     pub fn update(&mut self, ctx: &mut UpdateContext) {
+        if matches!(ctx.state.phase, GamePhase::Paused(_)) {
+            return;
+        }
         self.burst_chain.update(ctx.dt);
         self.pop_chain.update(ctx.dt);
 

@@ -80,7 +80,7 @@ impl PopManager {
     /// Updates the popping state. If in Normal phase, checks if a bubble is ready to pop.
     /// If in Popping phase, advances the animation timer.
     pub fn update(&mut self, ctx: &mut UpdateContext) {
-        match ctx.state.phase {
+        match &ctx.state.phase {
             GamePhase::Normal => {
                 if self.pending_pop.is_some() {
                     return;

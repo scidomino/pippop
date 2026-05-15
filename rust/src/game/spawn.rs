@@ -36,7 +36,7 @@ impl SpawnManager {
 
         self.next_spawn_time -= ctx.dt * multiplier;
 
-        if self.next_spawn_time < 0.0 && ctx.state.phase == GamePhase::Normal {
+        if self.next_spawn_time < 0.0 && matches!(ctx.state.phase, GamePhase::Normal) {
             self.spawn(&mut ctx.state.graph);
             self.next_spawn_time = Self::get_next_spawn_time();
             ctx.state.sound_events.push(SoundEvent::Spawn);

@@ -18,7 +18,7 @@ impl SlideManager {
 
     pub fn update(&mut self, ctx: &mut UpdateContext) {
         self.prune(ctx.dt);
-        if ctx.state.phase != GamePhase::Normal {
+        if !matches!(ctx.state.phase, GamePhase::Normal) {
             return;
         }
         if let Some(edge_key) = self.get_first_slidable(&ctx.state.graph) {

@@ -43,7 +43,7 @@ impl HighlightManager {
     }
 
     pub fn interact(&mut self, ctx: &mut InteractContext) {
-        if ctx.state.phase != GamePhase::Normal {
+        if !matches!(ctx.state.phase, GamePhase::Normal) {
             self.manual_highlight = None;
             return;
         }

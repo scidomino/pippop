@@ -17,7 +17,7 @@ impl WorldManager {
 
     /// Advances the physics simulation using a fixed timestep.
     pub fn update(&mut self, ctx: &mut UpdateContext) {
-        if ctx.state.phase == GamePhase::Bursting {
+        if matches!(ctx.state.phase, GamePhase::Paused(_) | GamePhase::Bursting) {
             return;
         }
         self.physics_accumulator += ctx.dt;

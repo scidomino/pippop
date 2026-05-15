@@ -45,7 +45,7 @@ impl ScoreKeeper {
 ///
 /// The game can only be in one phase at a time. This dictates which
 /// managers are actively processing logic (e.g., you cannot swap while popping).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GamePhase {
     /// The standard gameplay state where the physics simulation is running,
     /// bubbles spawn naturally, and the user can initiate interactions.
@@ -61,6 +61,8 @@ pub enum GamePhase {
     Bursting,
     /// The end-state of the game, reached when the player runs out of swaps.
     GameOver,
+    /// A temporary state where the game is frozen. It holds the phase to return to.
+    Paused(Box<GamePhase>),
 }
 
 /// A decoupled representation of an audio event.

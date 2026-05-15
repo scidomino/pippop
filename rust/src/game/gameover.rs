@@ -13,10 +13,14 @@ impl GameOverManager {
     }
 
     pub fn update(&mut self, ctx: &mut UpdateContext) {
-        if ctx.state.phase != GamePhase::GameOver {
+        if matches!(ctx.state.phase, GamePhase::Paused(_)) {
+            return;
+        }
+
+        if !matches!(ctx.state.phase, GamePhase::GameOver) {
             // Check for game over condition: swappable bubble has 0 swaps
             // and we are in Normal phase (not in the middle of animations)
-            if ctx.state.phase == GamePhase::Normal {
+            if matches!(ctx.state.phase, GamePhase::Normal) {
                 if let Some(swappable_bkey) = ctx.state.graph.bubbles.get_swappable() {
                     if let crate::graph::bubble::BubbleStyle::Swappable { swaps_left, .. } =
                         ctx.state.graph.bubbles[swappable_bkey].style
@@ -35,7 +39,7 @@ impl GameOverManager {
     }
 
     pub fn interact(&mut self, ctx: &mut InteractContext) -> bool {
-        if ctx.state.phase != GamePhase::GameOver {
+        if !matches!(ctx.state.phase, GamePhase::GameOver) {
             return false;
         }
         // Return true if we should go back to title screen

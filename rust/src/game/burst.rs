@@ -36,7 +36,7 @@ impl BurstManager {
     }
 
     pub fn update(&mut self, ctx: &mut UpdateContext) {
-        if ctx.state.phase != GamePhase::Bursting {
+        if !matches!(ctx.state.phase, GamePhase::Bursting) {
             return;
         }
 
