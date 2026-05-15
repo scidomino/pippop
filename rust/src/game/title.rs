@@ -101,7 +101,7 @@ impl TitleController {
             0.0,
             screen_width,
             screen_height,
-            Color::new(0.0, 0.0, 0.0, 0.7),
+            Color::new(0.0, 0.0, 0.0, 0.5),
         );
 
         let screen_center_x = screen_width / 2.0;

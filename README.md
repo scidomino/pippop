@@ -4,7 +4,7 @@ A 2-D bubble-swapping puzzle game without a grid! Join 5 bubbles of the same col
 
 <div align="center">
 
-[![PipPop Gameplay Demo](demo.gif)](https://scidomino.github.io/pippop/)
+[![PipPop Gameplay Demo](demo.png)](https://scidomino.github.io/pippop/)
 
 </div>
 
