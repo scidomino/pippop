@@ -2,10 +2,7 @@ use macroquad::prelude::*;
 use rust::game::controller::GameController;
 use rust::game::state::{Interaction, InteractionState};
 use rust::game::title::TitleController;
-use rust::graph::Graph;
 use rust::resources::Resources;
-use std::fs::File;
-use std::io::Write;
 
 enum Screen {
     Title(TitleController),
@@ -71,28 +68,7 @@ async fn main() {
         screen.update(&resources, get_frame_time());
         screen.draw(&resources, &camera);
 
-        if is_key_pressed(KeyCode::D) {
-            if let Screen::Game(c) = &screen {
-                dump_graph(&c.state.graph);
-            }
-        }
-
         next_frame().await
-    }
-}
-
-fn dump_graph(graph: &Graph) {
-    let dump = graph.dump_state();
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        if let Ok(mut file) = File::create("graph_dump.txt") {
-            let _ = file.write_all(dump.as_bytes());
-            log::info!("Graph state dumped to graph_dump.txt");
-        }
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        log::info!("{}", dump);
     }
 }
 
@@ -110,6 +86,7 @@ fn get_interaction(camera: &Camera2D) -> Interaction {
         } else {
             InteractionState::Hover
         },
+        char_pressed: get_char_pressed(),
     }
 }
 

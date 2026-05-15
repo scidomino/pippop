@@ -147,4 +147,6 @@ pub struct Interaction {
     pub position: Vec2,
     /// The current state of the pointer.
     pub state: InteractionState,
+    /// The character pressed during this frame, if any.
+    pub char_pressed: Option<char>,
 }

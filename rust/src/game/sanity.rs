@@ -1,7 +1,8 @@
-use crate::game::state::GameState;
+use crate::game::state::{GameState, InteractContext};
 use crate::graph::{
     bubble::BubbleStyle,
     edge::{EdgeKey, Slot},
+    Graph,
 };
 use std::collections::HashSet;
 use std::fs::File;
@@ -13,6 +14,27 @@ pub struct SanityManager;
 impl SanityManager {
     pub fn new() -> Self {
         Self
+    }
+
+    pub fn interact(&self, ctx: &mut InteractContext) {
+        if let Some('d') = ctx.interaction.char_pressed {
+            self.dump(&ctx.state.graph);
+        }
+    }
+
+    fn dump(&self, graph: &Graph) {
+        let dump = graph.dump_state();
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            if let Ok(mut file) = File::create("graph_dump.txt") {
+                let _ = file.write_all(dump.as_bytes());
+                log::info!("Graph state dumped to graph_dump.txt");
+            }
+        }
+        #[cfg(target_arch = "wasm32")]
+        {
+            log::info!("{}", dump);
+        }
     }
 
     pub fn update(&self, state: &GameState) {

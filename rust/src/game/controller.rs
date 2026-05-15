@@ -70,6 +70,7 @@ impl GameController {
             resources: Some(resources),
             interaction,
         };
+        self.sanity.interact(&mut ctx);
         let should_exit = self.gameover.interact(&mut ctx);
         self.swap.interact(&mut ctx);
         self.highlight.interact(&mut ctx);
