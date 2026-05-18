@@ -10,6 +10,7 @@ const FREEZE_DURATION: f32 = 0.5;
 #[derive(Default)]
 pub struct BurstManager {
     /// The edge currently being "frozen" for the burst animation.
+    /// When present this edge will belong to graph.focus_bubble.
     pub active_edge: Option<EdgeKey>,
     pub timer: f32,
 }
@@ -54,7 +55,7 @@ impl BurstManager {
             self.timer -= ctx.dt;
             if self.timer <= 0.0 {
                 let position = ctx.state.graph.vertices.get_edge(ekey).points[0];
-                self.burst(&mut ctx.state.graph, ekey, ctx.state.focus_bubble);
+                self.burst(&mut ctx.state.graph, ekey);
                 ctx.state.sound_events.push(SoundEvent::Burst);
                 ctx.state.score_events.push(ScoreEvent::Burst { position });
 
@@ -70,19 +71,10 @@ impl BurstManager {
     }
 
     /// Performs the topological merge of two bubbles across a shared edge.
-    /// Ensures that the focus bubble survives the merge.
-    pub fn burst(&mut self, graph: &mut Graph, mut ekey: EdgeKey, focus_bubble: Option<BubbleKey>) {
+    /// The bubble associated with `ekey` survives the merge.
+    pub fn burst(&mut self, graph: &mut Graph, ekey: EdgeKey) {
         if !self.is_burstable(graph, ekey) {
             return;
-        }
-
-        // In graph.remove_edge(ekey), ekey.bubble survives (b_top).
-        // If our focus bubble is the twin, we must swap to ensure it survives.
-        if let Some(focus) = focus_bubble {
-            let twin_key = graph.vertices.get_edge(ekey).twin;
-            if graph.vertices.get_edge(twin_key).bubble == focus {
-                ekey = twin_key;
-            }
         }
 
         graph.remove_edge(ekey);
@@ -181,7 +173,7 @@ mod tests {
         );
 
         let ekey = burst_manager.active_edge.unwrap();
-        burst_manager.burst(&mut state.graph, ekey, state.focus_bubble);
+        burst_manager.burst(&mut state.graph, ekey);
 
         let swappable_bkey = state.graph.bubbles.get_swappable().unwrap();
         if let BubbleStyle::Swappable { swaps_left, .. } = state.graph.bubbles[swappable_bkey].style
