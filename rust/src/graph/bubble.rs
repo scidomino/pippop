@@ -37,19 +37,6 @@ impl BubbleStyle {
         }
     }
 
-    pub fn merge(&self, other: &BubbleStyle) -> BubbleStyle {
-        match (self, other) {
-            (BubbleStyle::OpenAir, _) | (_, BubbleStyle::OpenAir) => BubbleStyle::OpenAir,
-            (BubbleStyle::Colored { size: s1, color }, BubbleStyle::Colored { size: s2, .. }) => {
-                BubbleStyle::Colored {
-                    size: s1 + s2,
-                    color: *color,
-                }
-            }
-            _ => *self,
-        }
-    }
-
     pub fn get_target_area(&self) -> f32 {
         match self {
             BubbleStyle::Colored { size, .. } | BubbleStyle::Invisible { size } => {

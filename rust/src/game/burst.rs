@@ -85,7 +85,13 @@ impl BurstManager {
         let tstyle = graph.bubbles[tbkey].style;
 
         // Merge the other bubble's style into the surviving bubble's style
-        graph.bubbles[bkey].style = bstyle.merge(&tstyle);
+        if let (BubbleStyle::Colored { size: s1, .. }, BubbleStyle::Colored { size: s2, .. }) =
+            (bstyle, tstyle)
+        {
+            if let BubbleStyle::Colored { size, .. } = &mut graph.bubbles[bkey].style {
+                *size = s1 + s2;
+            }
+        }
 
         graph.remove_edge(ekey);
 
