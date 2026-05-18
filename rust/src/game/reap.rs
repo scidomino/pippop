@@ -20,6 +20,9 @@ impl ReapManager {
             return;
         }
         let graph = &ctx.state.graph;
+        // collect edges to remove. Note that these are always the "twin"
+        // edge of the bubble being removed, so that we can merge into
+        // the surviving bubble.
         let to_remove: Vec<_> = graph
             .bubbles
             .iter()

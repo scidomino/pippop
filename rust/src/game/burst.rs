@@ -77,6 +77,16 @@ impl BurstManager {
             return;
         }
 
+        let bkey = graph.vertices.get_edge(ekey).bubble;
+        let tkey = graph.vertices.get_edge(ekey).twin;
+        let tbkey = graph.vertices.get_edge(tkey).bubble;
+
+        let bstyle = graph.bubbles[bkey].style;
+        let tstyle = graph.bubbles[tbkey].style;
+
+        // Merge the other bubble's style into the surviving bubble's style
+        graph.bubbles[bkey].style = bstyle.merge(&tstyle);
+
         graph.remove_edge(ekey);
 
         // Every wall burst grants the player an extra swap

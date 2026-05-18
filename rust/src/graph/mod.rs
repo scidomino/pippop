@@ -56,10 +56,8 @@ impl Graph {
         graph
     }
 
-    /// Removes an edge and its twin by removing their vertices and merging the two bubbles they separate.
-    ///
-    /// Special cases:
-    /// - If the edge has the same bubble on both sides, it cannot be removed.
+    /// Removes an edge. Delete the bubble on the other side whose
+    /// edges are add to the bubble on this side.
     ///
     /// ```text
     /// Before:           After:
@@ -94,7 +92,7 @@ impl Graph {
 
         // Note: it's ok if b_left == b_right. We handle that below.
         if b_top == b_left || b_top == b_right || b_bottom == b_left || b_bottom == b_right {
-            // Can't remove edge with same bubble on both sides
+            // Can't remove a sibling edge with same bubble on both sides
             // as this would create a disconnected graph.
             return;
         }
@@ -108,11 +106,6 @@ impl Graph {
             // the left or right bubble only has one edge.
             return;
         }
-
-        // Merge b_bottom into b_top
-        let bottom_style = self.bubbles[b_bottom].style;
-        let mut_b_top = &mut self.bubbles[b_top];
-        mut_b_top.style = mut_b_top.style.merge(&bottom_style);
 
         if ekey_next == tkey_prev_twin {
             // the top bubble only has two edges so b_left == b_right.
