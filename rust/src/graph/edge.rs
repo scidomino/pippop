@@ -23,19 +23,11 @@ impl Slot {
     }
 
     pub fn next(self) -> Self {
-        match self {
-            Slot::A => Slot::B,
-            Slot::B => Slot::C,
-            Slot::C => Slot::A,
-        }
+        Self::all()[(self as usize + 1) % 3]
     }
 
     pub fn prev(self) -> Self {
-        match self {
-            Slot::A => Slot::C,
-            Slot::B => Slot::A,
-            Slot::C => Slot::B,
-        }
+        Self::all()[(self as usize + 2) % 3]
     }
 }
 
