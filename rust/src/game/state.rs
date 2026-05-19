@@ -19,17 +19,16 @@ impl Default for ScoreKeeper {
 
 impl ScoreKeeper {
     pub fn new() -> Self {
-        let mut keeper = Self {
+        let high_score = STORAGE
+            .lock()
+            .unwrap()
+            .get("high_score")
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(0);
+        Self {
             score: 0,
-            high_score: 0,
-        };
-        let storage = STORAGE.lock().unwrap();
-        if let Some(saved) = storage.get("high_score") {
-            if let Ok(score) = saved.parse() {
-                keeper.high_score = score;
-            }
+            high_score,
         }
-        keeper
     }
 
     pub fn add_points(&mut self, points: i64) {
