@@ -1,7 +1,6 @@
 use crate::game::state::{GamePhase, InteractContext};
 use crate::graphics::{colors, RenderContext};
 use macroquad::prelude::*;
-use std::mem;
 
 #[derive(Default)]
 pub struct PauseManager;
@@ -20,20 +19,11 @@ impl PauseManager {
     }
 
     fn toggle_pause(&self, ctx: &mut InteractContext) {
-        match &ctx.state.phase {
-            GamePhase::Paused(_) => {
-                if let GamePhase::Paused(inner) =
-                    mem::replace(&mut ctx.state.phase, GamePhase::Normal)
-                {
-                    ctx.state.phase = *inner;
-                }
-            }
-            GamePhase::GameOver => {} // Don't allow pausing on game over
-            _ => {
-                let old_phase = mem::replace(&mut ctx.state.phase, GamePhase::Normal);
-                ctx.state.phase = GamePhase::Paused(Box::new(old_phase));
-            }
-        }
+        ctx.state.phase = match &ctx.state.phase {
+            GamePhase::Paused(inner) => *inner.clone(),
+            GamePhase::GameOver => GamePhase::GameOver,
+            old => GamePhase::Paused(Box::new(old.clone())),
+        };
     }
 
     pub fn draw(&self, ctx: &RenderContext) {
