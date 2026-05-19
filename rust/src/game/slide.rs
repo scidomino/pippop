@@ -1,5 +1,5 @@
 use crate::game::state::{GamePhase, UpdateContext};
-use crate::graph::edge::{EdgeKey, Slot};
+use crate::graph::edge::EdgeKey;
 use crate::graph::Graph;
 use std::collections::HashMap;
 
@@ -36,20 +36,13 @@ impl SlideManager {
 
     fn get_first_slidable(&self, graph: &Graph) -> Option<EdgeKey> {
         graph.vertices.iter().find_map(|(vkey, vertex)| {
-            Slot::all().into_iter().find_map(|slot| {
-                let edge_key = vkey.slot(slot);
-                let edge = vertex.edge(edge_key);
-
-                graph
-                    .vertices
-                    .get(edge.twin.vertex)
-                    .and_then(|twin_vertex| {
-                        let length = vertex.point.position.distance(twin_vertex.point.position);
-                        (length < MIN_LENGTH
-                            && !self.recently_slid.contains_key(&edge_key)
-                            && !self.recently_slid.contains_key(&edge.twin))
-                        .then_some(edge_key)
-                    })
+            vkey.edge_keys().into_iter().find(|&ekey| {
+                let edge = vertex.edge(ekey);
+                graph.vertices.get(edge.twin.vertex).is_some_and(|twin| {
+                    vertex.point.position.distance(twin.point.position) < MIN_LENGTH
+                        && !self.recently_slid.contains_key(&ekey)
+                        && !self.recently_slid.contains_key(&edge.twin)
+                })
             })
         })
     }
