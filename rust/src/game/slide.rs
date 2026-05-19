@@ -38,11 +38,10 @@ impl SlideManager {
         graph.vertices.iter().find_map(|(vkey, vertex)| {
             vkey.edge_keys().into_iter().find(|&ekey| {
                 let edge = vertex.edge(ekey);
-                graph.vertices.get(edge.twin.vertex).is_some_and(|twin| {
-                    vertex.point.position.distance(twin.point.position) < MIN_LENGTH
-                        && !self.recently_slid.contains_key(&ekey)
-                        && !self.recently_slid.contains_key(&edge.twin)
-                })
+                let twin = &graph.vertices[edge.twin.vertex];
+                vertex.point.position.distance(twin.point.position) < MIN_LENGTH
+                    && !self.recently_slid.contains_key(&ekey)
+                    && !self.recently_slid.contains_key(&edge.twin)
             })
         })
     }
