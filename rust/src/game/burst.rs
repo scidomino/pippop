@@ -170,7 +170,7 @@ mod tests {
         let vkey = state.graph.vertices.keys().next().unwrap();
         state
             .graph
-            .spawn(vkey, BubbleStyle::colored(colors::TURQUOISE));
+            .spawn(vkey.edge_keys()[1], BubbleStyle::colored(colors::TURQUOISE));
 
         let mut burst_manager = BurstManager::new();
         // Find the colored bubble that isn't the swappable

@@ -44,28 +44,32 @@ impl SpawnManager {
     }
 
     fn spawn(&mut self, graph: &mut Graph) {
-        let open_air_vertices = graph.get_open_air_vertices();
-        if open_air_vertices.is_empty() {
+        let open_air = graph.get_open_air();
+        let open_air_edges = &graph.bubbles[open_air].edges;
+        if open_air_edges.is_empty() {
             return;
         }
 
-        let vkey = *open_air_vertices.choose().expect("open air has vertices");
+        let ekey = *open_air_edges.choose().expect("open air has edges");
+        let twin_ekey = graph.vertices.get_edge(ekey).twin;
 
-        let adjacent_colors: Vec<Color> = graph.vertices[vkey]
-            .edges
-            .iter()
-            .filter_map(|edge| match graph.bubbles[edge.bubble].style {
-                BubbleStyle::Colored { color, .. } => Some(color),
-                _ => None,
-            })
-            .collect();
+        let mut adjacent_colors = Vec::new();
+        for vkey in [ekey.vertex, twin_ekey.vertex] {
+            for edge in &graph.vertices[vkey].edges {
+                if let BubbleStyle::Colored { color, .. } = graph.bubbles[edge.bubble].style {
+                    if !adjacent_colors.contains(&color) {
+                        adjacent_colors.push(color);
+                    }
+                }
+            }
+        }
 
         let mut valid_colors = self.colors.clone();
         valid_colors.retain(|c| !adjacent_colors.contains(c));
 
         let color = valid_colors.choose().expect("some colors to choose from");
 
-        graph.spawn(vkey, BubbleStyle::colored(*color));
+        graph.spawn(ekey, BubbleStyle::colored(*color));
     }
 
     fn get_next_spawn_time() -> f32 {
@@ -113,7 +117,8 @@ mod tests {
         // Fill up to MAX_BUBBLES
         while graph.bubbles.len() < MAX_BUBBLES {
             let vkey = graph.vertices.keys().next().unwrap();
-            graph.spawn(vkey, BubbleStyle::colored(colors::TURQUOISE));
+            let ekey = vkey.edge_keys()[0];
+            graph.spawn(ekey, BubbleStyle::colored(colors::TURQUOISE));
         }
 
         let mut state = GameState::new(graph);

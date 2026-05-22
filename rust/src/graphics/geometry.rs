@@ -17,6 +17,21 @@ impl Bezier {
         }
     }
 
+    pub fn evaluate(&self, t: f32) -> Vec2 {
+        let mt = 1.0 - t;
+        let mt2 = mt * mt;
+        let mt3 = mt2 * mt;
+        let t2 = t * t;
+        let t3 = t2 * t;
+
+        let p0 = vec2(self.x.x, self.y.x);
+        let p1 = vec2(self.x.y, self.y.y);
+        let p2 = vec2(self.x.z, self.y.z);
+        let p3 = vec2(self.x.w, self.y.w);
+
+        p0 * mt3 + p1 * (3.0 * mt2 * t) + p2 * (3.0 * mt * t2) + p3 * t3
+    }
+
     /// Calculates area contribution from the start vertex and first control point only.
     /// In the half-edge graph, (edge.half_area - twin_edge.half_area) completes
     /// the total area integral for the Bezier curve.

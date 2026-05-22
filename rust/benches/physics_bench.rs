@@ -14,8 +14,8 @@ fn bench_physics(c: &mut Criterion) {
     // Warm up and grow the graph to a reasonable size to make the benchmark meaningful
     for _ in 0..15 {
         let vkeys: Vec<_> = graph.vertices.keys().collect();
-        // Just pick the first vertex and spawn a bubble on it
-        graph.spawn(vkeys[0], BubbleStyle::colored(colors::ROSE));
+        // Just pick the first edge and spawn a bubble on it
+        graph.spawn(vkeys[0].edge_keys()[0], BubbleStyle::colored(colors::ROSE));
         // Advance physics a few times so the new bubbles settle
         for _ in 0..20 {
             physics::advance_frame(&mut graph);

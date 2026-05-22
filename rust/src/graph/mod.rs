@@ -368,52 +368,70 @@ impl Graph {
             .unwrap_or_default()
     }
 
-    /// Spawns a new bubble by "splitting" a vertex into three vertices.
+    /// Spawns a new bubble by splitting an edge.
     ///
-    /// This operation inserts two new vertices and creates a small triangular
-    /// bubble between the original vertex and the two new ones.
-    pub fn spawn(&mut self, vkey: VertexKey, style: BubbleStyle) {
-        let vertex = &self.vertices[vkey];
-        let ekeys: [EdgeKey; 3] = vkey.edge_keys();
-        let twin_ekeys = [
-            vertex.edges[0].twin,
-            vertex.edges[1].twin,
-            vertex.edges[2].twin,
-        ];
-        let bkeys = [
-            vertex.edges[0].bubble,
-            vertex.edges[1].bubble,
-            vertex.edges[2].bubble,
-        ];
+    /// This operation inserts two new vertices along the edge at 40% and 60%
+    /// of the Bezier curve length, and connects them to form a lens-shaped digon bubble.
+    pub fn spawn(&mut self, ekey: EdgeKey, style: BubbleStyle) {
+        let twin_ekey = self.vertices.get_edge(ekey).twin;
+        let bkey = self.vertices.get_edge(ekey).bubble;
+        let tbkey = self.vertices.get_edge(twin_ekey).bubble;
 
-        let vpoint = vertex.point.position;
-        let epoint1 = vertex.edges[0].point.position;
-        let epoint2 = vertex.edges[1].point.position;
+        let bezier = self.vertices.get_bezier(ekey);
+        let new_v1pos = bezier.evaluate(0.4);
+        let new_v2pos = bezier.evaluate(0.6);
 
         let new_vkey1 = self
             .vertices
-            .insert(Vertex::new(Point::from_vec2(vpoint.midpoint(epoint1))));
+            .insert(Vertex::new(Point::from_vec2(new_v1pos)));
         let new_vkey2 = self
             .vertices
-            .insert(Vertex::new(Point::from_vec2(vpoint.midpoint(epoint2))));
+            .insert(Vertex::new(Point::from_vec2(new_v2pos)));
 
         let new_ekeys1 = new_vkey1.edge_keys();
         let new_ekeys2 = new_vkey2.edge_keys();
 
-        // Connect the new vertices to each other.
-        self.link_twins(new_ekeys1[0], new_ekeys2[0]);
+        // Connect the new vertices to each other and to original endpoints.
+        self.link_twins(ekey, new_ekeys1[Slot::A]);
+        self.link_twins(twin_ekey, new_ekeys2[Slot::A]);
+        self.link_twins(new_ekeys1[Slot::B], new_ekeys2[Slot::C]);
+        self.link_twins(new_ekeys1[Slot::C], new_ekeys2[Slot::B]);
 
-        self.link_twins(new_ekeys1[1], ekeys[0]);
-        self.link_twins(new_ekeys1[2], twin_ekeys[0]);
+        // Initialize the control points to point in the right direction (10% of the way to the twin vertex).
+        let pos_a = self.vertices[ekey.vertex].point.position;
+        let pos_b = self.vertices[twin_ekey.vertex].point.position;
 
-        self.link_twins(new_ekeys2[1], twin_ekeys[1]);
-        self.link_twins(new_ekeys2[2], ekeys[1]);
+        self.vertices
+            .get_edge_mut(new_ekeys1[Slot::A])
+            .point
+            .position = new_v1pos.lerp(pos_a, 0.1);
+        self.vertices
+            .get_edge_mut(new_ekeys2[Slot::A])
+            .point
+            .position = new_v2pos.lerp(pos_b, 0.1);
+
+        self.vertices
+            .get_edge_mut(new_ekeys1[Slot::B])
+            .point
+            .position = new_v1pos.lerp(new_v2pos, 0.1);
+        self.vertices
+            .get_edge_mut(new_ekeys2[Slot::C])
+            .point
+            .position = new_v2pos.lerp(new_v1pos, 0.1);
+
+        self.vertices
+            .get_edge_mut(new_ekeys1[Slot::C])
+            .point
+            .position = new_v1pos.lerp(new_v2pos, 0.1);
+        self.vertices
+            .get_edge_mut(new_ekeys2[Slot::B])
+            .point
+            .position = new_v2pos.lerp(new_v1pos, 0.1);
 
         let new_bkey = self.bubbles.insert(Bubble::new(style));
-        self.rebubble(new_bkey, ekeys[0]);
-        self.rebubble(bkeys[1], ekeys[1]);
-        self.rebubble(bkeys[2], ekeys[2]);
-        self.rebubble(bkeys[0], new_ekeys2[0]);
+        self.rebubble(new_bkey, new_ekeys1[Slot::B]);
+        self.rebubble(bkey, ekey);
+        self.rebubble(tbkey, twin_ekey);
         self.update_cache();
     }
 }
@@ -548,21 +566,64 @@ mod tests {
 
         let oa_key = graph.get_open_air();
 
-        // Spawn a couple times to get a non-trivial graph
-        let mut vkeys: Vec<_> = graph.vertices.keys().collect();
-        graph.spawn(vkeys[0], BubbleStyle::colored(colors::GREEN));
-        vkeys = graph.vertices.keys().collect();
-        graph.spawn(vkeys[2], BubbleStyle::colored(colors::YELLOW));
+        // Find the initial internal edge separating Turquoise and Rose
+        let mut init_internal = None;
+        for (vkey, _) in &graph.vertices {
+            for slot in Slot::all() {
+                let ekey = vkey.slot(slot);
+                let twin_bubble = graph
+                    .vertices
+                    .get_edge(graph.vertices.get_edge(ekey).twin)
+                    .bubble;
+                if graph.vertices.get_edge(ekey).bubble != oa_key && twin_bubble != oa_key {
+                    init_internal = Some(ekey);
+                    break;
+                }
+            }
+            if init_internal.is_some() {
+                break;
+            }
+        }
+        let init_internal = init_internal.expect("Should find initial internal edge");
+        graph.spawn(init_internal, BubbleStyle::colored(colors::GREEN));
 
-        // Find an edge that separates two distinct colored bubbles
+        // Find the newly spawned Green bubble and spawn Yellow on one of its edges
+        let green_bubble = graph
+            .bubbles
+            .iter()
+            .find(|(_, b)| {
+                matches!(
+                    b.style,
+                    BubbleStyle::Colored {
+                        color: colors::GREEN,
+                        ..
+                    }
+                )
+            })
+            .map(|(k, _)| k)
+            .unwrap();
+        let yellow_spawn_edge = graph.bubbles[green_bubble].edges[0];
+        graph.spawn(yellow_spawn_edge, BubbleStyle::colored(colors::YELLOW));
+
+        // Find an edge that separates two distinct colored bubbles and can be slid (T1 flip)
         let mut target_ekey = None;
         for (vkey, vertex) in &graph.vertices {
             for slot in Slot::all() {
-                let edge = vertex.edge(vkey.slot(slot));
-                let twin_bubble = graph.vertices.get_edge(edge.twin).bubble;
+                let ekey = vkey.slot(slot);
+                let edge = vertex.edge(ekey);
+                let twin_ekey = edge.twin;
+                let twin_bubble = graph.vertices.get_edge(twin_ekey).bubble;
                 if edge.bubble != oa_key && twin_bubble != oa_key && edge.bubble != twin_bubble {
-                    target_ekey = Some(vkey.slot(slot));
-                    break;
+                    let ekey_prev = ekey.prev_on_vertex();
+                    let tkey_prev = twin_ekey.prev_on_vertex();
+                    let ekey_prev_tkey = graph.vertices.get_edge(ekey_prev).twin;
+                    let tkey_prev_tkey = graph.vertices.get_edge(tkey_prev).twin;
+                    let b_right = graph.vertices.get_edge(ekey_prev_tkey).bubble;
+                    let b_left = graph.vertices.get_edge(tkey_prev_tkey).bubble;
+                    if b_right != b_left {
+                        target_ekey = Some(ekey);
+                        break;
+                    }
                 }
             }
             if target_ekey.is_some() {
