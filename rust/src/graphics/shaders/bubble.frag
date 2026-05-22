@@ -8,9 +8,20 @@ void main() {
     // UV is 0.0 to 1.0. Center is 0.5, 0.5.
     vec2 rel = uv - 0.5;
     
-    // 1. Specular Highlight (Top-Left)
-    vec2 spec_pos = vec2(0.3, 0.3);
-    float spec = pow(max(0.0, 1.0 - length(uv - spec_pos) / 0.15), 32.0);
+    // 1. Specular Highlight (Crescent Shape in Top-Left)
+    vec2 arc_center = vec2(0.04, 0.04);
+    vec2 rel_arc = rel - arc_center;
+    float r = length(rel_arc);
+    float arc_r = 0.38;
+    float dist = abs(r - arc_r);
+    float ring = pow(max(0.0, 1.0 - dist / 0.11), 2.0);
+    
+    vec2 rel_norm = rel_arc / (r + 0.0001);
+    vec2 light_dir = normalize(vec2(-1.0, -1.0));
+    float dot_p = dot(rel_norm, light_dir);
+    float angle_fade = pow(max(0.0, dot_p), 16.0);
+    
+    float spec = ring * angle_fade;
     
     // 2. Directional Shading (Light from Top-Left, Shadow on Bottom-Right)
     vec2 shadow_offset = vec2(-0.2, -0.2);
