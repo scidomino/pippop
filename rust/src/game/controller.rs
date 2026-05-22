@@ -82,6 +82,12 @@ impl GameController {
     }
 
     pub fn update(&mut self, resources: &Resources, dt: f32) {
+        let dt = if is_key_down(KeyCode::S) {
+            dt * 0.2
+        } else {
+            dt
+        };
+
         let mut ctx = UpdateContext {
             state: &mut self.state,
             resources: Some(resources),
