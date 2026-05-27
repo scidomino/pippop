@@ -95,7 +95,7 @@ fn accelerate(graph: &mut Graph, accels: &GraphVector) {
     }
 }
 
-const MAX_VELOCITY: f32 = 20.0;
+const MAX_VELOCITY: f32 = 10.0;
 
 fn accelerate_point(point: &mut Point, accel: Vec2) {
     // Cap velocity to prevent instability.

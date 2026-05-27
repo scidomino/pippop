@@ -4,6 +4,7 @@ use crate::graphics::geometry::Bezier;
 use macroquad::prelude::{vec2, Vec2, Vec4};
 
 const PRESSURE_TENSION: f32 = 0.04;
+const MAX_PRESSURE_DIFF: f32 = 10.0;
 
 /// Computes and applies pressure forces to all vertices and control points in the graph.
 ///
@@ -20,7 +21,7 @@ pub fn update_force(graph: &Graph, force: &mut GraphVector) {
 
             let p1 = graph.bubbles[edge.bubble].get_pressure();
             let p2 = graph.bubbles[twin_bubble].get_pressure();
-            let pressure_diff = (p1 - p2).clamp(-2.0, 2.0);
+            let pressure_diff = (p1 - p2).clamp(-MAX_PRESSURE_DIFF, MAX_PRESSURE_DIFF);
             let pressure = pressure_diff * PRESSURE_TENSION;
 
             vertex_force += pressure * vertex_pressure_force(&bezier);
