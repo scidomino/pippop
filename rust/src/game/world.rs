@@ -35,9 +35,5 @@ impl WorldManager {
             let points = bubble::get_bubble_points(&ctx.state.graph, bkey);
             bubble::draw_bubble(ctx.resources, &bubble.style, &points, bubble.centroid);
         }
-
-        if crate::game::is_debug() {
-            bubble::draw_debug_points(&ctx.state.graph);
-        }
     }
 }
