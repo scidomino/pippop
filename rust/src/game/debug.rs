@@ -1,6 +1,7 @@
 use crate::game::state::{GameState, InteractContext};
 use crate::graph::{bubble::BubbleStyle, Graph};
-use macroquad::prelude::KeyCode;
+use crate::graphics::RenderContext;
+use macroquad::prelude::{draw_text, set_camera, set_default_camera, KeyCode};
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::Write;
@@ -49,6 +50,25 @@ impl DebugManager {
             log::error!("Graph State Dumped to debug_fail_dump.txt");
             panic!("Graph Invariant Failure: {e}");
         }
+    }
+
+    pub fn draw(&self, ctx: &RenderContext) {
+        if !crate::game::is_debug() {
+            return;
+        }
+
+        // Draw FPS in screen space
+        set_default_camera();
+        draw_text(
+            &format!("FPS: {:03}", macroquad::time::get_fps()),
+            10.0,
+            30.0,
+            30.0,
+            crate::graphics::colors::WHITE,
+        );
+
+        // Restore camera
+        set_camera(ctx.camera);
     }
 
     pub fn check(&self, state: &GameState) -> Result<(), String> {

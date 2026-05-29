@@ -38,19 +38,6 @@ impl WorldManager {
 
         if crate::game::is_debug() {
             bubble::draw_debug_points(&ctx.state.graph);
-
-            // Draw FPS in screen space if debug is enabled
-            set_default_camera();
-            macroquad::text::draw_text(
-                &format!("FPS: {:03}", macroquad::time::get_fps()),
-                10.0,
-                30.0,
-                30.0,
-                crate::graphics::colors::WHITE,
-            );
-
-            // Restore camera
-            set_camera(ctx.camera);
         }
     }
 }

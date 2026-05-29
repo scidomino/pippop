@@ -124,5 +124,6 @@ impl GameController {
         self.score.draw(&ctx);
         self.gameover.draw(&ctx);
         self.pause.draw(&ctx);
+        self.debug.draw(&ctx);
     }
 }
