@@ -1,10 +1,10 @@
 use crate::game::burst::BurstManager;
+use crate::game::debug::DebugManager;
 use crate::game::gameover::GameOverManager;
 use crate::game::highlight::HighlightManager;
 use crate::game::pause::PauseManager;
 use crate::game::pop::PopManager;
 use crate::game::reap::ReapManager;
-use crate::game::sanity::SanityManager;
 use crate::game::score::ScoreManager;
 use crate::game::slide::SlideManager;
 use crate::game::sound::SoundManager;
@@ -31,7 +31,7 @@ pub struct GameController {
     pub reap: ReapManager,
     pub highlight: HighlightManager,
     pub gameover: GameOverManager,
-    pub sanity: SanityManager,
+    pub debug: DebugManager,
     pub sound: SoundManager,
     pub pause: PauseManager,
 }
@@ -53,7 +53,7 @@ impl GameController {
             reap: ReapManager::new(),
             highlight: HighlightManager::new(),
             gameover: GameOverManager::new(),
-            sanity: SanityManager::new(),
+            debug: DebugManager::new(),
             sound: SoundManager::new(),
             pause: PauseManager::new(),
         }
@@ -74,7 +74,7 @@ impl GameController {
             interaction,
         };
         self.pause.interact(&mut ctx);
-        self.sanity.interact(&mut ctx);
+        self.debug.interact(&mut ctx);
         let should_exit = self.gameover.interact(&mut ctx);
         self.swap.interact(&mut ctx);
         self.highlight.interact(&mut ctx);
@@ -106,7 +106,7 @@ impl GameController {
         self.gameover.update(&mut ctx);
         self.sound.update(&mut ctx);
 
-        self.sanity.update(&self.state);
+        self.debug.update(&self.state);
     }
 
     pub fn draw(&self, resources: &Resources, camera: &Camera2D) {

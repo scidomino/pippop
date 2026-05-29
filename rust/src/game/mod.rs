@@ -18,12 +18,12 @@ pub fn is_debug() -> bool {
 
 pub mod burst;
 pub mod controller;
+pub mod debug;
 pub mod gameover;
 pub mod highlight;
 pub mod pause;
 pub mod pop;
 pub mod reap;
-pub mod sanity;
 pub mod score;
 pub mod slide;
 pub mod sound;

@@ -6,9 +6,9 @@ use std::fs::File;
 use std::io::Write;
 
 #[derive(Default)]
-pub struct SanityManager;
+pub struct DebugManager;
 
-impl SanityManager {
+impl DebugManager {
     pub fn new() -> Self {
         Self
     }
@@ -42,11 +42,11 @@ impl SanityManager {
             let dump = state.graph.dump_state();
             #[cfg(not(target_arch = "wasm32"))]
             {
-                if let Ok(mut file) = File::create("sanity_fail_dump.txt") {
+                if let Ok(mut file) = File::create("debug_fail_dump.txt") {
                     let _ = file.write_all(dump.as_bytes());
                 }
             }
-            log::error!("Graph State Dumped to sanity_fail_dump.txt");
+            log::error!("Graph State Dumped to debug_fail_dump.txt");
             panic!("Graph Invariant Failure: {e}");
         }
     }
