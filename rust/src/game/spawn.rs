@@ -6,6 +6,7 @@ use macroquad::rand::{gen_range, ChooseRandom};
 
 const AVG_WAIT: f32 = 2.0;
 const MAX_BUBBLES: usize = 40;
+const LOW_BUBBLE_SPEEDUP: f32 = 5.0;
 
 pub struct SpawnManager {
     pub colors: Vec<Color>,
@@ -29,7 +30,7 @@ impl SpawnManager {
 
         let count = ctx.state.graph.bubbles.values().count();
         let multiplier = if count < self.colors.len() * 3 {
-            5.0
+            LOW_BUBBLE_SPEEDUP
         } else {
             1.0
         };
