@@ -5,6 +5,7 @@ use macroquad::prelude::{draw_text, set_camera, set_default_camera, KeyCode};
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::Write;
+use std::sync::OnceLock;
 
 #[derive(Default)]
 pub struct DebugManager;
@@ -36,7 +37,7 @@ impl DebugManager {
     }
 
     pub fn update(&self, state: &GameState) {
-        if !crate::game::is_debug() {
+        if !is_debug() {
             return;
         }
         if let Err(e) = self.check(state) {
@@ -53,7 +54,7 @@ impl DebugManager {
     }
 
     pub fn draw(&self, ctx: &RenderContext) {
-        if !crate::game::is_debug() {
+        if !is_debug() {
             return;
         }
 
@@ -182,4 +183,9 @@ impl DebugManager {
 
         Ok(())
     }
+}
+
+fn is_debug() -> bool {
+    static DEBUG_MODE: OnceLock<bool> = OnceLock::new();
+    *DEBUG_MODE.get_or_init(|| std::env::var("DEBUG").is_ok())
 }
