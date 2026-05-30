@@ -60,7 +60,7 @@ impl DebugManager {
 
         // Draw control points in world space
         set_camera(ctx.camera);
-        crate::graphics::bubble::draw_debug_points(&ctx.state.graph);
+        crate::graphics::bubble::draw_ctrl_points(&ctx.state.graph);
 
         // Draw FPS in screen space
         set_default_camera();

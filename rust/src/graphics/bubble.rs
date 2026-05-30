@@ -91,7 +91,7 @@ pub fn draw_bubble(resources: &Resources, style: &BubbleStyle, points: &[Vec2], 
     }
 }
 
-pub fn draw_debug_points(graph: &Graph) {
+pub fn draw_ctrl_points(graph: &Graph) {
     for (_, vertex) in &graph.vertices {
         for edge in &vertex.edges {
             // Draw edge control point
