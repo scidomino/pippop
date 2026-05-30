@@ -8,11 +8,13 @@ use std::io::Write;
 use std::sync::OnceLock;
 
 #[derive(Default)]
-pub struct DebugManager;
+pub struct DebugManager {
+    pub open_air_loop_warning: Option<i32>,
+}
 
 impl DebugManager {
     pub fn new() -> Self {
-        Self
+        Self::default()
     }
 
     pub fn interact(&self, ctx: &mut InteractContext) {
@@ -36,10 +38,11 @@ impl DebugManager {
         }
     }
 
-    pub fn update(&self, state: &GameState) {
+    pub fn update(&mut self, state: &GameState) {
         if !is_debug() {
             return;
         }
+        self.open_air_loop_warning = calculate_open_air_turning_number(&state.graph);
         if let Err(e) = self.check(state) {
             let dump = state.graph.dump_state();
             #[cfg(not(target_arch = "wasm32"))]
@@ -71,6 +74,23 @@ impl DebugManager {
             30.0,
             crate::graphics::colors::WHITE,
         );
+
+        // Draw warning if turning number is not 1
+        if let Some(tn) = self.open_air_loop_warning {
+            if tn != 1 {
+                let warning_text = format!(
+                    "WARNING: Open Air Bubble has {} loops (expected 1 CCW loop)!",
+                    tn
+                );
+                draw_text(
+                    &warning_text,
+                    20.0,
+                    macroquad::window::screen_height() - 30.0,
+                    30.0,
+                    crate::graphics::colors::RED,
+                );
+            }
+        }
 
         // Restore camera
         set_camera(ctx.camera);
@@ -185,7 +205,116 @@ impl DebugManager {
     }
 }
 
+fn calculate_open_air_turning_number(graph: &Graph) -> Option<i32> {
+    // Find open air bubble
+    let open_air_key = graph.bubbles.iter().find_map(|(k, b)| {
+        if matches!(b.style, BubbleStyle::OpenAir) {
+            Some(k)
+        } else {
+            None
+        }
+    })?;
+
+    let bubble = &graph.bubbles[open_air_key];
+    if bubble.edges.is_empty() {
+        return None;
+    }
+
+    // Get the list of vertices for the open air bubble
+    let mut vertices = Vec::new();
+    for &ekey in &bubble.edges {
+        let pos = graph.vertices[ekey.vertex].point.position;
+        vertices.push(pos);
+    }
+
+    let n = vertices.len();
+    if n < 3 {
+        return Some(1);
+    }
+
+    // Calculate edges and their angles
+    let mut angles = Vec::with_capacity(n);
+    for i in 0..n {
+        let p1 = vertices[i];
+        let p2 = vertices[(i + 1) % n];
+        let edge = p2 - p1;
+        angles.push(edge.y.atan2(edge.x));
+    }
+
+    // Sum angle differences
+    let mut total_turn = 0.0;
+    for i in 0..n {
+        let a1 = angles[i];
+        let a2 = angles[(i + 1) % n];
+        let mut diff = a2 - a1;
+
+        // Normalize diff to [-PI, PI]
+        while diff > std::f32::consts::PI {
+            diff -= 2.0 * std::f32::consts::PI;
+        }
+        while diff < -std::f32::consts::PI {
+            diff += 2.0 * std::f32::consts::PI;
+        }
+
+        total_turn += diff;
+    }
+
+    let turning_number = (total_turn / (2.0 * std::f32::consts::PI)).round() as i32;
+    Some(turning_number)
+}
+
 fn is_debug() -> bool {
     static DEBUG_MODE: OnceLock<bool> = OnceLock::new();
     *DEBUG_MODE.get_or_init(|| std::env::var("DEBUG").is_ok())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::graph::edge::{EdgeKey, Slot};
+    use crate::graph::point::Point;
+    use crate::graph::vertex::Vertex;
+    use crate::graphics::colors;
+
+    #[test]
+    fn test_open_air_turning_number() {
+        let graph = Graph::new(
+            BubbleStyle::swappable(5),
+            BubbleStyle::colored(colors::TURQUOISE),
+        );
+        let tn = calculate_open_air_turning_number(&graph);
+        assert_eq!(tn, Some(1));
+    }
+
+    #[test]
+    fn test_open_air_turning_number_figure_eight() {
+        use macroquad::prelude::vec2;
+
+        let mut graph = Graph::new(
+            BubbleStyle::swappable(5),
+            BubbleStyle::colored(colors::TURQUOISE),
+        );
+
+        let v3 = graph.vertices.insert(Vertex::new(Point::new(0.0, 0.0)));
+        let v4 = graph.vertices.insert(Vertex::new(Point::new(0.0, 0.0)));
+
+        let oa_key = graph.get_open_air();
+
+        let keys = vec![
+            EdgeKey::new(graph.vertices.keys().nth(0).unwrap(), Slot::A),
+            EdgeKey::new(graph.vertices.keys().nth(1).unwrap(), Slot::A),
+            EdgeKey::new(v3, Slot::A),
+            EdgeKey::new(v4, Slot::A),
+        ];
+
+        graph.vertices.inner[keys[0].vertex].point.position = vec2(0.0, 0.0);
+        graph.vertices.inner[keys[1].vertex].point.position = vec2(1.0, 1.0);
+        graph.vertices.inner[keys[2].vertex].point.position = vec2(1.0, 0.0);
+        graph.vertices.inner[keys[3].vertex].point.position = vec2(0.0, 1.0);
+
+        graph.bubbles.inner[oa_key].edges = keys;
+
+        let tn = calculate_open_air_turning_number(&graph);
+        assert_eq!(tn, Some(0));
+    }
 }
