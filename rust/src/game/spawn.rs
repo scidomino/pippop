@@ -38,9 +38,17 @@ impl SpawnManager {
         self.next_spawn_time -= ctx.dt * multiplier;
 
         if self.next_spawn_time < 0.0 && matches!(ctx.state.phase, GamePhase::Normal) {
-            self.spawn(&mut ctx.state.graph);
-            self.next_spawn_time = Self::get_next_spawn_time();
-            ctx.state.sound_events.push(SoundEvent::Spawn);
+            let has_intersection = ctx
+                .state
+                .graph
+                .bubbles
+                .values()
+                .any(|b| b.has_self_intersection(&ctx.state.graph));
+            if !has_intersection {
+                self.spawn(&mut ctx.state.graph);
+                self.next_spawn_time = Self::get_next_spawn_time();
+                ctx.state.sound_events.push(SoundEvent::Spawn);
+            }
         }
     }
 
@@ -100,7 +108,7 @@ mod tests {
             dt: 1.0,
         });
 
-        assert_eq!(manager.next_spawn_time, initial_time - 5.0);
+        assert_eq!(manager.next_spawn_time, initial_time - LOW_BUBBLE_SPEEDUP);
     }
 
     #[test]
