@@ -7,6 +7,8 @@ use std::fs::File;
 use std::io::Write;
 use std::sync::OnceLock;
 
+const MIN_EDGE_LEN_SQ: f32 = 1.0;
+
 #[derive(Default)]
 pub struct DebugManager {
     pub open_air_loop_warning: Option<i32>,
@@ -64,6 +66,47 @@ impl DebugManager {
         // Draw control points in world space
         set_camera(ctx.camera);
         crate::graphics::bubble::draw_ctrl_points(&ctx.state.graph);
+
+        // Check orientation of control points and draw a blue dot if not clockwise
+        for (_, vertex) in &ctx.state.graph.vertices {
+            let v_pos = vertex.point.position;
+            let u = vertex.edges[0].point.position - v_pos;
+            let v = vertex.edges[1].point.position - v_pos;
+            let w = vertex.edges[2].point.position - v_pos;
+
+            if u.length_squared() < MIN_EDGE_LEN_SQ
+                || v.length_squared() < MIN_EDGE_LEN_SQ
+                || w.length_squared() < MIN_EDGE_LEN_SQ
+            {
+                continue;
+            }
+
+            let theta_a = u.y.atan2(u.x);
+            let theta_b = v.y.atan2(v.x);
+            let theta_c = w.y.atan2(w.x);
+
+            let cw_diff = |a: f32, b: f32| {
+                let mut diff = a - b;
+                while diff < 0.0 {
+                    diff += 2.0 * std::f32::consts::PI;
+                }
+                while diff >= 2.0 * std::f32::consts::PI {
+                    diff -= 2.0 * std::f32::consts::PI;
+                }
+                diff
+            };
+
+            let diff_ab = cw_diff(theta_a, theta_b);
+            let diff_bc = cw_diff(theta_b, theta_c);
+            let diff_ca = cw_diff(theta_c, theta_a);
+
+            let sum = diff_ab + diff_bc + diff_ca;
+            if (sum - 2.0 * std::f32::consts::PI).abs() <= 0.01 {
+                continue;
+            }
+
+            macroquad::prelude::draw_circle(v_pos.x, v_pos.y, 4.0, macroquad::prelude::BLUE);
+        }
 
         // Draw FPS in screen space
         set_default_camera();

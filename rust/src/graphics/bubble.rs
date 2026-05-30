@@ -98,7 +98,7 @@ pub fn draw_ctrl_points(graph: &Graph) {
             draw_circle(
                 edge.point.position.x,
                 edge.point.position.y,
-                3.0,
+                1.0,
                 colors::YELLOW,
             );
 
