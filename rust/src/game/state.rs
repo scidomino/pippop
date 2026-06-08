@@ -103,10 +103,18 @@ pub struct GameState {
     /// initiated the sequence and should be preserved during topological merges.
     pub focus_bubble: Option<BubbleKey>,
     pub keeper: ScoreKeeper,
+    pub muted: bool,
 }
 
 impl GameState {
     pub fn new(graph: Graph) -> Self {
+        let muted = STORAGE
+            .lock()
+            .unwrap()
+            .get("muted")
+            .map(|s| s == "true")
+            .unwrap_or(false);
+
         Self {
             graph,
             phase: GamePhase::Normal,
@@ -114,7 +122,14 @@ impl GameState {
             score_events: Vec::new(),
             focus_bubble: None,
             keeper: ScoreKeeper::new(),
+            muted,
         }
+    }
+
+    pub fn toggle_mute(&mut self) {
+        self.muted = !self.muted;
+        let mut storage = STORAGE.lock().unwrap();
+        storage.set("muted", &self.muted.to_string());
     }
 }
 

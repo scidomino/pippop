@@ -73,6 +73,7 @@ impl GameController {
             resources: Some(resources),
             interaction,
         };
+        self.sound.interact(&mut ctx);
         self.pause.interact(&mut ctx);
         self.debug.interact(&mut ctx);
         let should_exit = self.gameover.interact(&mut ctx);
@@ -122,6 +123,7 @@ impl GameController {
         self.burst.draw(&ctx);
         self.highlight.draw(&ctx);
         self.score.draw(&ctx);
+        self.sound.draw(&ctx);
         self.gameover.draw(&ctx);
         self.pause.draw(&ctx);
         self.debug.draw(&ctx);
